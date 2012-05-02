@@ -19,6 +19,8 @@ urlpatterns = patterns('',
     url(r'^accounts/login/$', 'django.contrib.auth.views.login'),
 
     url(r'^subenvironment/', include('subenvironment.urls')),
+
+    url(r'^envuser/', include('envuser.urls')),
 )
 
 if settings.DEBUG:

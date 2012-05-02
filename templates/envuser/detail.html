@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block app-content %}
+
+{% if envUser %}
+    User Name: {{ envUser.user.username }}
+    <br>
+    Full Name: {{ envUser.user.get_full_name }}
+    <br>
+    Rank: {{ envUser.rank }}
+    <br>
+    Economy: {{ envUser.economy }}
+{% else %}
+    <p>The requested EnvUser is invalid.</p>
+{% endif %}
+
+{% endblock %}

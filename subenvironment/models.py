@@ -26,14 +26,12 @@ class Artifact(models.Model):
     def __unicode__(self):
         return self.name
 
-def artifact_post_save(instance, **kwargs):
-    try:
+def artifact_post_save(sender, instance, created, **kwargs):
+    if not created:
         instance.original_file.delete(save=False)
-    except:
-        logger.debug('Could not delete the original file %s' % (instance.original_file))
     instance.original_file = instance.file
 
-def artifact_post_delete(instance, **kwargs):
+def artifact_post_delete(sender, instance, **kwargs):
     instance.file.delete(save=False)
 
 models.signals.post_save.connect(artifact_post_save, sender=Artifact)

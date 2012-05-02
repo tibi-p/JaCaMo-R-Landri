@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block app-content %}
+
+{% if envUserList %}
+    All EnvUsers:
+    <ul>
+    {% for envUser in envUserList %}
+        <li><a href="/envuser/{{ envUser.id }}/">{{ envUser.user.username }}</a></li>
+    {% endfor %}
+    </ul>
+{% else %}
+    <p>No EnvUsers are available.</p>
+{% endif %}
+
+{% endblock %}
