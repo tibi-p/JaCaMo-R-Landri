@@ -1,0 +1,16 @@
+{% extends "subenvironment/base.html" %}
+
+{% block subenvironment-content %}
+
+{% if subEnvironmentList %}
+    All SubEnvironments:
+    <ul>
+    {% for subEnvironment in subEnvironmentList %}
+        <li><a href="/subenvironment/{{ subEnvironment.id }}/">{{ subEnvironment.name }}</a></li>
+    {% endfor %}
+    </ul>
+{% else %}
+    <p>No SubEnvironments are available.</p>
+{% endif %}
+
+{% endblock %}

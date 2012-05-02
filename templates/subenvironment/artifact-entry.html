@@ -1,0 +1,5 @@
+{% if artifact %}
+    <a href="{{ artifact.file.url }}">{{ artifact.name }}</a>
+{% else %}
+    <p>The requested Artifact is invalid.</p>
+{% endif %}

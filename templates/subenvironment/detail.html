@@ -1,0 +1,20 @@
+{% extends "subenvironment/base.html" %}
+
+{% block subenvironment-content %}
+
+{% if subEnvironment %}
+    SubEnvironment: {{ subEnvironment.name }}
+    <br>
+    Description: {{ subEnvironment.description }}
+    <ul style="list-style-type: circle;">
+    {% for artifact in subEnvironment.artifact_set.all %}
+        <li>
+        {% include "subenvironment/artifact-entry.html" %}
+        </li>
+    {% endfor %}
+    </ul>
+{% else %}
+    <p>The requested SubEnvironment is invalid.</p>
+{% endif %}
+
+{% endblock %}
