@@ -8,7 +8,7 @@ class SubEnvironment(models.Model):
     description = models.TextField()
 
     def __unicode__(self):
-        return '%s (%s)' % (self.name, self.description)
+        return self.name
 
 def artifact_upload_to(instance, filename):
     pathArgs = (instance.subenvironment.id, filename)

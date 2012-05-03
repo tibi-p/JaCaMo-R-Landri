@@ -16,11 +16,19 @@ urlpatterns = patterns('',
     # Uncomment the next line to enable the admin:
     url(r'^admin/', include(admin.site.urls)),
 
+    url(r'^$', 'home.views.index', name='home'),
+
     url(r'^accounts/login/$', 'django.contrib.auth.views.login'),
 
     url(r'^subenvironment/', include('subenvironment.urls')),
 
     url(r'^envuser/', include('envuser.urls')),
+
+    url(r'^solution/', include('solution.urls')),
+
+    url(r'^schedule/', include('schedule.urls')),
+
+    url(r'^simulator/', include('simulator.urls')),
 )
 
 if settings.DEBUG:
