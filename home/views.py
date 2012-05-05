@@ -15,10 +15,12 @@ class SiteSection(object):
 def home_context_processor(request):
     currentUrl = request.get_full_path()
     sections = [ ]
+    sections.append(SiteSection('City', 'city.views.index'))
     sections.append(SiteSection('SubEnvironment', 'subenvironment.views.index'))
     sections.append(SiteSection('User', 'envuser.views.index'))
     sections.append(SiteSection('Simulator', 'simulator.views.simulate'))
-    sections.append(SiteSection('Admin', 'admin:index'))
+    if request.user.is_superuser:
+        sections.append(SiteSection('Admin', 'admin:index'))
 
     sortedSections = sorted(sections, key=lambda x: len(x.url), reverse=True)
     currentSection = None

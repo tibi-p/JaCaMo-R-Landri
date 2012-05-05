@@ -1,11 +1,10 @@
-import logging
 from django.db import models
-
-logger = logging.getLogger(__name__)
+from city.models import Ring
 
 class SubEnvironment(models.Model):
     name = models.CharField(max_length=200)
     description = models.TextField()
+    ring = models.ForeignKey(Ring)
 
     def __unicode__(self):
         return self.name

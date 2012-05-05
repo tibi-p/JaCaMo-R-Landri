@@ -6,6 +6,8 @@
     SubEnvironment: {{ subEnvironment.name }}
     <br>
     Description: {{ subEnvironment.description }}
+    <br>
+    Artifacts:
     <ul style="list-style-type: circle;">
     {% for artifact in subEnvironment.artifact_set.all %}
         <li>

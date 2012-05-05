@@ -17,29 +17,32 @@
     -->
 
     <link href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.18/themes/cupertino/jquery-ui.css" rel="stylesheet" type="text/css"/>
+    <link href="http://ajax.aspnetcdn.com/ajax/jquery.dataTables/1.9.0/css/jquery.dataTables.css" rel="stylesheet" type="text/css"//>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js" type="text/javascript"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.18/jquery-ui.min.js" type="text/javascript"></script>
+    <script src="http://ajax.aspnetcdn.com/ajax/jquery.dataTables/1.9.0/jquery.dataTables.min.js" type="text/javascript"></script>
     <!--
     -->
-</head>
 
-<script type="text/javascript">
-    $(document).ready(function() {
-        var tabs = $("#tabs").tabs();
-        tabs.tabs('select', "div-{{ currentSection.name }}");
-        $("#tabs a").each(function(index) {
-            this.onclick = function(event) {
-                if (this.dataset && this.dataset.backlink)
-                    self.location.href = this.dataset.backlink;
-            };
-        });
+    <script type="text/javascript">
+        $(document).ready(function() {
+            var tabs = $("#tabs").tabs();
+            tabs.tabs('select', "div-{{ currentSection.name }}");
+            $("#tabs a").each(function(index) {
+                this.onclick = function(event) {
+                    if (this.dataset && this.dataset.backlink)
+                        self.location.href = this.dataset.backlink;
+                };
+            });
 /*
         $("#tabs a").each(function(index) {
             this.href = this.dataset.backlink;
         });
 */
     });
-</script>
+    </script>
+
+    {% block extrastyle %} {% endblock %}
 
 </head>
 
@@ -49,7 +52,10 @@
 
 <div data-role="page" data-fullscreen="true" id="home" class="ui-content-transparent">
     <div data-role="header">
+        <!--
         <h1 id="site-name">{% trans "JaCaMo - The White City of R'Landri" %}</h1>
+        -->
+        <img src="/resources/jacamo-logo.png" />
     </div>
     Logged in as {{ user.get_full_name }} ({{ user.username }}).
     <div id="tabs" data-role="navbar">
@@ -58,7 +64,7 @@
             <li>
             {% url section.view as linkUrl %}
                 <a href="#div-{{ section.name }}" data-backlink="{{ section.url }}" target="_self"
-                {% if currentUrl == linkUrl %}
+                {% if section == currentSection %}
                 class="ui-btn-active"
                 {% endif %}
                 > {{ section.name }} </a>
@@ -68,7 +74,7 @@
 
     {% for section in sections %}
         <div id="div-{{ section.name }}">
-        {% if currentUrl == section.url %}
+        {% if section == currentSection %}
             <div id="app-content" data-role="content">
                 {% block app-content %} {% endblock %}
             </div>
@@ -77,6 +83,12 @@
     {% endfor %}
     </div>
 </div>
+
+{% if currentSection == None %}
+    <div id="home-content" data-role="content">
+        {% block home-content %} {% endblock %}
+    </div>
+{% endif %}
 
 {% endblock %}
 

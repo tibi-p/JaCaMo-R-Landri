@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block app-content %}
+
+{% if cityList %}
+    {% for city in cityList %}
+        <b>{{ city.name }}</b>
+        {% for ring in city.ring_set.all %}
+            <p>Ring {{ ring.index }}</p>
+            <ul>
+            {% for subEnvironment in ring.subenvironment_set.all %}
+                <li><a href="/subenvironment/{{ subEnvironment.id }}/">{{ subEnvironment.name }}</a></li>
+            {% endfor %}
+            </ul>
+        {% endfor %}
+    {% endfor %}
+{% else %}
+    <p>No cities are available.</p>
+{% endif %}
+
+{% endblock %}

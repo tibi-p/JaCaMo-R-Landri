@@ -4,4 +4,5 @@ urlpatterns = patterns('simulator.views',
     #url(r'^$', 'index'),
     #url(r'^(?P<simulatorId>\d+)/$', 'run'),
     url(r'^simulate/$', 'simulate'),
+    url(r'^getSolutions/(?P<subEnvId>\d*)/$', 'getsolutions'),
 )

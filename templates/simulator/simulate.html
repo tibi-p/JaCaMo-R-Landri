@@ -1,12 +1,95 @@
 {% extends "base.html" %}
 
-{% block app-content %}
-
 {% load url from future %}
+
+{% block extrastyle %}
+
+<script type="text/javascript">
+    function unsafeParseJSON(data, defValue) {
+        var obj = defValue;
+        try {
+            obj = jQuery.parseJSON(data);
+        } catch (e) {
+            console.log(e);
+        }
+        return obj;
+    }
+
+    function constructPrimaryMap(dataArr) {
+        var dataMap = { };
+        for (var i in dataArr) {
+            data = dataArr[i];
+            dataMap[data.pk] = data;
+        }
+        return dataMap;
+    }
+
+    function getModelField(obj, key) {
+        var value;
+        if (obj) {
+            var fields = obj.fields;
+            if (fields) {
+                value = fields[key];
+            }
+        }
+        return value;
+    }
+
+    $(document).ready(function() {
+        $("select#id_subenvironment").change(function() {
+            var subEnv = $(this).val();
+            if (subEnv) {
+                var url = "{% url 'simulator.views.getsolutions' '0' %}";
+                url = url.replace('0', subEnv);
+                $.getJSON(url, function(data) {
+                    var fakeSchedules = unsafeParseJSON(data.fakeSchedules, []);
+                    var solutions = unsafeParseJSON(data.solutions, []);
+                    var solutionMap = constructPrimaryMap(solutions);
+                    var aaData = [];
+                    for (var i in fakeSchedules) {
+                        var fakeSchedule = fakeSchedules[i];
+                        var fields = fakeSchedule.fields;
+                        if (fields) {
+                            var solution = solutionMap[fields.solution];
+                            var file = getModelField(solution, 'file');
+                            if (file) {
+                                var tokens = file.split('/');
+                                for (var i = tokens.length - 1; i >= 0; i--) {
+                                    var token = tokens[i];
+                                    if (token) {
+                                        file = token;
+                                        break;
+                                    }
+                                }
+                            }
+                            aaData.push([file, fields.numAgents]);
+                        }
+                    }
+                    aoColumns = [
+                        { "sTitle": "Agent File" },
+                        { "sTitle": "Number of Agents", "sClass": "center" },
+                    ];
+                    $('#id_fake_schedule_table').dataTable({
+                        "aaData": aaData,
+                        "aoColumns": aoColumns,
+                    });
+                    //$('#id_form_table_body').html(data);
+                });
+            }
+        });
+    });
+</script>
+
+{% endblock %}
+
+{% block app-content %}
 
 <form action="{% url 'simulator.views.simulate' %}" method="post">{% csrf_token %}
 {{ form.as_p }}
-<input type="submit" value="Submit" />
+<input type="submit" value="Simulate" />
 </form>
+
+<table id="id_fake_schedule_table">
+</table>
 
 {% endblock %}

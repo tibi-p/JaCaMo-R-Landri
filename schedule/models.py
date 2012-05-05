@@ -10,7 +10,8 @@ class Schedule(models.Model):
 
 class FakeSchedule(models.Model):
     solution = models.ForeignKey(Solution)
+    numAgents = models.PositiveIntegerField()
 
     def __unicode__(self):
-        uniArgs = (unicode(self.solution),)
-        return 'FakeSchedule(%s)' % uniArgs
+        uniArgs = (unicode(self.solution), self.numAgents)
+        return 'FakeSchedule(%s, %s)' % uniArgs

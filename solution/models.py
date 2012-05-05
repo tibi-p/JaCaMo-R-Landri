@@ -12,5 +12,5 @@ class Solution(models.Model):
     file = models.FileField(upload_to=solution_upload_to)
 
     def __unicode__(self):
-        uniArgs = (unicode(self.envUser), unicode(self.subEnvironment))
-        return '%s @ %s' % uniArgs
+        uniArgs = (unicode(self.envUser), unicode(self.subEnvironment), unicode(self.file))
+        return 'Author(%s), Env(%s), File(%s)' % uniArgs
