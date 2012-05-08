@@ -1,20 +1,18 @@
 from django import forms
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.models import User
 from django.core import serializers
-from django.http import HttpResponse
-from django.shortcuts import get_object_or_404, render_to_response
+from django.http import HttpResponse, HttpResponseRedirect
+from django.shortcuts import render_to_response
 from django.template import RequestContext
-from envuser.models import EnvUser
 from schedule.models import Schedule
 from schedule.models import FakeSchedule
+from simulator.sandbox import JaCaMoSandbox
 from solution.models import Solution
 from subenvironment.models import SubEnvironment
-from django.forms.formsets import formset_factory
-from django.forms.models import modelformset_factory
 import json
-
-FakeScheduleFormSet = modelformset_factory(FakeSchedule, extra=0)
+from multiprocessing import Process
+import os
+import tempfile
 
 class SimulateForm(forms.Form):
     subenvironment = forms.ModelChoiceField(queryset=SubEnvironment.objects.none(),
@@ -38,13 +36,50 @@ def run(request):
         { 'subEnvironmentList': subEnvironmentList },
         context_instance = RequestContext(request))
 
+def getPathList(subenvironment, key_set):
+    return ( elem.file.path for elem in getattr(subenvironment, key_set).all() )
+
+def runInSandbox(subenvironment, solutions, masArgs):
+    rootDir = tempfile.mkdtemp()
+    sandbox = JaCaMoSandbox(rootDir)
+    sandbox.populate((solution.file.path for solution in solutions), {
+        'agents': getPathList(subenvironment, 'envagent_set'),
+        'artifacts': getPathList(subenvironment, 'artifact_set'),
+        'orgs': getPathList(subenvironment, 'organization_set'),
+    })
+    sandbox = JaCaMoSandbox(rootDir)
+    masFilename = sandbox.writeMAS(**masArgs)
+    sandbox.buildMAS(masFilename)
+    sandbox.ant()
+    sandbox.clean()
+
 @login_required
 def simulate(request):
     if request.method == 'POST':
         form = SimulateForm(request.POST, user=request.user)
         if form.is_valid():
-            print form.cleaned_data
-            return
+            cleaned_data = form.cleaned_data
+            subenvironment = cleaned_data['subenvironment']
+            fakeSchedules, solutions = querySolutions(request.user, subenvironment.id)
+
+            masArgs = {
+                'name': "house_building",
+                'infra': "Centralised",
+                'env': "c4jason.CartagoEnvironment",
+                'agents': { },
+            }
+            for solution in solutions:
+                filename = os.path.basename(solution.file.name)
+                agentName = os.path.splitext(filename)[0]
+                count = sum(fakeSchedule.numAgents for fakeSchedule
+                    in solution.fakeschedule_set.all())
+                masArgs['agents'][agentName] = {
+                    'arch': 'c4jason.CAgentArch',
+                    'no': count,
+                }
+
+            Process(target=runInSandbox, args=(subenvironment, solutions, masArgs)).start()
+            return HttpResponseRedirect('/simulator/simulate/')
     else:
         form = SimulateForm(user=request.user)
 
@@ -54,10 +89,17 @@ def simulate(request):
 
 @login_required
 def getsolutions(request, subEnvId):
+    fakeSchedules, solutions = querySolutions(request.user, subEnvId)
+    jsonObj = { }
+    jsonObj['fakeSchedules'] = serializers.serialize("json", fakeSchedules)
+    jsonObj['solutions'] = serializers.serialize("json", solutions)
+    jsonStr = json.dumps(jsonObj)
+    return HttpResponse(jsonStr, mimetype="application/json")
+
+def querySolutions(user, subEnvId):
     fakeScheduleFilter = { }
-    currentUser = request.user
-    if not currentUser.is_superuser:
-        fakeScheduleFilter['solution__envUser__user__id'] = currentUser.id
+    if not user.is_superuser:
+        fakeScheduleFilter['solution__envUser__user__id'] = user.id
     if subEnvId:
         fakeScheduleFilter['solution__subEnvironment__id'] = subEnvId
     fakeSchedules = FakeSchedule.objects.filter(**fakeScheduleFilter)
@@ -65,10 +107,5 @@ def getsolutions(request, subEnvId):
     solutions = set()
     for fakeSchedule in fakeSchedules:
         solutions.add(fakeSchedule.solution)
-    solutions = list(solutions)
 
-    jsonObj = { }
-    jsonObj['fakeSchedules'] = serializers.serialize("json", fakeSchedules)
-    jsonObj['solutions'] = serializers.serialize("json", solutions)
-    jsonStr = json.dumps(jsonObj)
-    return HttpResponse(jsonStr, mimetype="application/json")
+    return fakeSchedules, list(solutions)
