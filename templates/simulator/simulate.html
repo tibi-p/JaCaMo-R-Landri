@@ -62,7 +62,7 @@
                                     }
                                 }
                             }
-                            aaData.push([file, fields.numAgents]);
+                            aaData.push([ file, fields.numAgents ]);
                         }
                     }
                     aoColumns = [
@@ -72,8 +72,9 @@
                     $('#id_fake_schedule_table').dataTable({
                         "aaData": aaData,
                         "aoColumns": aoColumns,
+                        "bDestroy": true,
+                        "bAutoWidth": false,
                     });
-                    //$('#id_form_table_body').html(data);
                 });
             }
         });

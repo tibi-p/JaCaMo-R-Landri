@@ -1,0 +1,15 @@
+MAS $name {
+
+	infrastructure: $infra
+
+	environment: $env
+
+	agents:
+$ags
+
+	classpath:
+$path
+
+	aslSourcePath: "src/agents";
+
+}
