@@ -1,5 +1,6 @@
 from django.db import models
 from city.models import Ring
+import functools
 
 class SubEnvironment(models.Model):
     name = models.CharField(max_length=200)
@@ -9,29 +10,41 @@ class SubEnvironment(models.Model):
     def __unicode__(self):
         return self.name
 
-def artifact_upload_to(instance, filename):
-    pathArgs = (instance.subenvironment.id, filename)
-    return 'subenvironments/%s/artifacts/%s' % pathArgs
+def dir_upload_to(dir, instance, filename):
+    pathArgs = (instance.subenvironment.id, dir, filename)
+    return 'subenvironments/%s/%s/%s' % pathArgs
 
-class Artifact(models.Model):
+class BaseComponent(models.Model):
     subenvironment = models.ForeignKey(SubEnvironment)
     name = models.CharField(max_length=200)
-    file = models.FileField(upload_to=artifact_upload_to)
 
     def __init__(self, *args, **kwargs):
-        super(Artifact, self).__init__(*args, **kwargs)
+        super(BaseComponent, self).__init__(*args, **kwargs)
         self.original_file = self.file
 
     def __unicode__(self):
         return self.name
 
-def artifact_post_save(sender, instance, created, **kwargs):
+    class Meta:
+        abstract = True
+
+class EnvAgent(BaseComponent):
+    file = models.FileField(upload_to=functools.partial(dir_upload_to, 'agents'))
+
+class Artifact(BaseComponent):
+    file = models.FileField(upload_to=functools.partial(dir_upload_to, 'artifacts'))
+
+class Organization(BaseComponent):
+    file = models.FileField(upload_to=functools.partial(dir_upload_to, 'organizations'))
+
+def file_post_save(sender, instance, created, **kwargs):
     if not created:
         instance.original_file.delete(save=False)
     instance.original_file = instance.file
 
-def artifact_post_delete(sender, instance, **kwargs):
+def file_post_delete(sender, instance, **kwargs):
     instance.file.delete(save=False)
 
-models.signals.post_save.connect(artifact_post_save, sender=Artifact)
-models.signals.post_delete.connect(artifact_post_delete, sender=Artifact)
+for sender in BaseComponent.__subclasses__():
+    models.signals.post_save.connect(file_post_save, sender=sender)
+    models.signals.post_delete.connect(file_post_delete, sender=sender)

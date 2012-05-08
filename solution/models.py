@@ -1,6 +1,7 @@
 from django.db import models
 from envuser.models import EnvUser
 from subenvironment.models import SubEnvironment
+import os
 
 def solution_upload_to(instance, filename):
     pathArgs = (instance.envUser.id, instance.subEnvironment.id, filename)
@@ -12,5 +13,6 @@ class Solution(models.Model):
     file = models.FileField(upload_to=solution_upload_to)
 
     def __unicode__(self):
-        uniArgs = (unicode(self.envUser), unicode(self.subEnvironment), unicode(self.file))
+        filename = os.path.basename(self.file.name)
+        uniArgs = (unicode(self.envUser), unicode(self.subEnvironment), filename)
         return 'Author(%s), Env(%s), File(%s)' % uniArgs
