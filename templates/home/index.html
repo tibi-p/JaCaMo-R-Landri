@@ -3,7 +3,7 @@
 {% block home-content %}
 
 <script type="text/javascript">
-    self.location.href = "{% url city.views.index %}";
+    self.location.href = "{{ sections.0.url }}";
 </script>
 
 {% endblock %}

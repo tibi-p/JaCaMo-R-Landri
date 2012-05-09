@@ -2,10 +2,20 @@ from django.db import models
 from city.models import Ring
 import functools
 
+class SubEnvironmentManager(models.Manager):
+    def get_solved_by_user(self, user):
+        queryset = self.get_query_set()
+        filter = { 'solution__isnull': False }
+        if not user.is_superuser:
+            filter['solution__envUser__user'] = user
+        return queryset.filter(**filter).distinct()
+
 class SubEnvironment(models.Model):
     name = models.CharField(max_length=200)
     description = models.TextField()
     ring = models.ForeignKey(Ring)
+
+    objects = SubEnvironmentManager()
 
     def __unicode__(self):
         return self.name
