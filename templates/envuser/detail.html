@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 
 {% load tag_extras %}
+{% load url from future %}
 
 {% block extrastyle %}
 
@@ -14,19 +15,47 @@ td.user-property {
 
 <script type="text/javascript">
     $(function () {
-        $("[id^=accordion]").accordion({
-            collapsible: true,
-        });
         $("#subenvironment-solutions").jstree({
+            'json_data': {
+                'data' : [
+                {% for subSolutions in allSolutions %}
+                {
+                    'data': '{{ subSolutions.subEnvironment|escapejs }}',
+                    'metadata': {
+                    {% url 'subenvironment.views.index' as subEnvUrl %}
+                        'link': '{{ subEnvUrl|escapejs }}',
+                    },
+                    'state': 'open',
+                    'children': [
+                    {% for solution in subSolutions.someSolutions %}
+                    {
+                        'data': '{{ solution.file|basename|escapejs }}',
+                        'metadata': {
+                            'link': '{{ solution.file.url|escapejs }}',
+                        },
+                    },
+                    {% endfor %}
+                    ]
+                },
+                {% endfor %}
+                ]
+            },
             'themes': {
                 'theme': 'apple',
             },
             'plugins': [
                 'themes',
-                'html_data',
+                'json_data',
                 'ui',
                 'crrm',
             ],
+        }).bind("select_node.jstree", function (event, data) {
+            var link = data.rslt.obj.data('link');
+            window.location.href = link;
+        }).bind("loaded.jstree", function (event, data) {
+            $("[id^=accordion]").accordion({
+                collapsible: true,
+            });
         });
     });
 </script>
@@ -57,36 +86,18 @@ td.user-property {
         </tbody>
     </table>
 
-<div id="accordion-subenv">
-    <h3><a href="#">Owned subenvironments</a></h3>
-    <div>
-        <p> Placeholder. </p>
+    <div id="accordion-subenv">
+        <h3><a href="#">Owned subenvironments</a></h3>
+        <div>
+            <p> Placeholder. </p>
+        </div>
     </div>
-</div>
 
-<div id="accordion-soln">
-    <h3><a href="#">Submitted solutions</a></h3>
-    <div id="subenvironment-solutions">
-        <ul>
-        {% for subSolutions in allSolutions %}
-            <li class="jstree-open">
-                <a href="#">
-                    {{ subSolutions.subEnvironment }}
-                </a>
-                <ul>
-                {% for solution in subSolutions.someSolutions %}
-                    <li>
-                        <a href="#">
-                            {{ solution.file|basename }}
-                        </a>
-                    </li>
-                {% endfor %}
-                </ul>
-            </li>
-        {% endfor %}
-        </ul>
+    <div id="accordion-soln">
+        <h3><a href="#">Submitted solutions</a></h3>
+        <div id="subenvironment-solutions">
+        </div>
     </div>
-</div>
 
 {% else %}
     <p>The requested EnvUser is invalid.</p>

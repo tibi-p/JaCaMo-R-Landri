@@ -14,7 +14,7 @@ def index(request):
 
 @login_required
 def detail(request, envUserId):
-    envUser = get_object_or_404(EnvUser, pk = envUserId)
+    envUser = get_object_or_404(EnvUser, pk=envUserId)
     user = envUser.user
     subEnvironments = SubEnvironment.objects.get_solved_by_user(user)
     solutions = Solution.objects
@@ -30,3 +30,12 @@ def detail(request, envUserId):
             'allSolutions': allSolutions,
         },
         context_instance = RequestContext(request))
+
+@login_required
+def profile(request):
+    user = request.user
+    if user.is_superuser:
+        return index(request)
+    else:
+        envUser = get_object_or_404(EnvUser, user=user)
+        return detail(request, envUser.pk)
