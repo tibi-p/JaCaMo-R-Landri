@@ -1,14 +1,11 @@
 {% extends "base.html" %}
 
+{% load render_table from django_tables2 %}
+
 {% block app-content %}
 
-{% if envUserList %}
-    All EnvUsers:
-    <ul>
-    {% for envUser in envUserList %}
-        <li><a href="/envuser/{{ envUser.id }}/">{{ envUser.user.username }}</a></li>
-    {% endfor %}
-    </ul>
+{% if envUserTable %}
+    {% render_table envUserTable %}
 {% else %}
     <p>No EnvUsers are available.</p>
 {% endif %}
