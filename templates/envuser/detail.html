@@ -14,7 +14,14 @@ td.user-property {
 <script src="/resources/jstree/jquery.jstree.js" type="text/javascript"></script>
 
 <script type="text/javascript">
+    function loadAccordion(event, data) {
+        $("[id^=accordion]").accordion({
+            collapsible: true,
+        });
+    }
+
     $(function () {
+    {% if user.is_superuser or user == envUser.user %}
         $("#subenvironment-solutions").jstree({
             'json_data': {
                 'data' : [
@@ -52,11 +59,10 @@ td.user-property {
         }).bind("select_node.jstree", function (event, data) {
             var link = data.rslt.obj.data('link');
             window.location.href = link;
-        }).bind("loaded.jstree", function (event, data) {
-            $("[id^=accordion]").accordion({
-                collapsible: true,
-            });
-        });
+        }).bind("loaded.jstree", loadAccordion);
+    {% else %}
+        loadAccordion();
+    {% endif %}
     });
 </script>
 
@@ -89,15 +95,17 @@ td.user-property {
     <div id="accordion-subenv">
         <h3><a href="#">Owned subenvironments</a></h3>
         <div>
-            <p> Placeholder. </p>
+            <p> No information available at the time. </p>
         </div>
     </div>
 
+    {% if user.is_superuser or user == envUser.user %}
     <div id="accordion-soln">
         <h3><a href="#">Submitted solutions</a></h3>
         <div id="subenvironment-solutions">
         </div>
     </div>
+    {% endif %}
 
 {% else %}
     <p>The requested EnvUser is invalid.</p>

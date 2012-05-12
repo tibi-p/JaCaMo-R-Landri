@@ -42,13 +42,13 @@
                 var url = "{% url 'simulator.views.getsolutions' '0' %}";
                 url = url.replace('0', subEnv);
                 $.getJSON(url, function(data) {
-                    var fakeSchedules = unsafeParseJSON(data.fakeSchedules, []);
+                    var offlineTests = unsafeParseJSON(data.offlineTests, []);
                     var solutions = unsafeParseJSON(data.solutions, []);
                     var solutionMap = constructPrimaryMap(solutions);
                     var aaData = [];
-                    for (var i in fakeSchedules) {
-                        var fakeSchedule = fakeSchedules[i];
-                        var fields = fakeSchedule.fields;
+                    for (var i in offlineTests) {
+                        var offlineTest = offlineTests[i];
+                        var fields = offlineTest.fields;
                         if (fields) {
                             var solution = solutionMap[fields.solution];
                             var file = getModelField(solution, 'file');
