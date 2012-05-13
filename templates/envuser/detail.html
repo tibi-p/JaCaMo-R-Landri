@@ -29,7 +29,7 @@ td.user-property {
                 {
                     'data': '{{ subSolutions.subEnvironment|escapejs }}',
                     'metadata': {
-                    {% url 'subenvironment.views.index' as subEnvUrl %}
+                        {% url 'subenvironment.views.index' as subEnvUrl %}
                         'link': '{{ subEnvUrl|escapejs }}',
                     },
                     'state': 'open',
@@ -58,7 +58,8 @@ td.user-property {
             ],
         }).bind("select_node.jstree", function (event, data) {
             var link = data.rslt.obj.data('link');
-            window.location.href = link;
+            if (link)
+                window.location.href = link;
         }).bind("loaded.jstree", loadAccordion);
     {% else %}
         loadAccordion();

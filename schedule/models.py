@@ -6,6 +6,10 @@ class ScheduleQuerySet(models.query.QuerySet):
         solutions = set(entry.solution for entry in self)
         return list(solutions)
 
+    def get_envusers(self):
+        envusers = set(entry.solution.envUser for entry in self)
+        return list(envusers)
+
 class ScheduleManager(models.Manager):
     def get_query_set(self):
         return ScheduleQuerySet(self.model)
@@ -22,11 +26,12 @@ class AbstractSchedule(models.Model):
 class OfflineTest(AbstractSchedule):
     def __unicode__(self):
         uniArgs = (unicode(self.solution), self.numAgents)
-        return 'OfflineTest(%s, %s)' % uniArgs
+        return '%s, #%s' % uniArgs
 
 class Schedule(AbstractSchedule):
     step = models.PositiveIntegerField()
+    lastModified = models.DateTimeField(auto_now=True)
 
     def __unicode__(self):
-        uniArgs = (unicode(self.solution), self.numAgents)
-        return 'Schedule(%s, %s)' % uniArgs
+        uniArgs = (unicode(self.solution), self.numAgents, self.step)
+        return '%s, #%s, @%s' % uniArgs

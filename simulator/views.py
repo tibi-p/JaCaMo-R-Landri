@@ -4,8 +4,7 @@ from django.core import serializers
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render_to_response
 from django.template import RequestContext
-from schedule.models import OfflineTest
-from schedule.models import Schedule
+from schedule.models import OfflineTest, Schedule
 from simulator.turn import getSandboxProcess, runTurn
 from solution.models import Solution
 from subenvironment.models import SubEnvironment

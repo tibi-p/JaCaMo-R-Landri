@@ -1,6 +1,7 @@
+from django.db.models import F
 from simulator.sandbox import JaCaMoSandbox
 from schedule.models import Schedule
-from schedule.models import OfflineTest
+from simulator.models import TimePool
 from subenvironment.models import SubEnvironment
 from multiprocessing import Process
 import os
@@ -9,6 +10,7 @@ import tempfile
 def runTurn(numSteps):
     for step in xrange(numSteps):
         runStep(step)
+    TimePool.objects.all().delete()
 
 def getSandboxProcess(subenvironment, schedules):
     masArgs = {
@@ -40,7 +42,13 @@ def runStep(step):
         if canRunSubEnvironment(subEnvironment, schedules):
             print step, subEnvironment, schedules.get_solutions()
             process = getSandboxProcess(subEnvironment, schedules)
-            process.start()
+            for envUser in schedules.get_envusers():
+                timePool, created = TimePool.objects.get_or_create(envUser=envUser)
+                timePool.remaining = F('remaining') - 1
+                timePool.save()
+            for timePool in TimePool.objects.all():
+                print timePool
+            #process.start()
 
 def runInSandbox(subenvironment, solutions, masArgs):
     rootDir = tempfile.mkdtemp()
