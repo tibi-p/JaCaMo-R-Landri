@@ -1,5 +1,6 @@
 from django.db import models
 from city.models import Ring
+from envuser.models import EnvUser
 import functools
 
 class SubEnvironmentManager(models.Manager):
@@ -14,11 +15,17 @@ class SubEnvironment(models.Model):
     name = models.CharField(max_length=200)
     description = models.TextField()
     ring = models.ForeignKey(Ring)
+    owners = models.ManyToManyField(EnvUser, through='OwnerRelationship')
 
     objects = SubEnvironmentManager()
 
     def __unicode__(self):
         return self.name
+
+class OwnerRelationship(models.Model):
+    subEnvironment = models.ForeignKey(SubEnvironment)
+    envUser = models.ForeignKey(EnvUser)
+    shares = models.PositiveIntegerField()
 
 def dir_upload_to(dir, instance, filename):
     pathArgs = (instance.subenvironment.id, dir, filename)

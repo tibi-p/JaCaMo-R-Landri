@@ -1,20 +1,90 @@
 {% extends "base.html" %}
 
+{% block extrastyle %}
+
+{% if subEnvironment %}
+<script src="/resources/jstree/jquery.jstree.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+    $(function () {
+        $("#subenvironment-details").jstree({
+            'json_data': {
+                'data' : [
+                {
+                    'data': 'Environment Agents',
+                    'state': 'open',
+                    'children': [
+                    {% for component in subEnvironment.envagent_set.all %}
+                    {
+                        'data': '{{ component.name }}',
+                        'metadata': {
+                            'link': '{{ component.file.url|escapejs }}',
+                        },
+                    },
+                    {% endfor %}
+                    ]
+                },
+                {
+                    'data': 'Artifacts',
+                    'state': 'open',
+                    'children': [
+                    {% for component in subEnvironment.artifact_set.all %}
+                    {
+                        'data': '{{ component.name }}',
+                        'metadata': {
+                            'link': '{{ component.file.url|escapejs }}',
+                        },
+                    },
+                    {% endfor %}
+                    ]
+                },
+                {
+                    'data': 'Organizations',
+                    'state': 'open',
+                    'children': [
+                    {% for component in subEnvironment.organization_set.all %}
+                    {
+                        'data': '{{ component.name }}',
+                        'metadata': {
+                            'link': '{{ component.file.url|escapejs }}',
+                        },
+                    },
+                    {% endfor %}
+                    ]
+                },
+                ]
+            },
+            'themes': {
+                'theme': 'apple',
+            },
+            'plugins': [
+                'themes',
+                'json_data',
+                'ui',
+                'crrm',
+            ],
+        }).bind("select_node.jstree", function (event, data) {
+            var link = data.rslt.obj.data('link');
+            if (link)
+                window.location.href = link;
+        });
+    });
+</script>
+{% endif %}
+
+{% endblock %}
+
 {% block app-content %}
 
 {% if subEnvironment %}
-    SubEnvironment: {{ subEnvironment.name }}
+    <b> {{ subEnvironment.name }} </b>
+    <br>
     <br>
     Description: {{ subEnvironment.description }}
     <br>
-    Artifacts:
-    <ul style="list-style-type: circle;">
-    {% for artifact in subEnvironment.artifact_set.all %}
-        <li>
-        {% include "subenvironment/artifact-entry.html" %}
-        </li>
-    {% endfor %}
-    </ul>
+    <br>
+    <div id="subenvironment-details">
+    </div>
 {% else %}
     <p>The requested SubEnvironment is invalid.</p>
 {% endif %}

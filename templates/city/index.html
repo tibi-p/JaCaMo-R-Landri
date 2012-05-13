@@ -22,7 +22,7 @@
                     {
                         'data': '{{ subEnvironment.name }}',
                         'metadata': {
-                            {% url 'subenvironment.views.index' as subEnvUrl %}
+                            {% url 'subenvironment.views.detail' subEnvironment.pk as subEnvUrl %}
                             'link': '{{ subEnvUrl|escapejs }}',
                         },
                     },
