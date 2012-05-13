@@ -41,9 +41,9 @@ def simulate(request):
         if form.is_valid():
             cleaned_data = form.cleaned_data
             subenvironment = cleaned_data['subenvironment']
-            offlineTests, solutions = querySolutions(request.user, subenvironment.id)
+            offlineTests = queryOfflineTests(request.user, subenvironment.id)
 
-            process = getSandboxProcess(subenvironment, solutions)
+            process = getSandboxProcess(subenvironment, offlineTests)
             process.start()
             return HttpResponseRedirect('/simulator/simulate/')
     else:
@@ -55,20 +55,19 @@ def simulate(request):
 
 @login_required
 def getsolutions(request, subEnvId):
-    offlineTests, solutions = querySolutions(request.user, subEnvId)
+    offlineTests = queryOfflineTests(request.user, subEnvId)
+    solutions = offlineTests.get_solutions()
     jsonObj = { }
     jsonObj['offlineTests'] = serializers.serialize("json", offlineTests)
     jsonObj['solutions'] = serializers.serialize("json", solutions)
     jsonStr = json.dumps(jsonObj)
     return HttpResponse(jsonStr, mimetype="application/json")
 
-def querySolutions(user, subEnvId):
+def queryOfflineTests(user, subEnvId):
     offlineTestFilter = { }
     if not user.is_superuser:
         offlineTestFilter['solution__envUser__user'] = user
     if subEnvId:
         offlineTestFilter['solution__subEnvironment__id'] = subEnvId
     offlineTests = OfflineTest.objects.filter(**offlineTestFilter)
-
-    solutions = set(entry.solution for entry in offlineTests)
-    return offlineTests, list(solutions)
+    return offlineTests

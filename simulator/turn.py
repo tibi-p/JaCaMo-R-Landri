@@ -1,5 +1,6 @@
 from simulator.sandbox import JaCaMoSandbox
 from schedule.models import Schedule
+from schedule.models import OfflineTest
 from subenvironment.models import SubEnvironment
 from multiprocessing import Process
 import os
@@ -9,13 +10,14 @@ def runTurn(numSteps):
     for step in xrange(numSteps):
         runStep(step)
 
-def getSandboxProcess(subenvironment, solutions):
+def getSandboxProcess(subenvironment, schedules):
     masArgs = {
         'name': "house_building",
         'infra': "Centralised",
         'env': "c4jason.CartagoEnvironment",
         'agents': { },
     }
+    solutions = schedules.get_solutions()
     for solution in solutions:
         filename = os.path.basename(solution.file.name)
         agentName = os.path.splitext(filename)[0]
@@ -28,6 +30,17 @@ def getSandboxProcess(subenvironment, solutions):
 
     return Process(target=runInSandbox,
         args=(subenvironment, solutions, masArgs))
+
+def runStep(step):
+    for subEnvironment in SubEnvironment.objects.all():
+        schedules = Schedule.objects.filter(**{
+            'solution__subEnvironment': subEnvironment,
+            'step': step,
+        })
+        if canRunSubEnvironment(subEnvironment, schedules):
+            print step, subEnvironment, schedules.get_solutions()
+            process = getSandboxProcess(subEnvironment, schedules)
+            process.start()
 
 def runInSandbox(subenvironment, solutions, masArgs):
     rootDir = tempfile.mkdtemp()
@@ -42,15 +55,6 @@ def runInSandbox(subenvironment, solutions, masArgs):
     sandbox.buildMAS(masFilename)
     sandbox.ant()
     sandbox.clean()
-
-def runStep(step):
-    for subEnvironment in SubEnvironment.objects.all():
-        schedules = Schedule.objects.filter(**{
-            'solution__subEnvironment': subEnvironment,
-            'step': step,
-        })
-        if canRunSubEnvironment(subEnvironment, schedules):
-            print step, subEnvironment, schedules
 
 def canRunSubEnvironment(subEnvironment, offlineTests):
     return sum(offlineTest.numAgents for offlineTest in offlineTests) >= 1
