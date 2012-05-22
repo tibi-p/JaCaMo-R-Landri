@@ -83,10 +83,14 @@
     Description: {{ subEnvironment.description }}
     <br>
     <br>
-    <i> Owners: </i>
-    {% for envUser in subEnvironment.owners.all %}
-        <li> {{ envUser }} </li>
-    {% endfor %}
+    {% with owners=subEnvironment.owners.all %}
+        {% if owners.exists %}
+            <i> Owners: </i>
+            {% for envUser in owners %}
+                <li> {{ envUser }} </li>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
     </ul>
     <br>
     <div id="subenvironment-details">

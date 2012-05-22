@@ -9,7 +9,7 @@ class City(models.Model):
 
 class Ring(models.Model):
     city = models.ForeignKey(City)
-    index = models.PositiveIntegerField(blank=True)
+    index = models.PositiveIntegerField()
     size = models.PositiveIntegerField()
 
     def __unicode__(self):

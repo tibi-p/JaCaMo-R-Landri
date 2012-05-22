@@ -5,9 +5,71 @@
 
 {% block extrastyle %}
 
+<style type="text/css">
+.grid-table {
+    border-width: 1px;
+    border-spacing: 2px;
+    border-style: inset;
+    border-color: gray;
+    border-collapse: collapse;
+}
+.grid-table td {
+    border-width: 1px;
+    padding: 1px;
+    border-style: solid;
+    border-color: gray;
+}
+</style>
+
+<link href="/resources/qtip/jquery.qtip.min.css" rel="stylesheet" type="text/css"//>
+<script src="/resources/qtip/jquery.qtip.min.js" type="text/javascript"></script>
 <script src="/resources/jstree/jquery.jstree.js" type="text/javascript"></script>
 
 <script type="text/javascript">
+    function rebuildTable(table, numRows, numColumns) {
+        var rowCount = table.rows.length;
+        for (var i = rowCount - 1; i >= 0; i--)
+            table.deleteRow(i);
+        for (var i = 0; i < numRows; i++) {
+            var row = table.insertRow(i);
+            for (var j = 0; j < numColumns; j++) {
+                row.insertCell(j);
+            }
+        }
+    }
+
+    function dotProduct(v, u) {
+        var n = Math.min(v.length, u.length);
+        var sum = 0;
+        for (var i = 0; i < n; i++)
+            sum += v[i] * u[i];
+        return sum;
+    }
+
+    function matMulVec(mat, v) {
+        var n = mat.length;
+        var u = [ ];
+        for (var i = 0; i < n; i++)
+            u.push(dotProduct(mat[i], v));
+        return u;
+    }
+
+    function sumVec(v, u) {
+        var n = Math.min(v.length, u.length);
+        var w = [ ];
+        for (var i = 0; i < n; i++)
+            w.push(v[i] + u[i]);
+        return w;
+    }
+
+    function diffVec(v, u) {
+        var n = Math.min(v.length, u.length);
+        var w = [ ];
+        for (var i = 0; i < n; i++)
+            w.push(v[i] - u[i]);
+        return w;
+    }
+
     $(function () {
     {% for city in cityList %}
         $("#subenvironment-tree-{{ city.pk }}").jstree({
@@ -46,6 +108,90 @@
             if (link)
                 window.location.href = link;
         });
+        var cityMap = {
+        {% for ring in city.ring_set.all %}
+            {{ ring.index }}: {
+                size: {{ ring.size }},
+                subenv: {
+                {% for subEnvironment in ring.subenvironment_set.all %}
+                    {{ subEnvironment.index }}: {
+                        'name': '{{ subEnvironment.name }}',
+                        {% url 'subenvironment.views.detail' subEnvironment.pk as subEnvUrl %}
+                        'link': '{{ subEnvUrl|escapejs }}',
+                    },
+                {% endfor %}
+                },
+            },
+        {% endfor %}
+        };
+        var keys = Object.keys(cityMap).map(function (elem) {
+            return parseInt(elem);
+        });
+        keys.sort();
+        var cellSize = [ 40, 40 ];
+        var maxRing = Math.max.apply(this, keys);
+        var jGridCanvas = $("#grid-canvas");
+        if (jGridCanvas.length) {
+            var gridCanvas = jGridCanvas[0];
+            if (gridCanvas.getContext) {
+                var canvasContext = gridCanvas.getContext("2d");
+                console.log(canvasContext);
+                console.log(jGridCanvas.attr('width'));
+            }
+        }
+        var cRow = maxRing, cColumn = maxRing;
+        var cGrid = [ cRow, cColumn ];
+        var cx = 0, cy = 0;
+        var linear = [ [ 0, 1 ], [ -1, 0 ] ];
+        var translation = diffVec([ cx, cy ], matMulVec(linear, cGrid));
+        var jGridTable = $("#grid-table-{{ city.pk }}");
+        if (jGridTable.length) {
+            var gridTable = jGridTable[0];
+            var side = 2 * maxRing + 1;
+            rebuildTable(gridTable, side, side);
+            jGridTable.width(side * cellSize[0]);
+            jGridTable.height(side * cellSize[1]);
+        }
+        console.log(cityMap);
+        var jGridCells = jGridTable.find("td");
+        jGridCells.width(cellSize[0]);
+        jGridCells.height(cellSize[1]);
+        jGridTable.find("tr").each(function (row) {
+            $(this).find("td").each(function (column) {
+                var tPoint = [ row, column ];
+                var gPoint = sumVec(matMulVec(linear, tPoint), translation);
+                var ringIdx = Math.max.apply(this, gPoint.map(Math.abs));
+                var subenvIdx;
+                if (gPoint[1] == ringIdx) {
+                    subenvIdx = 2 * ringIdx - gPoint[0];
+                } else if (gPoint[1] == -ringIdx) {
+                    subenvIdx = 6 * ringIdx + gPoint[0];
+                } else {
+                    if (gPoint[0] >= 0) {
+                        if (gPoint[1] >= 0) {
+                            subenvIdx = gPoint[1];
+                        } else {
+                            subenvIdx = 8 * ringIdx + gPoint[1];
+                        }
+                    } else {
+                        subenvIdx = 4 * ringIdx - gPoint[1];
+                    }
+                }
+                var ring = cityMap[ringIdx];
+                if (ring) {
+                    var subenv = ring.subenv[subenvIdx];
+                    if (subenv) {
+                        var tpl = '<a href="{0}" title="{1}"> <img src="{2}" /> </a>';
+                        this.innerHTML = jQuery.validator.format(tpl, subenv.link, subenv.name, "/resources/champion.png");
+                    }
+                }
+            });
+        });
+        jGridTable.find("a[title]").qtip({
+            style: {
+                classes: 'ui-tooltip-tipsy ui-tooltip-shadow',
+            },
+        });
     {% endfor %}
     });
 </script>
@@ -59,6 +205,12 @@
     <b> {{ city.name }} </b>
     <div id="subenvironment-tree-{{ city.pk }}">
     </div>
+    <br>
+    <table id="grid-table-{{ city.pk }}" class="grid-table">
+        <tbody>
+        </tbody>
+    </table>
+    <br>
     {% endfor %}
 {% else %}
     <p>No cities are available.</p>

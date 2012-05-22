@@ -15,6 +15,7 @@ class SubEnvironment(models.Model):
     name = models.CharField(max_length=200)
     description = models.TextField()
     ring = models.ForeignKey(Ring)
+    index = models.PositiveIntegerField()
     owners = models.ManyToManyField(EnvUser, through='OwnerRelationship')
 
     objects = SubEnvironmentManager()
