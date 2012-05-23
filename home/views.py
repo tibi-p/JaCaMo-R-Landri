@@ -3,9 +3,10 @@ from django.shortcuts import render_to_response
 from django.template import RequestContext
 
 class SiteSection(object):
-    def __init__(self, name, view):
+    def __init__(self, name, view, bgcolor):
         self.name = name
         self.view = view
+        self.bgcolor = bgcolor
         self.url = reverse(view)
         self.isCurrent = False
 
@@ -15,12 +16,14 @@ class SiteSection(object):
 def home_context_processor(request):
     currentUrl = request.get_full_path()
     sections = [ ]
-    sections.append(SiteSection('City', 'city.views.index'))
-    sections.append(SiteSection('SubEnvironment', 'subenvironment.views.index'))
-    sections.append(SiteSection('User', 'envuser.views.index'))
-    sections.append(SiteSection('Simulator', 'simulator.views.simulate'))
+    sections.append(SiteSection('Profile', 'envuser.views.profile', '#53b388'))
+    sections.append(SiteSection('City', 'city.views.index', '#5a69a9'))
+    sections.append(SiteSection('Solutions', 'solution.views.index', '#5a69a9'))
+    sections.append(SiteSection('Ranking', 'envuser.views.index', '#c26468'))
+    sections.append(SiteSection('Simulator', 'simulator.views.simulate', '#bf7cc7'))
+    sections.append(SiteSection('SubEnvironment', 'subenvironment.views.index', '#bf7cc7'))
     if request.user.is_superuser:
-        sections.append(SiteSection('Admin', 'admin:index'))
+        sections.append(SiteSection('Admin', 'admin:index', '#111111'))
 
     sortedSections = sorted(sections, key=lambda x: len(x.url), reverse=True)
     currentSection = None

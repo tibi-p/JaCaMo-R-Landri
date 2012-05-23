@@ -17,13 +17,55 @@
     -->
 
     <link href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.18/themes/cupertino/jquery-ui.css" rel="stylesheet" type="text/css"/>
-    <link href="http://ajax.aspnetcdn.com/ajax/jquery.dataTables/1.9.0/css/jquery.dataTables.css" rel="stylesheet" type="text/css"//>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js" type="text/javascript"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.18/jquery-ui.min.js" type="text/javascript"></script>
-    <script src="http://ajax.aspnetcdn.com/ajax/jquery.dataTables/1.9.0/jquery.dataTables.min.js" type="text/javascript"></script>
-    <script src="http://ajax.aspnetcdn.com/ajax/jquery.validate/1.9/jquery.validate.min.js" type="text/javascript"></script>
+    <script src="/resources/kwicks/jquery.kwicks-1.5.1.pack.js" type="text/javascript"></script>
     <!--
     -->
+
+    <style type="text/css">
+    .kwicks-sections {
+        list-style: none;
+        position: relative;
+        margin: 0;
+        padding: 0;
+    }
+    .kwicks-sections li {
+        display: block;
+        overflow: hidden;
+        padding: 0;
+        cursor: pointer;
+        float: left;
+        width: 180px;
+        height: 83px;
+        margin-right: 5px;
+    }
+    .kwicks-sections tr {
+        height: 25px;
+    }
+    .kwicks-sections .section-text {
+        font-family: Lucida Grande, Lucida Sans, Arial, sans-serif;
+        font-size: 15px;
+        font-variant: small-caps;
+        font-weight: bold;
+        text-align: center;
+    }
+    .kwicks-sections .section-text div {
+        width: 180px;
+    }
+    .kwicks-sections .section-img img {
+        width: 64px;
+        height: 64px;
+    }
+    {% for section in sections %}
+    #li-{{ section.name }} {
+        background-color: {{ section.bgcolor }};
+        {% if forloop.last %}
+        margin-right: 0px;
+        {% endif %}
+    }
+    {% endfor %}
+    </style>
 
     <script type="text/javascript">
         $(document).ready(function() {
@@ -34,6 +76,12 @@
                     if (this.dataset && this.dataset.backlink)
                         self.location.href = this.dataset.backlink;
                 };
+            });
+            $('.kwicks-sections').kwicks({
+                max: 254,
+                spacing: 5,
+                duration: 1500,
+                easing: 'easeOutBounce',
             });
 /*
         $("#tabs a").each(function(index) {
@@ -59,6 +107,43 @@
         <img src="/resources/jacamo-logo.png" />
     </div>
     Logged in as {{ user.get_full_name }} ({{ user.username }}).
+<!--
+    <ul class="kwicks-sections">
+    {% for section in sections %}
+        <li id="li-{{ section.name }}">
+        {% url section.view as linkUrl %}
+            <a href="{{ section.url }}" target="_self"
+                {% if section == currentSection %}
+                class="ui-btn-active"
+                {% endif %}
+            >
+                <table>
+                    <tbody>
+                        <tr>
+                            <td> </td>
+                            <td rowspan="3" style="vertical-align: middle">
+                            <div class="section-img">
+                                <img src="/resources/globe terrestre.png" />
+                            </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="section-text">
+                            <div>
+                                {{ section.name }}
+                            </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td> </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </a>
+        </li>
+        {% endfor %}
+    </ul>
+-->
     <div id="tabs" data-role="navbar">
         <ul>
         {% for section in sections %}

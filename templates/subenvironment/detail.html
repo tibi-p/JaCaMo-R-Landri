@@ -1,8 +1,12 @@
 {% extends "base.html" %}
 
+{% load tag_extras %}
+
 {% block extrastyle %}
 
+{% with owners=subEnvironment.owners.all %}
 {% if subEnvironment %}
+{% if user.is_superuser or owners|filteruser:user %}
 <script src="/resources/jstree/jquery.jstree.js" type="text/javascript"></script>
 
 <script type="text/javascript">
@@ -71,11 +75,14 @@
     });
 </script>
 {% endif %}
+{% endif %}
+{% endwith %}
 
 {% endblock %}
 
 {% block app-content %}
 
+{% with owners=subEnvironment.owners.all %}
 {% if subEnvironment %}
     <b> {{ subEnvironment.name }} </b>
     <br>
@@ -83,20 +90,22 @@
     Description: {{ subEnvironment.description }}
     <br>
     <br>
-    {% with owners=subEnvironment.owners.all %}
-        {% if owners.exists %}
-            <i> Owners: </i>
-            {% for envUser in owners %}
-                <li> {{ envUser }} </li>
-            {% endfor %}
-        {% endif %}
-    {% endwith %}
-    </ul>
+    {% if owners.exists %}
+        <i> Owners: </i>
+        <ul>
+        {% for envUser in owners %}
+            <li> {{ envUser }} </li>
+        {% endfor %}
+        </ul>
+    {% endif %}
     <br>
-    <div id="subenvironment-details">
-    </div>
+    {% if user.is_superuser or owners|filteruser:user %}
+        <div id="subenvironment-details">
+        </div>
+    {% endif %}
 {% else %}
     <p>The requested SubEnvironment is invalid.</p>
 {% endif %}
+{% endwith %}
 
 {% endblock %}
