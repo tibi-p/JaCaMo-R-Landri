@@ -12,7 +12,7 @@ def index(request):
 
 @login_required
 def detail(request, subEnvironmentId):
-    subEnvironment = get_object_or_404(SubEnvironment, pk = subEnvironmentId)
+    subEnvironment = get_object_or_404(SubEnvironment, pk=subEnvironmentId)
     return render_to_response('subenvironment/detail.html',
         { 'subEnvironment': subEnvironment },
         context_instance = RequestContext(request))
