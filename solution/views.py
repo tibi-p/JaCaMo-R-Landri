@@ -13,20 +13,22 @@ from subenvironment.models import SubEnvironment
 import json
 
 def make_solution_form(subEnvKwArgs={ }):
-    if 'queryset' not in subEnvKwArgs or subEnvKwArgs['queryset'] is None:
-        subEnvKwArgs['queryset'] = SubEnvironment.objects.all()
-    if 'widget' not in subEnvKwArgs or subEnvKwArgs['widget'] is None:
-        subEnvKwArgs['widget'] = forms.Select()
+    hidden = subEnvKwArgs.pop('hidden', False)
+    if hidden:
+        class SolutionForm(forms.models.ModelForm):
+            class Meta:
+                model = Solution
+                exclude = ('envUser', 'subEnvironment')
+    else:
+        if subEnvKwArgs.get('queryset', None) is None:
+            subEnvKwArgs['queryset'] = SubEnvironment.objects.all()
 
-    class SolutionForm(forms.models.ModelForm):
-        subEnvironment = forms.ModelChoiceField(**subEnvKwArgs)
+        class SolutionForm(forms.models.ModelForm):
+            subEnvironment = forms.ModelChoiceField(**subEnvKwArgs)
 
-        def __init__(self, *args, **kwargs):
-            super(SolutionForm, self).__init__(*args, **kwargs)
-
-        class Meta:
-            model = Solution
-            exclude = ('envUser',)
+            class Meta:
+                model = Solution
+                exclude = ('envUser',)
 
     return SolutionForm
 
@@ -39,15 +41,12 @@ def make_base_custom_formset(queryset):
 
     return BaseCustomFormSet
 
-def make_solution_formset(userSolutions, subenvs, subEnvWidget=None):
-    subEnvKwArgs = {
-        'queryset': subenvs,
-        'widget': subEnvWidget,
-    }
-    for kwArgs in [ subEnvKwArgs ]:
-        queryset = kwArgs['queryset']
-        if queryset:
-            kwArgs['initial'] = queryset[0]
+def make_solution_formset(userSolutions, subenvs, singleSubEnv=False):
+    subEnvKwArgs = { }
+    if singleSubEnv:
+        subEnvKwArgs['hidden'] = True
+    else:
+        subEnvKwArgs['queryset'] = subenvs
 
     SolutionForm = make_solution_form(subEnvKwArgs)
     solutions = userSolutions.filter(subEnvironment__in=subenvs)
@@ -78,18 +77,11 @@ def index_common(request, postSubEnv=None, others=False):
     allSolutions = [ ]
     for subEnvironment in subEnvironments:
         SolutionFormSet = make_solution_formset(userSolutions,
-            SubEnvironment.objects.filter(pk=subEnvironment.pk), subEnvWidget=forms.HiddenInput())
+            SubEnvironment.objects.filter(pk=subEnvironment.pk), singleSubEnv=True)
         if request.method == 'POST' and subEnvironment == postSubEnv:
-            print request.POST, request.FILES
             formset = SolutionFormSet(request.POST, request.FILES)
             if formset.is_valid():
-                cleaned_data = formset.cleaned_data
-                tempSolutions = formset.save(commit=False)
-                for tempSol in tempSolutions:
-                    tempSol.envUser = envUser
-                    tempSol.save()
-                print cleaned_data
-                return HttpResponseRedirect('/solution/index/')
+                return handle_solution_formset(formset, envUser, subEnvironment)
         else:
             formset = SolutionFormSet()
         allSolutions.append({
@@ -103,10 +95,7 @@ def index_common(request, postSubEnv=None, others=False):
         print request.POST, request.FILES
         othersFormset = SolutionFormSet(request.POST, request.FILES)
         if othersFormset.is_valid():
-            cleaned_data = othersFormset.cleaned_data
-            othersFormset.save()
-            print cleaned_data
-            return HttpResponseRedirect('/solution/index/')
+            return handle_solution_formset(othersFormset, envUser)
     else:
         othersFormset = SolutionFormSet()
 
@@ -116,6 +105,17 @@ def index_common(request, postSubEnv=None, others=False):
             'othersFormset': othersFormset,
         },
         context_instance = RequestContext(request))
+
+def handle_solution_formset(formset, envUser, subEnvironment=None):
+    cleaned_data = formset.cleaned_data
+    solutions = formset.save(commit=False)
+    for soln in solutions:
+        soln.envUser = envUser
+        if subEnvironment is not None:
+            soln.subEnvironment = subEnvironment
+        soln.save()
+    print cleaned_data
+    return HttpResponseRedirect('/solution/index/')
 
 @login_required
 def getsolutions(request, subEnvId):
