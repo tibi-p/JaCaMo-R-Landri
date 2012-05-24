@@ -7,7 +7,7 @@
 <script type="text/javascript">
     $(function () {
         $("#solution-accordion").accordion({
-            collapsible: true,
+            autoHeight: false,
         });
     });
 </script>
@@ -18,22 +18,35 @@
 
 <div id="solution-accordion">
 {% for subSolutions in allSolutions %}
+{% with subSolutions.subEnvironment as subEnvironment %}
     <h3>
-        <a href="#"> {{ subSolutions.subEnvironment }} </a>
+        <a href="#"> {{ subEnvironment }} </a>
     </h3>
     <div>
-    {% for solution in subSolutions.someSolutions %}
-        <p> {{ solution }} </p>
-    {% endfor %}
+    <form enctype="multipart/form-data"
+        action="{% url 'solution.views.index_post' subEnvironment.pk %}"
+        method="post"> {% csrf_token %}
+        <table>
+            {{ subSolutions.formset }}
+        </table>
+        <input type="submit" value="Submit Solutions" />
+    </form>
     </div>
+{% endwith %}
 {% endfor %}
+    <h3>
+        <a href="#"> Unsolved SubEnvironments </a>
+    </h3>
+    <div>
+    <form enctype="multipart/form-data"
+        action="{% url 'solution.views.index_post' 0 %}"
+        method="post"> {% csrf_token %}
+        <table>
+            {{ othersFormset }}
+        </table>
+        <input type="submit" value="Submit Solutions" />
+    </form>
+    </div>
 </div>
-
-<form enctype="multipart/form-data" action="{% url 'solution.views.index' %}" method="post">{% csrf_token %}
-<table>
-{{ formset }}
-</table>
-<input type="submit" value="Simulate" />
-</form>
 
 {% endblock %}

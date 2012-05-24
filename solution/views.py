@@ -12,18 +12,21 @@ from solution.models import Solution
 from subenvironment.models import SubEnvironment
 import json
 
-def make_solution_form(userQueryset):
+def make_solution_form(subEnvKwArgs={ }):
+    if 'queryset' not in subEnvKwArgs or subEnvKwArgs['queryset'] is None:
+        subEnvKwArgs['queryset'] = SubEnvironment.objects.all()
+    if 'widget' not in subEnvKwArgs or subEnvKwArgs['widget'] is None:
+        subEnvKwArgs['widget'] = forms.Select()
+
     class SolutionForm(forms.models.ModelForm):
-        envUser = forms.ModelChoiceField(queryset=EnvUser.objects.all(),
-            widget=forms.HiddenInput())
+        subEnvironment = forms.ModelChoiceField(**subEnvKwArgs)
 
         def __init__(self, *args, **kwargs):
             super(SolutionForm, self).__init__(*args, **kwargs)
-            if userQueryset != None:
-                self.fields['envUser'].queryset = userQueryset
 
         class Meta:
             model = Solution
+            exclude = ('envUser',)
 
     return SolutionForm
 
@@ -36,46 +39,81 @@ def make_base_custom_formset(queryset):
 
     return BaseCustomFormSet
 
+def make_solution_formset(userSolutions, subenvs, subEnvWidget=None):
+    subEnvKwArgs = {
+        'queryset': subenvs,
+        'widget': subEnvWidget,
+    }
+    for kwArgs in [ subEnvKwArgs ]:
+        queryset = kwArgs['queryset']
+        if queryset:
+            kwArgs['initial'] = queryset[0]
+
+    SolutionForm = make_solution_form(subEnvKwArgs)
+    solutions = userSolutions.filter(subEnvironment__in=subenvs)
+    BaseSolutionFormSet = make_base_custom_formset(solutions)
+    return modelformset_factory(Solution, form=SolutionForm,
+        formset=BaseSolutionFormSet, can_delete=True)
+
 @login_required
 def index(request):
+    return index_common(request)
+
+@login_required
+def index_post(request, subEnvId):
+    try:
+        subEnvironment = SubEnvironment.objects.get(pk=subEnvId)
+        return index_common(request, postSubEnv=subEnvironment)
+    except SubEnvironment.DoesNotExist:
+        return index_common(request, others=True)
+
+def index_common(request, postSubEnv=None, others=False):
     user = request.user
     envUser = get_object_or_404(EnvUser, user=user)
+
+    userSolutions = Solution.objects.filter(envUser=envUser)
+
     subEnvironments = SubEnvironment.objects.get_solved_by_user(user)
-    solutions = Solution.objects
+    unsubEnvironments = SubEnvironment.objects.get_unsolved_by_user(user)
     allSolutions = [ ]
     for subEnvironment in subEnvironments:
+        SolutionFormSet = make_solution_formset(userSolutions,
+            SubEnvironment.objects.filter(pk=subEnvironment.pk), subEnvWidget=forms.HiddenInput())
+        if request.method == 'POST' and subEnvironment == postSubEnv:
+            print request.POST, request.FILES
+            formset = SolutionFormSet(request.POST, request.FILES)
+            if formset.is_valid():
+                cleaned_data = formset.cleaned_data
+                tempSolutions = formset.save(commit=False)
+                for tempSol in tempSolutions:
+                    tempSol.envUser = envUser
+                    tempSol.save()
+                print cleaned_data
+                return HttpResponseRedirect('/solution/index/')
+        else:
+            formset = SolutionFormSet()
         allSolutions.append({
             'subEnvironment': subEnvironment,
-            'someSolutions': solutions.get_sent_by_user_for_env(user, subEnvironment),
+            'formset': formset,
         })
 
-    envUser = get_object_or_404(EnvUser, user=request.user)
-    userQueryset = EnvUser.objects.filter(pk=envUser.pk)
-    customQueryset = Solution.objects.filter(envUser=envUser)
-    formArgs = {
-        'initial': {
-            'envUser': envUser,
-        },
-    }
-
-    SolutionForm = make_solution_form(userQueryset)
-    BaseSolutionFormSet = make_base_custom_formset(customQueryset)
-    SolutionFormSet = modelformset_factory(Solution, form=SolutionForm,
-        formset=BaseSolutionFormSet, can_delete=True)
-    if request.method == 'POST':
-        formset = SolutionFormSet(request.POST, request.FILES)
-        if formset.is_valid():
-            cleaned_data = formset.cleaned_data
-            formset.save()
+    SolutionFormSet = make_solution_formset(userSolutions,
+        unsubEnvironments)
+    if request.method == 'POST' and others:
+        print request.POST, request.FILES
+        othersFormset = SolutionFormSet(request.POST, request.FILES)
+        if othersFormset.is_valid():
+            cleaned_data = othersFormset.cleaned_data
+            othersFormset.save()
             print cleaned_data
             return HttpResponseRedirect('/solution/index/')
     else:
-        formset = SolutionFormSet()
+        othersFormset = SolutionFormSet()
 
     return render_to_response('solution/index.html',
         {
-            'formset': formset,
             'allSolutions': allSolutions,
+            'othersFormset': othersFormset,
         },
         context_instance = RequestContext(request))
 
