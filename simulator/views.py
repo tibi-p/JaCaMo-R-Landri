@@ -70,3 +70,9 @@ def queryOfflineTests(user, subEnvId):
         offlineTestFilter['solution__subEnvironment__id'] = subEnvId
     offlineTests = OfflineTest.objects.filter(**offlineTestFilter)
     return offlineTests
+
+@login_required
+def jUpdateOfflineTests(request):
+    post = request.POST
+    jsonStr = json.dumps(post['value'])
+    return HttpResponse(jsonStr, mimetype="application/json")

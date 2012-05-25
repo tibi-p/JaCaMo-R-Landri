@@ -7,81 +7,81 @@
 <link href="http://ajax.aspnetcdn.com/ajax/jquery.dataTables/1.9.1/css/jquery.dataTables.css" rel="stylesheet" type="text/css"//>
 <link href="http://ajax.aspnetcdn.com/ajax/jquery.dataTables/1.9.1/css/jquery.dataTables_themeroller.css" rel="stylesheet" type="text/css"//>
 <script src="http://ajax.aspnetcdn.com/ajax/jquery.dataTables/1.9.1/jquery.dataTables.min.js" type="text/javascript"></script>
+<script src="http://ajax.aspnetcdn.com/ajax/jquery.validate/1.9/jquery.validate.min.js" type="text/javascript"></script>
+<script src="/resources/jeditable/jquery.jeditable.mini.js" type="text/javascript"></script>
+<script src="/resources/jeditable/jquery.dataTables.editable.js" type="text/javascript"></script>
+<script src="/resources/rlandri/util.js" type="text/javascript"></script>
 
 <script type="text/javascript">
-    function unsafeParseJSON(data, defValue) {
-        var obj = defValue;
-        try {
-            obj = jQuery.parseJSON(data);
-        } catch (e) {
-            console.log(e);
-        }
-        return obj;
-    }
-
-    function constructPrimaryMap(dataArr) {
-        var dataMap = { };
-        for (var i in dataArr) {
-            data = dataArr[i];
-            dataMap[data.pk] = data;
-        }
-        return dataMap;
-    }
-
-    function getModelField(obj, key) {
-        var value;
-        if (obj) {
-            var fields = obj.fields;
-            if (fields) {
-                value = fields[key];
+    $(document).ready(function () {
+        function handleJsonTests(data) {
+            var offlineTests = rlandri.util.parseJSON(data.offlineTests, []);
+            var solutions = rlandri.util.parseJSON(data.solutions, []);
+            var solutionMap = rlandri.util.constructPrimaryMap(solutions);
+            var aaData = [];
+            for (var i in offlineTests) {
+                var offlineTest = offlineTests[i];
+                var fields = offlineTest.fields;
+                if (fields) {
+                    var solution = solutionMap[fields.solution];
+                    var file = rlandri.util.getModelField(solution, 'file');
+                    if (file) {
+                        var tokens = file.split('/');
+                        for (var i = tokens.length - 1; i >= 0; i--) {
+                            var token = tokens[i];
+                            if (token) {
+                                file = token;
+                                break;
+                            }
+                        }
+                    }
+                    aaData.push([ file, fields.numAgents ]);
+                }
+            }
+            var aoColumns = [
+                { "sTitle": "Agent File" },
+                { "sTitle": "Number of Agents", "sClass": "center" },
+            ];
+            var otTable = $('#id_offline_test_table').dataTable({
+                "aaData": aaData,
+                "aoColumns": aoColumns,
+                "bDestroy": true,
+                "bAutoWidth": false,
+                "bJQueryUI": true,
+                "sPaginationType": "full_numbers",
+            });
+            otTable.makeEditable({
+                sUpdateURL: '{% url 'simulator.views.jUpdateOfflineTests' %}',
+                aoColumns: [
+                    null,
+                    {
+                        oValidationOptions: {
+                            rules: {
+                                'value': {
+                                    required: true,
+                                    number: true,
+                                    min: 0,
+                                },
+                            },
+                        },
+                    },
+                ],
+            });
+            var nodes = otTable.fnGetNodes();
+            for (var i in offlineTests) {
+                var test = offlineTests[i];
+                if (i in nodes && test.fields) {
+                    nodes[i].id = test.fields.solution;
+                }
             }
         }
-        return value;
-    }
 
-    $(document).ready(function() {
-        $("select#id_subenvironment").change(function() {
+        $("select#id_subenvironment").change(function () {
             var subEnv = $(this).val();
             if (subEnv) {
                 var url = "{% url 'simulator.views.getsolutions' '0' %}";
                 url = url.replace('0', subEnv);
-                $.getJSON(url, function(data) {
-                    var offlineTests = unsafeParseJSON(data.offlineTests, []);
-                    var solutions = unsafeParseJSON(data.solutions, []);
-                    var solutionMap = constructPrimaryMap(solutions);
-                    var aaData = [];
-                    for (var i in offlineTests) {
-                        var offlineTest = offlineTests[i];
-                        var fields = offlineTest.fields;
-                        if (fields) {
-                            var solution = solutionMap[fields.solution];
-                            var file = getModelField(solution, 'file');
-                            if (file) {
-                                var tokens = file.split('/');
-                                for (var i = tokens.length - 1; i >= 0; i--) {
-                                    var token = tokens[i];
-                                    if (token) {
-                                        file = token;
-                                        break;
-                                    }
-                                }
-                            }
-                            aaData.push([ file, fields.numAgents ]);
-                        }
-                    }
-                    aoColumns = [
-                        { "sTitle": "Agent File" },
-                        { "sTitle": "Number of Agents", "sClass": "center" },
-                    ];
-                    $('#id_fake_schedule_table').dataTable({
-                        "aaData": aaData,
-                        "aoColumns": aoColumns,
-                        "bDestroy": true,
-                        "bAutoWidth": false,
-                        "bJQueryUI": true,
-                        "sPaginationType": "full_numbers",
-                    });
-                });
+                $.getJSON(url, handleJsonTests);
             }
         });
     });
@@ -96,7 +96,7 @@
 <input type="submit" value="Simulate" />
 </form>
 
-<table id="id_fake_schedule_table">
+<table id="id_offline_test_table">
 </table>
 
 {% endblock %}

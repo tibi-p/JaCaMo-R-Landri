@@ -5,4 +5,5 @@ urlpatterns = patterns('simulator.views',
     url(r'^run/$', 'run'),
     url(r'^simulate/$', 'simulate'),
     url(r'^getSolutions/(?P<subEnvId>\d*)/$', 'getsolutions'),
+    url(r'^jUpdateOfflineTests/$', 'jUpdateOfflineTests'),
 )
