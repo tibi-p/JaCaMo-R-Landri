@@ -15,7 +15,7 @@ class ScheduleManager(models.Manager):
         return ScheduleQuerySet(self.model)
 
 class AbstractSchedule(models.Model):
-    solution = models.ForeignKey(Solution)
+    solution = models.OneToOneField(Solution)
     numAgents = models.PositiveIntegerField()
 
     objects = ScheduleManager()
