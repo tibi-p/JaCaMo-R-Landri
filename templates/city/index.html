@@ -180,7 +180,8 @@
                     var subenv = ring.subenv[subenvIdx];
                     if (subenv) {
                         var tpl = '<a href="{0}" title="{1}"> <img src="{2}" /> </a>';
-                        this.innerHTML = jQuery.validator.format(tpl, subenv.link, subenv.name, "/resources/champion.png");
+                        this.innerHTML = $.validator.format(tpl, subenv.link,
+                            subenv.name, "/resources/champion.png");
                     }
                 }
             });

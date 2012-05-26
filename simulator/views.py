@@ -11,6 +11,7 @@ from simulator.turn import getSandboxProcess, runTurn
 from solution.models import Solution
 from subenvironment.models import SubEnvironment
 import json
+import os
 
 class OfflineTestForm(forms.models.ModelForm):
     solution = forms.models.ModelChoiceField(Solution.objects.all(), widget=forms.TextInput(attrs={'class':'disabled', 'readonly':'readonly'}))
@@ -75,7 +76,6 @@ def simulate(request):
 
 @login_required
 def simulate_post(request, subEnvId):
-    print subEnvId
     subEnvironment = SubEnvironment.objects.get(pk=subEnvId)
     return simulate_common(request, subEnvironment)
 
@@ -89,7 +89,6 @@ def simulate_common(request, postSubEnv=None):
     for subenv in subenvs:
         subEnvId = subenv.id
         OfflineTestFormSet = make_offline_test_formset(subEnvId, extra=0)
-        print request.method, subEnvId, postSubEnv, subEnvId == postSubEnv
         if request.method == 'POST' and subenv == postSubEnv:
             formset = OfflineTestFormSet(request.POST, request.FILES)
             if formset.is_valid():
@@ -101,14 +100,23 @@ def simulate_common(request, postSubEnv=None):
             'formset': formset,
         })
 
+    solutions = Solution.objects.filter(envUser__user=user)
+
+    def niceValue(field):
+        value = field.value()
+        if field.name == 'solution':
+            solution = solutions.get(pk=value)
+            return os.path.basename(solution.file.name)
+        else:
+            return value
+
     for test in allTests:
         formset = test['formset']
-        aaData = [ [ field.value() for field in form ] for form in formset ]
-        errors = [ [ field.errors for field in form ] for form in formset ]
+        aaData = [ [ (niceValue(field), field.errors) for field in form ]
+            for form in formset ]
         cellIds = [ [ field.id_for_label for field in form ] for form in formset ]
         rowIds = [ form['solution'].value() for form in formset ]
         test['aaData'] = json.dumps(aaData)
-        test['errors'] = json.dumps(errors)
         test['cellIds'] = json.dumps(cellIds)
         test['rowIds'] = json.dumps(rowIds)
     return render_to_response('simulator/simulate.html',

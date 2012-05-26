@@ -4,6 +4,12 @@
 
 {% block extrastyle %}
 
+<style type="text/css">
+.offline-test-formtable {
+    display: none;
+}
+</style>
+
 <link href="http://ajax.aspnetcdn.com/ajax/jquery.dataTables/1.9.1/css/jquery.dataTables.css" rel="stylesheet" type="text/css"//>
 <link href="http://ajax.aspnetcdn.com/ajax/jquery.dataTables/1.9.1/css/jquery.dataTables_themeroller.css" rel="stylesheet" type="text/css"//>
 <script src="http://ajax.aspnetcdn.com/ajax/jquery.dataTables/1.9.1/jquery.dataTables.min.js" type="text/javascript"></script>
@@ -85,28 +91,37 @@
             }
         });
 
-{% for test in allTests %}
-{% with test.subEnvironment as subEnvironment %}
-{% with test.formset as formset %}
-    (function () {
-            {% for form in formset %}
-                {% for field in form %}
-                    '{{ field.errors.as_text }}' + '{{ field.value|escapejs }}';
-                {% endfor %}
-            {% endfor %}
-            var aaData = '{{ test.aaData|escapejs }}';
+    function trimSuffix(str, suffix) {
+        var index = str.lastIndexOf(suffix);
+        if (index >= 0)
+            return str.substring(0, index);
+        else
+            return '';
+    }
+
+    function createTable(subEnvId, aaData, cellIds, rowIds) {
             aaData = rlandri.util.parseJSON(aaData, [ ]);
-            var cellIds = '{{ test.cellIds|escapejs }}';
             cellIds = rlandri.util.parseJSON(cellIds, [ ]);
-            var rowIds = '{{ test.rowIds|escapejs }}';
             rowIds = rlandri.util.parseJSON(rowIds, [ ]);
+
+            var numRows = aaData.length;
+            for (var i = 0; i < numRows; i++) {
+                var row = aaData[i];
+                var numCols = row.length;
+                for (var j = 0; j < numCols; j++) {
+                    var cell = row[j];
+                    var errors = cell[1];
+                    var tpl = (errors.length > 0) ? '{0} ({1})' : '{0}';
+                    row[j] = $.validator.format(tpl, cell[0], errors);
+                }
+            }
+
             var aoColumns = [
                 { "sTitle": "Agent File" },
                 { "sTitle": "Number of Agents", "sClass": "center" },
             ];
-            var tpl = '#offline-test-realtable-{0}';
-            var id = '{{ test.subEnvironment.id|escapejs }}';
-            var tableId = jQuery.validator.format(tpl, id);
+            var tableTpl = '#offline-test-realtable-{0}';
+            var tableId = $.validator.format(tableTpl, subEnvId);
             var otTable = $(tableId).dataTable({
                 "aaData": aaData,
                 "aoColumns": aoColumns,
@@ -117,13 +132,10 @@
             });
             otTable.makeEditable({
                 sUpdateURL: function (value, settings) {
-                    var suffix = "-realtable";
-                    var id = this.id;
-                    var index = id.lastIndexOf(suffix);
-                    if (index >= 0) {
-                        id = id.substring(0, index);
-                        $('#' + id).val(value);
-                        var forms = $('#offline-test-form-{{ subEnvironment.id }}');
+                    var cellId = trimSuffix(this.id, "-realtable");
+                    if (cellId) {
+                        $('#' + cellId).val(value);
+                        var forms = $('#offline-test-form-' + subEnvId);
                         forms.each(function(idx) {
                             this.submit();
                         });
@@ -155,15 +167,21 @@
                 var ids = cellIds[i];
                 var numCells = Math.min(cells.length, ids.length);
                 for (var j = 0; j < numCells; j++) {
-                    var id = ids[j] + "-realtable";
-                    cells[j].id = id;
+                    var cellId = ids[j] + "-realtable";
+                    cells[j].id = cellId;
                 }
             }
             numNodes = Math.min(nodes.length, rowIds.length);
             for (var i = 0; i < numNodes; i++) {
                 nodes[i].id = rowIds[i];
             }
-    })();
+    }
+
+{% for test in allTests %}
+{% with test.subEnvironment as subEnv %}
+{% with test.formset as formset %}
+    createTable('{{ subEnv.id|escapejs }}', '{{ test.aaData|escapejs }}',
+        '{{ test.cellIds|escapejs }}', '{{ test.rowIds|escapejs }}');
 {% endwith %}
 {% endwith %}
 {% endfor %}
@@ -192,7 +210,7 @@
     </table>
     <form action="{% url 'simulator.views.simulate_post' subEnvironment.pk %}"
         id="offline-test-form-{{ subEnvironment.id }}" method="post">{% csrf_token %}
-        <table id="offline-test-formtable-{{ subEnvironment.id }}" style="display: none;">
+        <table class="offline-test-formtable">
             {{ formset }}
         </table>
     </form>
