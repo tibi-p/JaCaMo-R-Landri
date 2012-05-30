@@ -9,5 +9,4 @@ def basename(file):
 
 @register.filter
 def filteruser(queryset, user):
-    print queryset.filter(user=user)
     return queryset.filter(user=user)

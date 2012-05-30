@@ -23,8 +23,7 @@ def getSandboxProcess(subenvironment, schedules):
     for solution in solutions:
         filename = os.path.basename(solution.file.name)
         agentName = os.path.splitext(filename)[0]
-        count = sum(offlineTest.numAgents for offlineTest
-            in solution.offlinetest_set.all())
+        count = solution.offlinetest.numAgents
         masArgs['agents'][agentName] = {
             'arch': 'c4jason.CAgentArch',
             'no': count,
@@ -40,7 +39,7 @@ def runStep(step):
             'step': step,
         })
         if canRunSubEnvironment(subEnvironment, schedules):
-            print step, subEnvironment, schedules.get_solutions()
+            print step, subEnvironment, schedules, schedules.get_solutions()
             process = getSandboxProcess(subEnvironment, schedules)
             for envUser in schedules.get_envusers():
                 timePool, created = TimePool.objects.get_or_create(envUser=envUser)
@@ -48,7 +47,7 @@ def runStep(step):
                 timePool.save()
             for timePool in TimePool.objects.all():
                 print timePool
-            #process.start()
+            process.start()
 
 def runInSandbox(subenvironment, solutions, masArgs):
     rootDir = tempfile.mkdtemp()
@@ -64,8 +63,8 @@ def runInSandbox(subenvironment, solutions, masArgs):
     sandbox.ant()
     sandbox.clean()
 
-def canRunSubEnvironment(subEnvironment, offlineTests):
-    return sum(offlineTest.numAgents for offlineTest in offlineTests) >= 1
+def canRunSubEnvironment(subEnvironment, tests):
+    return sum(test.numAgents for test in tests) >= 1
 
 def getPathList(subenvironment, key_set):
     return ( elem.file.path for elem in getattr(subenvironment, key_set).all() )

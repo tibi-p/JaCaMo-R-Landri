@@ -80,68 +80,6 @@ table.dataTable tr.even.row_selected td {
             });
         }
 
-        function handleJsonTests(data) {
-            var offlineTests = rlandri.util.parseJSON(data.offlineTests, []);
-            var solutions = rlandri.util.parseJSON(data.solutions, []);
-            var solutionMap = rlandri.util.constructPrimaryMap(solutions);
-            var aaData = [];
-            for (var i in offlineTests) {
-                var offlineTest = offlineTests[i];
-                var fields = offlineTest.fields;
-                if (fields) {
-                    var solution = solutionMap[fields.solution];
-                    var file = rlandri.util.getModelField(solution, 'file');
-                    if (file) {
-                        var tokens = file.split('/');
-                        for (var i = tokens.length - 1; i >= 0; i--) {
-                            var token = tokens[i];
-                            if (token) {
-                                file = token;
-                                break;
-                            }
-                        }
-                    }
-                    aaData.push([ file, fields.numAgents ]);
-                }
-            }
-            var aoColumns = [
-                { "sTitle": "Agent File" },
-                { "sTitle": "Number of Agents", "sClass": "center" },
-            ];
-            var otTable = $('#id_offline_test_table').dataTable({
-                "aaData": aaData,
-                "aoColumns": aoColumns,
-                "bDestroy": true,
-                "bAutoWidth": false,
-                "bJQueryUI": true,
-                "sPaginationType": "full_numbers",
-            });
-            otTable.makeEditable({
-                sUpdateURL: '{% url 'simulator.views.jUpdateOfflineTests' %}',
-                aoColumns: [
-                    null,
-                    {
-                        oValidationOptions: {
-                            rules: {
-                                'value': {
-                                    required: true,
-                                    number: true,
-                                    min: 0,
-                                },
-                            },
-                        },
-                    },
-                ],
-            });
-            var nodes = otTable.fnGetNodes();
-            for (var i in offlineTests) {
-                var test = offlineTests[i];
-                if (i in nodes && test.fields) {
-                    nodes[i].id = test.fields.solution;
-                }
-            }
-        }
-
         function createTable(subEnvId, aaData, cellIds, rowIds) {
             aaData = rlandri.util.parseJSON(aaData, [ ]);
             cellIds = rlandri.util.parseJSON(cellIds, [ ]);
@@ -339,14 +277,22 @@ table.dataTable tr.even.row_selected td {
     <table id="offline-test-realtable-{{ subEnvironment.id }}">
     </table>
 
-<form id="add-new-row-form-{{ subEnvironment.id }}" class="formAddNewRow" action="#" title="Add a new browser">
-<table>
-{{ form.as_table }}
-</table>
-</form>
+    <form id="add-new-row-form-{{ subEnvironment.id }}" action="#" title="Add a new browser">
+        <table>
+            {{ form.as_table }}
+        </table>
+    </form>
+
+    <form action="{% url 'simulator.views.run_simulation' %}"
+        id="run-simulation-{{ subEnvironment.id }}" method="post">
+        {% csrf_token %}
+        <input type="hidden" name="subEnvId" value="{{ subEnvironment.id }}" />
+        <input type="submit" value="Simulate" />
+    </form>
 
     <form action="{% url 'simulator.views.simulate_post' subEnvironment.pk %}"
-        id="offline-test-form-{{ subEnvironment.id }}" method="post">{% csrf_token %}
+        id="offline-test-form-{{ subEnvironment.id }}" method="post">
+        {% csrf_token %}
         <table class="offline-test-formtable">
             {{ formset }}
         </table>

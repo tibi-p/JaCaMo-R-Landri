@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% load url from future %}
+
+{% block app-content %}
+
+<form action="{% url 'simulator.views.schedule' %}"
+    id="run-simulation-{{ subEnvironment.id }}" method="post">
+    {% csrf_token %}
+    <table>
+        {{ formset.as_table }}
+    </table>
+    <input type="submit" value="Update Schedule" />
+</form>
+
+{% endblock %}

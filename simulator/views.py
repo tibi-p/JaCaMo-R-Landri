@@ -6,6 +6,7 @@ from django.forms.models import modelformset_factory
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render_to_response
 from django.template import RequestContext
+from home.base import make_base_custom_formset
 from schedule.models import OfflineTest, Schedule
 from simulator.turn import getSandboxProcess, runTurn
 from solution.models import Solution
@@ -38,15 +39,6 @@ class StiffOfflineTestForm(OfflineTestForm):
             'readonly': 'readonly',
         }))
 
-def make_base_custom_formset(queryset):
-    class BaseCustomFormSet(forms.models.BaseModelFormSet):
-        def __init__(self, *args, **kwargs):
-            if queryset is not None and not 'queryset' in kwargs:
-                kwargs['queryset'] = queryset
-            super(BaseCustomFormSet, self).__init__(*args, **kwargs)
-
-    return BaseCustomFormSet
-
 def make_offline_test_formset(subEnvId, extra):
     tests = OfflineTest.objects.filter(solution__subEnvironment__id=subEnvId)
     BaseOfflineTestFormSet = make_base_custom_formset(tests)
@@ -73,24 +65,11 @@ def run(request):
     runTurn(5)
     subEnvironmentList = SubEnvironment.objects.all()
     return render_to_response('simulator/run.html',
-        { 'subEnvironmentList': subEnvironmentList },
+        { },
         context_instance = RequestContext(request))
 
 @login_required
 def simulate(request):
-    '''if request.method == 'POST':
-        form = SimulateForm(request.POST, user=request.user)
-        if form.is_valid():
-            cleaned_data = form.cleaned_data
-            subenvironment = cleaned_data['subenvironment']
-            offlineTests = queryOfflineTests(request.user, subenvironment.id)
-
-            process = getSandboxProcess(subenvironment, offlineTests)
-            process.start()
-            return HttpResponseRedirect('/simulator/simulate/')
-    else:
-        form = SimulateForm(user=request.user)'''
-
     return simulate_common(request)
 
 @login_required
@@ -106,7 +85,7 @@ def simulate_common(request, postSubEnv=None):
         solutionFilter['envUser__user'] = user
     solutions = Solution.objects.filter(**solutionFilter)
 
-    subenvs = SubEnvironment.objects.filter(solution__in=solutions).distinct()
+    subenvs = set(solution.subEnvironment for solution in solutions)
     allTests = [ ]
     for subenv in subenvs:
         subEnvId = subenv.id
@@ -161,15 +140,42 @@ def handle_offline_test_formset(formset):
     formset.save()
     return HttpResponseRedirect(reverse(simulate))
 
-@login_required
-def getsolutions(request, subEnvId):
-    offlineTests = queryOfflineTests(request.user, subEnvId)
-    solutions = offlineTests.get_solutions()
-    jsonObj = { }
-    jsonObj['offlineTests'] = serializers.serialize("json", offlineTests)
-    jsonObj['solutions'] = serializers.serialize("json", solutions)
-    jsonStr = json.dumps(jsonObj)
-    return HttpResponse(jsonStr, mimetype="application/json")
+def make_base_solution_formset(queryset):
+    class BaseScheduleFormSet(make_base_custom_formset(queryset)):
+        def clean(self):
+            if any(self.errors):
+                return
+            for form in self.forms:
+                cleaned_data = form.cleaned_data
+                print cleaned_data
+            super(BaseScheduleFormSet, self).clean()
+
+    return BaseScheduleFormSet
+
+def schedule(request):
+    user = request.user
+
+    solutionFilter = { }
+    if not user.is_superuser:
+        solutionFilter['envUser__user'] = user
+    solutions = Solution.objects.filter(**solutionFilter)
+
+    schedules = Schedule.objects.filter(solution__in=solutions)
+    ScheduleFormSet = modelformset_factory(Schedule, can_delete=True,
+        formset=make_base_solution_formset(schedules))
+    if request.method == 'POST':
+        formset = ScheduleFormSet(request.POST)
+        if formset.is_valid():
+            formset.save()
+            return HttpResponseRedirect(reverse(schedule))
+    else:
+        formset = ScheduleFormSet()
+
+    return render_to_response('simulator/schedule.html',
+        {
+            'formset': formset,
+        },
+        context_instance = RequestContext(request))
 
 @login_required
 def add_new_test(request):
@@ -235,25 +241,26 @@ def get_other_solutions(request):
     jsonStr = json.dumps(jsonObj)
     return HttpResponse(jsonStr, mimetype="application/json")
 
-def queryOfflineTests(user, subEnvId):
+@login_required
+def run_simulation(request):
+    user = request.user
+    response = 'failure'
+
+    if request.method == 'POST':
+        subEnvId = request.POST[u'subEnvId']
+        subEnvironment = get_object_or_404(SubEnvironment, id=subEnvId)
+        tests = queryOfflineTests(user, subEnvironment)
+        process = getSandboxProcess(subEnvironment, tests)
+        process.start()
+        return HttpResponseRedirect(reverse(simulate))
+
+    return HttpResponse(response, mimetype="text/plain")
+
+def queryOfflineTests(user, subEnvironment):
     offlineTestFilter = { }
     if not user.is_superuser:
         offlineTestFilter['solution__envUser__user'] = user
-    if subEnvId:
-        offlineTestFilter['solution__subEnvironment__id'] = subEnvId
+    if subEnvironment:
+        offlineTestFilter['solution__subEnvironment'] = subEnvironment
     offlineTests = OfflineTest.objects.filter(**offlineTestFilter)
     return offlineTests
-
-@login_required
-def jUpdateOfflineTests(request):
-    post = request.POST
-    try:
-        id = post[u'id']
-        value = int(post[u'value'])
-        if value > 0:
-            test = OfflineTest.objects.get(solution=id)
-            test.numAgents = value
-            test.save()
-    except:
-        pass
-    return HttpResponse("ok", mimetype="text/plain")

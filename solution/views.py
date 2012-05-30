@@ -7,6 +7,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render_to_response
 from django.template import RequestContext
 from envuser.models import EnvUser
+from home.base import make_base_custom_formset
 from schedule.models import OfflineTest, Schedule
 from simulator.turn import getSandboxProcess, runTurn
 from solution.models import Solution
@@ -32,15 +33,6 @@ def make_solution_form(subEnvKwArgs={ }):
                 exclude = ('envUser',)
 
     return SolutionForm
-
-def make_base_custom_formset(queryset):
-    class BaseCustomFormSet(forms.models.BaseModelFormSet):
-        def __init__(self, *args, **kwargs):
-            if queryset is not None and not 'queryset' in kwargs:
-                kwargs['queryset'] = queryset
-            super(BaseCustomFormSet, self).__init__(*args, **kwargs)
-
-    return BaseCustomFormSet
 
 def make_solution_formset(userSolutions, subenvs, singleSubEnv=False):
     subEnvKwArgs = { }
