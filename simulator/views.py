@@ -4,7 +4,7 @@ from django.core import serializers
 from django.core.urlresolvers import reverse
 from django.forms.models import modelformset_factory
 from django.http import HttpResponse, HttpResponseRedirect
-from django.shortcuts import render_to_response
+from django.shortcuts import get_object_or_404, render_to_response
 from django.template import RequestContext
 from schedule.models import OfflineTest, Schedule
 from simulator.turn import getSandboxProcess, runTurn
@@ -14,10 +14,29 @@ import json
 import os
 
 class OfflineTestForm(forms.models.ModelForm):
-    solution = forms.models.ModelChoiceField(Solution.objects.all(), widget=forms.TextInput(attrs={'class':'disabled', 'readonly':'readonly'}))
-
     class Meta:
         model = OfflineTest
+
+def make_radio_offline_test_form(testKwArgs={ }):
+    queryset = testKwArgs.get('queryset', None)
+    if queryset is None:
+        queryset = Solution.objects.all()
+        testKwArgs['queryset'] = queryset
+    if testKwArgs.get('initial', None) is None:
+        if queryset:
+            testKwArgs['initial'] = queryset[0]
+
+    class RadioOfflineTestForm(OfflineTestForm):
+        solution = forms.models.ModelChoiceField(**testKwArgs)
+
+    return RadioOfflineTestForm
+
+class StiffOfflineTestForm(OfflineTestForm):
+    solution = forms.models.ModelChoiceField(Solution.objects.all(),
+        widget=forms.TextInput(attrs={
+            'class': 'disabled',
+            'readonly': 'readonly',
+        }))
 
 def make_base_custom_formset(queryset):
     class BaseCustomFormSet(forms.models.BaseModelFormSet):
@@ -31,7 +50,7 @@ def make_base_custom_formset(queryset):
 def make_offline_test_formset(subEnvId, extra):
     tests = OfflineTest.objects.filter(solution__subEnvironment__id=subEnvId)
     BaseOfflineTestFormSet = make_base_custom_formset(tests)
-    return modelformset_factory(OfflineTest, form=OfflineTestForm,
+    return modelformset_factory(OfflineTest, form=StiffOfflineTestForm,
         formset=BaseOfflineTestFormSet, extra=extra)
 
 class SimulateForm(forms.Form):
@@ -81,10 +100,13 @@ def simulate_post(request, subEnvId):
 
 def simulate_common(request, postSubEnv=None):
     user = request.user
-    subEnvFilter = { 'solution__offlinetest__isnull': False }
+
+    solutionFilter = { }
     if not user.is_superuser:
-        subEnvFilter['solution__envUser__user__id'] = user.id
-    subenvs = SubEnvironment.objects.filter(**subEnvFilter).distinct()
+        solutionFilter['envUser__user'] = user
+    solutions = Solution.objects.filter(**solutionFilter)
+
+    subenvs = SubEnvironment.objects.filter(solution__in=solutions).distinct()
     allTests = [ ]
     for subenv in subenvs:
         subEnvId = subenv.id
@@ -100,8 +122,6 @@ def simulate_common(request, postSubEnv=None):
             'formset': formset,
         })
 
-    solutions = Solution.objects.filter(envUser__user=user)
-
     def niceValue(field):
         value = field.value()
         if field.name == 'solution':
@@ -115,13 +135,24 @@ def simulate_common(request, postSubEnv=None):
         aaData = [ [ (niceValue(field), field.errors) for field in form ]
             for form in formset ]
         cellIds = [ [ field.id_for_label for field in form ] for form in formset ]
-        rowIds = [ form['solution'].value() for form in formset ]
+        rowIds = [ form['id'].value() for form in formset ]
         test['aaData'] = json.dumps(aaData)
         test['cellIds'] = json.dumps(cellIds)
         test['rowIds'] = json.dumps(rowIds)
+
+    unusedFilter = {
+        'offlinetest__isnull': True,
+    }
+    if not user.is_superuser:
+        unusedFilter['envUser__user'] = user
+    unusedQueryset = Solution.objects.filter(**unusedFilter)
+    RadioOfflineTestForm = make_radio_offline_test_form({
+        'queryset': unusedQueryset,
+    })
+
     return render_to_response('simulator/simulate.html',
         {
-            #'form': form,
+            'form': RadioOfflineTestForm(),
             'allTests': allTests,
         },
         context_instance = RequestContext(request))
@@ -137,6 +168,70 @@ def getsolutions(request, subEnvId):
     jsonObj = { }
     jsonObj['offlineTests'] = serializers.serialize("json", offlineTests)
     jsonObj['solutions'] = serializers.serialize("json", solutions)
+    jsonStr = json.dumps(jsonObj)
+    return HttpResponse(jsonStr, mimetype="application/json")
+
+@login_required
+def add_new_test(request):
+    user = request.user
+    response = 'failure'
+
+    if request.method == 'POST':
+        unusedFilter = {
+            'offlinetest__isnull': True,
+        }
+        if not user.is_superuser:
+            unusedFilter['envUser__user'] = user
+        unusedQueryset = Solution.objects.filter(**unusedFilter)
+        RadioOfflineTestForm = make_radio_offline_test_form({
+            'queryset': unusedQueryset,
+        })
+        form = RadioOfflineTestForm(request.POST, request.FILES)
+        if form.is_valid():
+            test = form.save()
+            response = test.id
+
+    return HttpResponse(response, mimetype="text/plain")
+
+@login_required
+def delete_test(request):
+    user = request.user
+    response = 'failure'
+
+    if request.method == 'POST':
+        params = request.POST
+        testFilter = {
+            'id': params[u'id'],
+        }
+        if not user.is_superuser:
+            testFilter['solution__envUser__user'] = user
+        test = get_object_or_404(OfflineTest, **testFilter)
+        test.delete()
+        response = 'ok'
+
+    return HttpResponse(response, mimetype="text/plain")
+
+@login_required
+def get_other_solutions(request):
+    params = request.GET
+    user = request.user
+
+    if u'subEnvId' in params:
+        subEnvId = params[u'subEnvId']
+        unusedFilter = {
+            'offlinetest__isnull': True,
+            'subEnvironment': subEnvId,
+        }
+        if not user.is_superuser:
+            unusedFilter['envUser__user'] = user
+        unusedQueryset = Solution.objects.filter(**unusedFilter)
+        RadioOfflineTestForm = make_radio_offline_test_form({
+            'queryset': unusedQueryset,
+        })
+        jsonObj = RadioOfflineTestForm().as_table()
+    else:
+        jsonObj = ''
+
     jsonStr = json.dumps(jsonObj)
     return HttpResponse(jsonStr, mimetype="application/json")
 

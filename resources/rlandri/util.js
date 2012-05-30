@@ -29,4 +29,12 @@ rlandri.util = {
         }
         return value;
     },
+
+    trimSuffix: function (str, suffix) {
+        var index = str.lastIndexOf(suffix);
+        if (index >= 0)
+            return str.substring(0, index);
+        else
+            return '';
+    },
 };
