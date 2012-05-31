@@ -140,7 +140,19 @@ def handle_offline_test_formset(formset):
     formset.save()
     return HttpResponseRedirect(reverse(simulate))
 
-def make_base_solution_formset(queryset):
+def make_schedule_form(solnEnvKwArgs={ }):
+    if solnEnvKwArgs.get('queryset', None) is None:
+        solnEnvKwArgs['queryset'] = Solution.objects.all()
+
+    class ScheduleForm(forms.models.ModelForm):
+        solution = forms.ModelChoiceField(**solnEnvKwArgs)
+
+        class Meta:
+            model = Schedule
+
+    return ScheduleForm
+
+def make_base_schedule_formset(queryset):
     class BaseScheduleFormSet(make_base_custom_formset(queryset)):
         def clean(self):
             if any(self.errors):
@@ -159,10 +171,16 @@ def schedule(request):
     if not user.is_superuser:
         solutionFilter['envUser__user'] = user
     solutions = Solution.objects.filter(**solutionFilter)
-
     schedules = Schedule.objects.filter(solution__in=solutions)
+    schedules = schedules.order_by('step')
+
+    ScheduleForm = make_schedule_form({
+        'queryset': solutions,
+    })
+    BaseScheduleFormset = make_base_schedule_formset(schedules)
     ScheduleFormSet = modelformset_factory(Schedule, can_delete=True,
-        formset=make_base_solution_formset(schedules))
+        form=ScheduleForm, formset=BaseScheduleFormset)
+
     if request.method == 'POST':
         formset = ScheduleFormSet(request.POST)
         if formset.is_valid():
