@@ -2,7 +2,7 @@ from django.db.models import F
 from simulator.sandbox import JaCaMoSandbox
 from schedule.models import Schedule
 from simulator.models import TimePool
-from subenvironment.models import SubEnvironment
+from subenvironment.models import SubEnvironment, DefaultExtra
 from multiprocessing import Process
 import os
 import tempfile
@@ -57,6 +57,7 @@ def runInSandbox(subenvironment, solutions, masArgs):
         'agents': getPathList(subenvironment, 'envagent_set'),
         'artifacts': getPathList(subenvironment, 'artifact_set'),
         'orgs': getPathList(subenvironment, 'organization_set'),
+        '..': querysetToPaths(DefaultExtra.objects.all()),
     })
     sandbox = JaCaMoSandbox(rootDir)
     masFilename = sandbox.writeMAS(**masArgs)
@@ -68,4 +69,8 @@ def canRunSubEnvironment(subEnvironment, tests):
     return sum(test.numAgents for test in tests) >= 1
 
 def getPathList(subenvironment, key_set):
-    return ( elem.file.path for elem in getattr(subenvironment, key_set).all() )
+    queryset = getattr(subenvironment, key_set).all()
+    return querysetToPaths(queryset)
+
+def querysetToPaths(queryset):
+    return ( elem.file.path for elem in queryset )

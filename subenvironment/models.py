@@ -37,16 +37,22 @@ class OwnerRelationship(models.Model):
     envUser = models.ForeignKey(EnvUser)
     shares = models.PositiveIntegerField()
 
+def subenv_upload_to(tuple):
+    return 'subenvironments/%s/%s/%s' % tuple
+
+def dir_default_upload_to(dir, instance, filename):
+    pathArgs = ('generic', dir, filename)
+    return subenv_upload_to(pathArgs)
+
 def dir_upload_to(dir, instance, filename):
     pathArgs = (instance.subenvironment.id, dir, filename)
-    return 'subenvironments/%s/%s/%s' % pathArgs
+    return subenv_upload_to(pathArgs)
 
-class BaseComponent(models.Model):
-    subenvironment = models.ForeignKey(SubEnvironment)
+class BaseDefaultFileComponent(models.Model):
     name = models.CharField(max_length=200)
 
     def __init__(self, *args, **kwargs):
-        super(BaseComponent, self).__init__(*args, **kwargs)
+        super(BaseDefaultFileComponent, self).__init__(*args, **kwargs)
         self.original_file = self.file
 
     def __unicode__(self):
@@ -55,13 +61,22 @@ class BaseComponent(models.Model):
     class Meta:
         abstract = True
 
-class EnvAgent(BaseComponent):
+class DefaultExtra(BaseDefaultFileComponent):
+    file = models.FileField(upload_to=functools.partial(dir_default_upload_to, 'extra'))
+
+class BaseFileComponent(BaseDefaultFileComponent):
+    subenvironment = models.ForeignKey(SubEnvironment)
+
+    class Meta:
+        abstract = True
+
+class EnvAgent(BaseFileComponent):
     file = models.FileField(upload_to=functools.partial(dir_upload_to, 'agents'))
 
-class Artifact(BaseComponent):
+class Artifact(BaseFileComponent):
     file = models.FileField(upload_to=functools.partial(dir_upload_to, 'artifacts'))
 
-class Organization(BaseComponent):
+class Organization(BaseFileComponent):
     file = models.FileField(upload_to=functools.partial(dir_upload_to, 'organizations'))
 
 def file_post_save(sender, instance, created, **kwargs):
@@ -72,6 +87,16 @@ def file_post_save(sender, instance, created, **kwargs):
 def file_post_delete(sender, instance, **kwargs):
     instance.file.delete(save=False)
 
-for sender in BaseComponent.__subclasses__():
+def for_each_subclass(base, callback):
+    if base._meta.abstract:
+        children = base.__subclasses__()
+        for child in children:
+            for_each_subclass(child, callback)
+    else:
+        callback(base)
+
+def set_file_signals(sender):
     models.signals.post_save.connect(file_post_save, sender=sender)
     models.signals.post_delete.connect(file_post_delete, sender=sender)
+
+for_each_subclass(BaseDefaultFileComponent, set_file_signals)
