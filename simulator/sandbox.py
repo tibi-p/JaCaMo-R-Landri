@@ -98,15 +98,10 @@ class JaCaMoSandbox(object):
             "-f",
             os.path.join(self.root, 'bin', 'build.xml'),
         ])
-        '''subprocess.call([
-            "ant",
-            "-f",
-            os.path.join(self.root, 'bin', 'build.xml'),
-        ], shell=True)'''
 
     def clean(self):
-        shutil.rmtree(os.path.join(self.root, 'src'))
-        shutil.rmtree(os.path.join(self.root, 'bin'))
+        shutil.rmtree(os.path.join(self.root, 'src'), True)
+        shutil.rmtree(os.path.join(self.root, 'bin'), True)
         for file in os.listdir(self.root):
             relfile = os.path.join(self.root, file)
             if checkExtension(relfile, 'mas2j'):

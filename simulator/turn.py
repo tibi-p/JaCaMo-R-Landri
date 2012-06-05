@@ -20,10 +20,11 @@ def getSandboxProcess(subenvironment, schedules):
         'agents': { },
     }
     solutions = schedules.get_solutions()
-    for solution in solutions:
+    for schedule in schedules:
+        solution = schedule.solution
         filename = os.path.basename(solution.file.name)
         agentName = os.path.splitext(filename)[0]
-        count = solution.offlinetest.numAgents
+        count = schedule.numAgents
         masArgs['agents'][agentName] = {
             'arch': 'c4jason.CAgentArch',
             'no': count,
