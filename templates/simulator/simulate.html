@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 
 {% load url from future %}
+{% load socketio_tags %}
 
 {% block extrastyle %}
 
@@ -25,9 +26,19 @@
 
 <link href="http://ajax.aspnetcdn.com/ajax/jquery.dataTables/1.9.1/css/jquery.dataTables.css" rel="stylesheet" type="text/css"//>
 <link href="http://ajax.aspnetcdn.com/ajax/jquery.dataTables/1.9.1/css/jquery.dataTables_themeroller.css" rel="stylesheet" type="text/css"//>
-<link href="/resources/qtip/jquery.qtip.min.css" rel="stylesheet" type="text/css"//>
 <script src="http://ajax.aspnetcdn.com/ajax/jquery.dataTables/1.9.1/jquery.dataTables.min.js" type="text/javascript"></script>
-<script src="http://ajax.aspnetcdn.com/ajax/jquery.validate/1.9/jquery.validate.min.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+    if (typeof $(document).dataTable === 'undefined') {
+        console.log('DataTables joins operation CDN fallback!');
+        var ds = rlandri.dynamic_scripts;
+        ds.addCSS(ds.dir + 'css/jquery.dataTables.css');
+        ds.addCSS(ds.dir + 'css/jquery.dataTables_themeroller.css');
+        ds.addJavascript(ds.dir + 'js/jquery.dataTables.min.js');
+    }
+</script>
+
+<link href="/resources/qtip/jquery.qtip.min.css" rel="stylesheet" type="text/css"//>
 <script src="/resources/jeditable/jquery.jeditable.mini.js" type="text/javascript"></script>
 <script src="/resources/jeditable/jquery.dataTables.editable.js" type="text/javascript"></script>
 <script src="/resources/qtip/jquery.qtip.min.js" type="text/javascript"></script>
@@ -42,7 +53,49 @@ table.dataTable tr.even.row_selected td {
 }
 </style>
 
+{% socketio %}
+
 <script type="text/javascript">
+{% if abstractProcess %}
+{% with subEnv=abstractProcess.subEnvironment procId=abstractProcess.id %}
+    $(document).ready(function () {
+        var accordion = $('#offline-test-accordion');
+        accordion.prepend('<h3> </h3> <div> </div>');
+
+        var h3 = accordion.children(':eq(0)');
+        var tpl = '<a href="#{0}"> {1} </a>';
+        var id = 'accordion-header-process-{{ procId }}';
+        var title = 'Running Simulation ({{ subEnv }})';
+        h3.append($.validator.format(tpl, id, title));
+
+        var div = accordion.children(':eq(1)');
+        div.attr('id', 'div-process-{{ procId }}');
+    });
+
+    $(function () {
+        try {
+            var socket = new io.Socket();
+            socket.on('connect', function () {
+                var id = 'abstract-process-{{ procId }}';
+                socket.subscribe(id);
+            });
+            socket.on('message', function (data) {
+                var id = '#div-process-{{ procId }}';
+                $(id).html(function(index, oldhtml) {
+                    var tpl = '<div> {0} </div>';
+                    var delta = $.validator.format(tpl, data);
+                    return oldhtml + delta;
+                });
+                console.log(data);
+            });
+            socket.connect();
+        } catch (e) {
+            console.log(e);
+        }
+    });
+{% endwith %}
+{% endif %}
+
     $(document).ready(function () {
         var names = { };
         var maxIndex = 0;
@@ -223,11 +276,9 @@ table.dataTable tr.even.row_selected td {
         }
 
 {% for test in allTests %}
-{% with test.subEnvironment as subEnv %}
-{% with test.formset as formset %}
+{% with subEnv=test.subEnvironment formset=test.formset %}
         createTable('{{ subEnv.id|escapejs }}', '{{ test.aaData|escapejs }}',
             '{{ test.cellIds|escapejs }}', '{{ test.rowIds|escapejs }}');
-{% endwith %}
 {% endwith %}
 {% endfor %}
 
@@ -257,7 +308,9 @@ table.dataTable tr.even.row_selected td {
 
     $(function () {
         $("#offline-test-accordion").accordion({
+            animated: 'bounceslide',
             autoHeight: false,
+            navigation: true,
         });
     });
 </script>
@@ -266,11 +319,16 @@ table.dataTable tr.even.row_selected td {
 
 {% block app-content %}
 
+<div id="ceasca">
+</div>
+
 <div id="offline-test-accordion">
 {% for test in allTests %}
 {% with subEnvironment=test.subEnvironment formset=test.formset %}
     <h3>
-        <a href="#"> {{ subEnvironment }} </a>
+        <a href="#accordion-header-{{ subEnvironment.id }}">
+            {{ subEnvironment }}
+        </a>
     </h3>
     <div>
 

@@ -58,9 +58,12 @@ class JaCaMoSandbox(object):
     def writeMAS(self, name, infra, env, agents):
         # create agents string
         ags = [ ]
-        for agName, agent in agents.iteritems():
-            fmtArgs = (agName, agent['arch'], agent['no'])
-            ags.append('\t\t%s agentArchClass %s #%s;' % fmtArgs)
+        for agent in agents:
+            if 'arch' in agent:
+                agTpl = '\t\t%(name)s agentArchClass %(arch)s #%(no)s;'
+            else:
+                agTpl = '\t\t%(name)s #%(no)s;'
+            ags.append(agTpl % agent)
         ags = '\n'.join(ags)
 
         # create classpath string
@@ -88,16 +91,29 @@ class JaCaMoSandbox(object):
             path,
         ])
 
-    def ant(self):
+    def ant(self, pipe):
         libraries = filterListDir(os.path.join('lib', 'ant'), 'jar')
-        subprocess.call([
+        popenArgs = { }
+        if pipe is not None:
+            popenArgs['stdout'] = subprocess.PIPE
+        masProcess = subprocess.Popen([
             "java",
             "-classpath",
             os.pathsep.join(libraries),
             "org.apache.tools.ant.launch.Launcher",
             "-f",
             os.path.join(self.root, 'bin', 'build.xml'),
-        ])
+        ], **popenArgs)
+        if pipe is not None:
+            while True:
+                line = masProcess.stdout.readline()
+                if line:
+                    line = line.rstrip()
+                    pipe.send(line)
+                else:
+                    break
+            pipe.close()
+        return masProcess.wait()
 
     def clean(self):
         shutil.rmtree(os.path.join(self.root, 'src'), True)

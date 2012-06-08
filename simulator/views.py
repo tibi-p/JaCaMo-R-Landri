@@ -6,11 +6,14 @@ from django.forms.models import modelformset_factory
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render_to_response
 from django.template import RequestContext
+from envuser.models import EnvUser
 from home.base import make_base_custom_formset
 from schedule.models import OfflineTest, Schedule
+from simulator.models import AbstractProcess
 from simulator.turn import getSandboxProcess, runTurn
 from solution.models import Solution
 from subenvironment.models import SubEnvironment
+from collections import defaultdict
 import json
 import os
 
@@ -18,7 +21,7 @@ class OfflineTestForm(forms.models.ModelForm):
     class Meta:
         model = OfflineTest
 
-def make_radio_offline_test_form(testKwArgs={ }):
+def make_custom_offline_test_form(testKwArgs={ }):
     queryset = testKwArgs.get('queryset', None)
     if queryset is None:
         queryset = Solution.objects.all()
@@ -27,10 +30,10 @@ def make_radio_offline_test_form(testKwArgs={ }):
         if queryset:
             testKwArgs['initial'] = queryset[0]
 
-    class RadioOfflineTestForm(OfflineTestForm):
+    class CustomOfflineTestForm(OfflineTestForm):
         solution = forms.models.ModelChoiceField(**testKwArgs)
 
-    return RadioOfflineTestForm
+    return CustomOfflineTestForm
 
 class StiffOfflineTestForm(OfflineTestForm):
     solution = forms.models.ModelChoiceField(Solution.objects.all(),
@@ -44,21 +47,6 @@ def make_offline_test_formset(subEnvId, extra):
     BaseOfflineTestFormSet = make_base_custom_formset(tests)
     return modelformset_factory(OfflineTest, form=StiffOfflineTestForm,
         formset=BaseOfflineTestFormSet, extra=extra)
-
-class SimulateForm(forms.Form):
-    subenvironment = forms.ModelChoiceField(queryset=SubEnvironment.objects.none(),
-        required=False)
-
-    def __init__(self, *args, **kwargs):
-        currentUser = kwargs.pop('user', None)
-        super(SimulateForm, self).__init__(*args, **kwargs)
-        if currentUser != None:
-            subEnvFilter = { 'solution__offlinetest__isnull': False }
-            if not currentUser.is_superuser:
-                subEnvFilter['solution__envUser__user__id'] = currentUser.id
-            subEnvQueryset = SubEnvironment.objects.filter(**subEnvFilter).distinct()
-            self.fields['subenvironment'] = forms.ModelChoiceField(queryset=subEnvQueryset,
-                required=False)
 
 @login_required
 def run(request):
@@ -75,9 +63,14 @@ def simulate(request):
 @login_required
 def simulate_post(request, subEnvId):
     subEnvironment = SubEnvironment.objects.get(pk=subEnvId)
-    return simulate_common(request, subEnvironment)
+    return simulate_common(request, targetEnv=subEnvironment)
 
-def simulate_common(request, postSubEnv=None):
+@login_required
+def simulate_proc(request, procId):
+    process = AbstractProcess.objects.get(pk=procId)
+    return simulate_common(request, abstractProcess=process)
+
+def simulate_common(request, targetEnv=None, abstractProcess=None):
     user = request.user
 
     solutionFilter = { }
@@ -90,7 +83,7 @@ def simulate_common(request, postSubEnv=None):
     for subenv in subenvs:
         subEnvId = subenv.id
         OfflineTestFormSet = make_offline_test_formset(subEnvId, extra=0)
-        if request.method == 'POST' and subenv == postSubEnv:
+        if request.method == 'POST' and subenv == targetEnv:
             formset = OfflineTestFormSet(request.POST, request.FILES)
             if formset.is_valid():
                 return handle_offline_test_formset(formset)
@@ -125,14 +118,15 @@ def simulate_common(request, postSubEnv=None):
     if not user.is_superuser:
         unusedFilter['envUser__user'] = user
     unusedQueryset = Solution.objects.filter(**unusedFilter)
-    RadioOfflineTestForm = make_radio_offline_test_form({
+    CustomOfflineTestForm = make_custom_offline_test_form({
         'queryset': unusedQueryset,
     })
 
     return render_to_response('simulator/simulate.html',
         {
-            'form': RadioOfflineTestForm(),
+            'form': CustomOfflineTestForm(),
             'allTests': allTests,
+            'abstractProcess': abstractProcess,
         },
         context_instance = RequestContext(request))
 
@@ -153,13 +147,21 @@ def make_schedule_form(solnEnvKwArgs={ }):
     return ScheduleForm
 
 def make_base_schedule_formset(queryset):
-    class BaseScheduleFormSet(make_base_custom_formset(queryset)):
+    BaseCustomFormset = make_base_custom_formset(queryset)
+
+    class BaseScheduleFormSet(BaseCustomFormset):
         def clean(self):
             if any(self.errors):
                 return
+            schedule = defaultdict(lambda: [ ])
             for form in self.forms:
                 cleaned_data = form.cleaned_data
-                print cleaned_data
+                if cleaned_data and not cleaned_data.get('DELETE', False):
+                    step = cleaned_data['step']
+                    schedule[step].append(cleaned_data)
+            for step, entries in schedule.iteritems():
+                print [ entry['solution'] for entry in entries ]
+            #print schedule
             super(BaseScheduleFormSet, self).clean()
 
     return BaseScheduleFormSet
@@ -207,10 +209,10 @@ def add_new_test(request):
         if not user.is_superuser:
             unusedFilter['envUser__user'] = user
         unusedQueryset = Solution.objects.filter(**unusedFilter)
-        RadioOfflineTestForm = make_radio_offline_test_form({
+        CustomOfflineTestForm = make_custom_offline_test_form({
             'queryset': unusedQueryset,
         })
-        form = RadioOfflineTestForm(request.POST, request.FILES)
+        form = CustomOfflineTestForm(request.POST, request.FILES)
         if form.is_valid():
             test = form.save()
             response = test.id
@@ -240,7 +242,7 @@ def get_other_solutions(request):
     params = request.GET
     user = request.user
 
-    if u'subEnvId' in params:
+    if request.method == 'GET' and u'subEnvId' in params:
         subEnvId = params[u'subEnvId']
         unusedFilter = {
             'offlinetest__isnull': True,
@@ -249,15 +251,17 @@ def get_other_solutions(request):
         if not user.is_superuser:
             unusedFilter['envUser__user'] = user
         unusedQueryset = Solution.objects.filter(**unusedFilter)
-        RadioOfflineTestForm = make_radio_offline_test_form({
+        CustomOfflineTestForm = make_custom_offline_test_form({
             'queryset': unusedQueryset,
         })
-        jsonObj = RadioOfflineTestForm().as_table()
+        jsonObj = CustomOfflineTestForm().as_table()
     else:
         jsonObj = ''
 
     jsonStr = json.dumps(jsonObj)
     return HttpResponse(jsonStr, mimetype="application/json")
+
+runningInfo = defaultdict(lambda: { })
 
 @login_required
 def run_simulation(request):
@@ -265,12 +269,28 @@ def run_simulation(request):
     response = 'failure'
 
     if request.method == 'POST':
+        envUser = get_object_or_404(EnvUser, user=user)
         subEnvId = request.POST[u'subEnvId']
         subEnvironment = get_object_or_404(SubEnvironment, id=subEnvId)
+        # TODO AbstractProcess.objects.all().delete()
+        abstractProcess = AbstractProcess(envUser=envUser, subEnvironment=subEnvironment)
+        abstractProcess.save()
+        '''
         tests = queryOfflineTests(user, subEnvironment)
-        process = getSandboxProcess(subEnvironment, tests)
+        process, pipes = getSandboxProcess(subEnvironment, tests)
         process.start()
-        return HttpResponseRedirect(reverse(simulate))
+        pipes[1].close()
+        while True:
+            print "(*-*) let's"
+            try:
+                msg = pipes[0].recv()
+                print '#### ruins: ' + msg
+            except EOFError:
+                break
+        #return HttpResponse("ok", mimetype="application/json")
+        '''
+        url = reverse(simulate_proc, args=[ abstractProcess.id ])
+        return HttpResponseRedirect(url)
 
     return HttpResponse(response, mimetype="text/plain")
 

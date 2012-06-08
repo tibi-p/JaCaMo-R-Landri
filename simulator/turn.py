@@ -3,7 +3,7 @@ from simulator.sandbox import JaCaMoSandbox
 from schedule.models import Schedule
 from simulator.models import TimePool
 from subenvironment.models import SubEnvironment, DefaultExtra
-from multiprocessing import Process
+from multiprocessing import Pipe, Process
 import os
 import tempfile
 
@@ -12,12 +12,13 @@ def runTurn(numSteps):
         runStep(step)
     TimePool.objects.all().delete()
 
-def getSandboxProcess(subenvironment, schedules):
+def getSandboxProcess(subenvironment, schedules, usePipe=False):
     masArgs = {
         'name': "house_building",
         'infra': "Centralised",
         'env': "c4jason.CartagoEnvironment",
-        'agents': { },
+        #'env': "Env(2, 2000)",
+        'agents': [ ],
     }
     solutions = schedules.get_solutions()
     for schedule in schedules:
@@ -25,13 +26,18 @@ def getSandboxProcess(subenvironment, schedules):
         filename = os.path.basename(solution.file.name)
         agentName = os.path.splitext(filename)[0]
         count = schedule.numAgents
-        masArgs['agents'][agentName] = {
+        masArgs['agents'].append({
             'arch': 'c4jason.CAgentArch',
+            'name': agentName,
             'no': count,
-        }
+        })
 
-    return Process(target=runInSandbox,
-        args=(subenvironment, solutions, masArgs))
+    conn = None
+    args = (subenvironment, solutions, masArgs)
+    if usePipe:
+        conn = Pipe()
+        args += (conn[1],)
+    return (Process(target=runInSandbox, args=args), conn)
 
 def runStep(step):
     for subEnvironment in SubEnvironment.objects.all():
@@ -41,7 +47,7 @@ def runStep(step):
         })
         if canRunSubEnvironment(subEnvironment, schedules):
             print step, subEnvironment, schedules, schedules.get_solutions()
-            process = getSandboxProcess(subEnvironment, schedules)
+            process, _ = getSandboxProcess(subEnvironment, schedules)
             for envUser in schedules.get_envusers():
                 timePool, created = TimePool.objects.get_or_create(envUser=envUser)
                 timePool.remaining = F('remaining') - 1
@@ -50,7 +56,7 @@ def runStep(step):
                 print timePool
             process.start()
 
-def runInSandbox(subenvironment, solutions, masArgs):
+def runInSandbox(subenvironment, solutions, masArgs, pipe=None):
     rootDir = tempfile.mkdtemp()
     sandbox = JaCaMoSandbox(rootDir)
     sandbox.populate((solution.file.path for solution in solutions), {
@@ -59,10 +65,9 @@ def runInSandbox(subenvironment, solutions, masArgs):
         'orgs': getPathList(subenvironment, 'organization_set'),
         '..': querysetToPaths(DefaultExtra.objects.all()),
     })
-    sandbox = JaCaMoSandbox(rootDir)
     masFilename = sandbox.writeMAS(**masArgs)
     sandbox.buildMAS(masFilename)
-    sandbox.ant()
+    sandbox.ant(pipe)
     sandbox.clean()
 
 def canRunSubEnvironment(subEnvironment, tests):
