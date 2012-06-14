@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 {% load i18n %}
+{% load url from future %}
 <html>
 <head>
     <title>
@@ -47,6 +48,15 @@
     -->
 
     <style type="text/css">
+    .log-main {
+        overflow: hidden;
+    }
+    .log-left {
+        float: left;
+    }
+    .log-right {
+        float: right;
+    }
     .kwicks-sections {
         list-style: none;
         position: relative;
@@ -129,7 +139,17 @@
         -->
         <div align="center"> <img src="/resources/jacamo-logo.png" /> </div>
     </div>
-    Logged in as {{ user.get_full_name }} ({{ user.username }}).
+    <div class="log-main">
+        <div class="log-left">
+            Logged in as {{ user.get_full_name }} ({{ user.username }}).
+        </div>
+        <div class="log-right">
+            {% url 'django.contrib.auth.views.logout' as logout_url %}
+            <a href="{{ logout_url }}?next={{ request.path }}">
+                Log out
+            </a>
+        </div>
+    </div>
 <!--
     <ul class="kwicks-sections">
     {% for section in sections %}

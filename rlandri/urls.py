@@ -22,6 +22,7 @@ urlpatterns = patterns('',
     url(r'^$', 'home.views.index', name='home'),
 
     url(r'^accounts/login/$', 'django.contrib.auth.views.login'),
+    url(r'^accounts/logout/$', 'django.contrib.auth.views.logout'),
 
     url(r'^city/', include('city.urls')),
 
