@@ -6,19 +6,19 @@ import functools
 class SubEnvironmentManager(models.Manager):
     def get_solved_by_user(self, user):
         queryset = self.get_query_set()
-        filter = self.create_user_filter(user)
-        return queryset.filter(**filter).distinct()
+        qfilter = self.create_user_filter(user)
+        return queryset.filter(**qfilter).distinct()
 
     def get_unsolved_by_user(self, user):
         queryset = self.get_query_set()
-        filter = self.create_user_filter(user)
-        return queryset.exclude(**filter).distinct()
+        qfilter = self.create_user_filter(user)
+        return queryset.exclude(**qfilter).distinct()
 
     def create_user_filter(self, user):
-        filter = { 'solution__isnull': False }
+        qfilter = { 'solution__isnull': False }
         if not user.is_superuser:
-            filter['solution__envUser__user'] = user
-        return filter
+            qfilter['solution__envUser__user'] = user
+        return qfilter
 
 class SubEnvironment(models.Model):
     name = models.CharField(max_length=200)
@@ -37,15 +37,15 @@ class OwnerRelationship(models.Model):
     envUser = models.ForeignKey(EnvUser)
     shares = models.PositiveIntegerField()
 
-def subenv_upload_to(tuple):
-    return 'subenvironments/%s/%s/%s' % tuple
+def subenv_upload_to(args):
+    return 'subenvironments/%s/%s/%s' % args
 
-def dir_default_upload_to(dir, instance, filename):
-    pathArgs = ('generic', dir, filename)
+def dir_default_upload_to(directory, instance, filename):
+    pathArgs = ('generic', directory, filename)
     return subenv_upload_to(pathArgs)
 
-def dir_upload_to(dir, instance, filename):
-    pathArgs = (instance.subenvironment.id, dir, filename)
+def dir_upload_to(directory, instance, filename):
+    pathArgs = (instance.subenvironment.id, directory, filename)
     return subenv_upload_to(pathArgs)
 
 class BaseDefaultFileComponent(models.Model):

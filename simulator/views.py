@@ -1,6 +1,5 @@
 from django import forms
 from django.contrib.auth.decorators import login_required
-from django.core import serializers
 from django.core.urlresolvers import reverse
 from django.forms.models import modelformset_factory
 from django.http import HttpResponse, HttpResponseRedirect
@@ -54,7 +53,7 @@ def run(request):
     subEnvironmentList = SubEnvironment.objects.all()
     return render_to_response('simulator/run.html',
         { },
-        context_instance = RequestContext(request))
+        context_instance=RequestContext(request))
 
 @login_required
 def simulate(request):
@@ -128,7 +127,7 @@ def simulate_common(request, targetEnv=None, abstractProcess=None):
             'allTests': allTests,
             'abstractProcess': abstractProcess,
         },
-        context_instance = RequestContext(request))
+        context_instance=RequestContext(request))
 
 def handle_offline_test_formset(formset):
     formset.save()
@@ -195,7 +194,7 @@ def schedule(request):
         {
             'formset': formset,
         },
-        context_instance = RequestContext(request))
+        context_instance=RequestContext(request))
 
 @login_required
 def add_new_test(request):

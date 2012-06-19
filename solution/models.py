@@ -10,10 +10,10 @@ def solution_upload_to(instance, filename):
 class SolutionManager(models.Manager):
     def get_sent_by_user_for_env(self, user, subEnvironment):
         queryset = self.get_query_set()
-        filter = { 'subEnvironment': subEnvironment }
+        qfilter = { 'subEnvironment': subEnvironment }
         if not user.is_superuser:
-            filter['envUser__user'] = user
-        return queryset.filter(**filter)
+            qfilter['envUser__user'] = user
+        return queryset.filter(**qfilter)
 
 class Solution(models.Model):
     envUser = models.ForeignKey(EnvUser)
