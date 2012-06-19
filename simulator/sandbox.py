@@ -15,7 +15,7 @@ def silent_md(f, path):
 
 def absposixpath(file):
     file = os.path.abspath(file)
-    if os.altsep != os.sep:
+    if os.altsep is not None and os.altsep != os.sep:
         file = file.replace(os.sep, os.altsep)
     return file
 
