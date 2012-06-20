@@ -1,18 +1,14 @@
 from django import forms
 from django.contrib.auth.decorators import login_required
-from django.core import serializers
 from django.core.urlresolvers import reverse
 from django.forms.models import modelformset_factory
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render_to_response
 from django.template import RequestContext
 from envuser.models import EnvUser
 from home.base import make_base_custom_formset
-from schedule.models import OfflineTest, Schedule
-from simulator.turn import getSandboxProcess, runTurn
 from solution.models import Solution
 from subenvironment.models import SubEnvironment
-import json
 
 def make_solution_form(subEnvKwArgs={ }):
     hidden = subEnvKwArgs.pop('hidden', False)
