@@ -10,9 +10,11 @@ class EnvUser(models.Model):
     def __unicode__(self):
         return self.user.username
 
-class UserAgent(models.Model):
+class EnvAgent(models.Model):
     name = models.CharField(max_length=200)
     envUser = models.ForeignKey(EnvUser)
+    location = models.ForeignKey('subenvironment.SubEnvironment')
+    timePool = models.PositiveIntegerField(default=272)
 
     def __unicode__(self):
         uniArgs = (self.name, unicode(self.envUser))

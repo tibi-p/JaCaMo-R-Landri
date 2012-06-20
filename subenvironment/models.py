@@ -70,7 +70,7 @@ class BaseFileComponent(BaseDefaultFileComponent):
     class Meta:
         abstract = True
 
-class EnvAgent(BaseFileComponent):
+class Agent(BaseFileComponent):
     file = models.FileField(upload_to=functools.partial(dir_upload_to, 'agents'))
 
 class Artifact(BaseFileComponent):

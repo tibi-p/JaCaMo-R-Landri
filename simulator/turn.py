@@ -1,7 +1,7 @@
 from django.db.models import F
+from envuser.models import EnvAgent
 from simulator.sandbox import JaCaMoSandbox
 from schedule.models import Schedule
-from simulator.models import TimePool
 from subenvironment.models import SubEnvironment, DefaultExtra
 from multiprocessing import Pipe, Process
 import os
@@ -10,7 +10,7 @@ import tempfile
 def runTurn(numSteps):
     for step in xrange(numSteps):
         runStep(step)
-    TimePool.objects.all().delete()
+    EnvAgent.objects.all().update(timePool=None)
 
 def getSandboxProcess(subenvironment, schedules, usePipe=False):
     masArgs = {
@@ -49,18 +49,19 @@ def runStep(step):
             print step, subEnvironment, schedules, schedules.get_solutions()
             process, _ = getSandboxProcess(subEnvironment, schedules)
             for envUser in schedules.get_envusers():
-                timePool, created = TimePool.objects.get_or_create(envUser=envUser)
-                timePool.remaining = F('remaining') - 1
-                timePool.save()
-            for timePool in TimePool.objects.all():
-                print timePool
+                for envAgent in envUser.envagent_set.all():
+                    envAgent.timePool = F('timePool') - 1
+                    envAgent.save()
+            for envUser in schedules.get_envusers():
+                for envAgent in envUser.envagent_set.all():
+                    print envAgent.timePool
             process.start()
 
 def runInSandbox(subenvironment, solutions, masArgs, pipe=None):
     rootDir = tempfile.mkdtemp()
     sandbox = JaCaMoSandbox(rootDir)
     sandbox.populate((solution.file.path for solution in solutions), {
-        'agents': getPathList(subenvironment, 'envagent_set'),
+        'agents': getPathList(subenvironment, 'agent_set'),
         'artifacts': getPathList(subenvironment, 'artifact_set'),
         'orgs': getPathList(subenvironment, 'organization_set'),
         '..': querysetToPaths(DefaultExtra.objects.all()),
@@ -78,4 +79,4 @@ def getPathList(subenvironment, key_set):
     return querysetToPaths(queryset)
 
 def querysetToPaths(queryset):
-    return ( elem.file.path for elem in queryset )
+    return (elem.file.path for elem in queryset)
