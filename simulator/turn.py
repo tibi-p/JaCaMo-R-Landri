@@ -31,9 +31,14 @@ def getSandboxProcess(subenvironment, schedules, usePipe=False):
             'name': agentName,
             'no': count,
         })
+    solutionFiles = {
+        'agents': (solution.file.path for solution in solutions),
+        'artifacts': [ ],
+        'orgs': [ ],
+    }
 
     conn = None
-    args = (subenvironment, solutions, masArgs)
+    args = (subenvironment, solutionFiles, masArgs)
     if usePipe:
         conn = Pipe()
         args += (conn[1],)
@@ -57,10 +62,10 @@ def runStep(step):
                     print envAgent.timePool
             process.start()
 
-def runInSandbox(subenvironment, solutions, masArgs, pipe=None):
+def runInSandbox(subenvironment, solutionFiles, masArgs, pipe=None):
     rootDir = tempfile.mkdtemp()
     sandbox = JaCaMoSandbox(rootDir)
-    sandbox.populate((solution.file.path for solution in solutions), {
+    sandbox.populate(solutionFiles, {
         'agents': getPathList(subenvironment, 'agent_set'),
         'artifacts': getPathList(subenvironment, 'artifact_set'),
         'orgs': getPathList(subenvironment, 'organization_set'),

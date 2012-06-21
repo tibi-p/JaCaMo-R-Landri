@@ -13,11 +13,11 @@ def silent_md(f, path):
         if e.errno != errno.EEXIST:
             raise
 
-def absposixpath(file):
-    file = os.path.abspath(file)
+def absposixpath(filename):
+    filename = os.path.abspath(filename)
     if os.altsep is not None and os.altsep != os.sep:
-        file = file.replace(os.sep, os.altsep)
-    return file
+        filename = filename.replace(os.sep, os.altsep)
+    return filename
 
 def checkExtension(filename, ext):
     if os.path.isfile(filename):
@@ -31,29 +31,31 @@ def filterListDir(directory, ext):
     files = map(functools.partial(os.path.join, directory), files)
     return filter(functools.partial(checkExtension, ext=ext), files)
 
-def extractZipFile(files, dir):
-    for filename in files:
-        with ZipFile(filename) as f:
-            names = [ name for name in f.namelist() if
-                not os.path.isabs(name) and os.pardir not in name ]
-            f.extractall(dir, names)
+def transferFiles(files, directory):
+    for source in files:
+        if checkExtension(source, 'zip'):
+            with ZipFile(source) as f:
+                names = [ name for name in f.namelist() if
+                    not os.path.isabs(name) and os.pardir not in name ]
+                f.extractall(directory, names)
+        else:
+            dest = os.path.join(directory, os.path.basename(source))
+            shutil.copyfile(source, os.path.join(dest))
 
 class JaCaMoSandbox(object):
     def __init__(self, root):
         self.root = root
 
-    def populate(self, agentFiles, files):
-        agentDir = os.path.join(self.root, 'src', 'agents')
-        silent_md(os.makedirs, agentDir)
-        for source in agentFiles:
-            dest = os.path.join(agentDir, os.path.basename(source))
-            silent_md(os.makedirs, os.path.dirname(dest))
-            shutil.copyfile(source, os.path.join(dest))
+    def populate(self, solutionFiles, subenvFiles):
+        for dirname, filelist in solutionFiles.iteritems():
+            directory = os.path.join(self.root, 'src', dirname)
+            silent_md(os.makedirs, directory)
+            transferFiles(filelist, directory)
 
-        for dirname, files in files.iteritems():
-            dir = os.path.join(self.root, 'src', dirname)
-            silent_md(os.makedirs, dir)
-            extractZipFile(files, dir)
+        for dirname, filelist in subenvFiles.iteritems():
+            directory = os.path.join(self.root, 'src', dirname)
+            silent_md(os.makedirs, directory)
+            transferFiles(filelist, directory)
 
     def writeMAS(self, name, infra, env, agents):
         # create agents string
@@ -73,7 +75,7 @@ class JaCaMoSandbox(object):
         #template filling
         with open("templates/template.mas2j") as f:
             template = Template(f.read())
-            contents = template.substitute(name=name,infra=infra,env=env,ags=ags,path=path)
+            contents = template.substitute(name=name, infra=infra, env=env, ags=ags, path=path)
 
         filename = '%s.mas2j' % (name,)
         with open(os.path.join(self.root, filename), 'w') as g:
@@ -118,7 +120,7 @@ class JaCaMoSandbox(object):
     def clean(self):
         shutil.rmtree(os.path.join(self.root, 'src'), True)
         shutil.rmtree(os.path.join(self.root, 'bin'), True)
-        for file in os.listdir(self.root):
-            relfile = os.path.join(self.root, file)
+        for filename in os.listdir(self.root):
+            relfile = os.path.join(self.root, filename)
             if checkExtension(relfile, 'mas2j'):
                 os.remove(relfile)
