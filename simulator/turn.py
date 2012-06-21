@@ -2,6 +2,7 @@ from django.db.models import F
 from envuser.models import EnvAgent
 from simulator.sandbox import JaCaMoSandbox
 from schedule.models import Schedule
+from solution.models import solution_upload_to
 from subenvironment.models import SubEnvironment, DefaultExtra
 from multiprocessing import Pipe, Process
 import os
@@ -21,19 +22,21 @@ def getSandboxProcess(subenvironment, schedules, usePipe=False):
         #'env': "Env(2, 2000)",
         'agents': [ ],
     }
-    solutions = schedules.get_solutions()
-    for schedule in schedules:
-        solution = schedule.solution
-        envUser = solution.envUser
-        xmlFile = solution.xmlFile
-        spec = SolutionSpecification()
-        agents, agentFiles, artifactsJar, orgsZip = spec.parse_agents(xmlFile)
-        masArgs['agents'] = agents
     solutionFiles = {
-        'agents': (solution.file.path for solution in solutions),
+        'agents': [ ],
         'artifacts': [ ],
         'orgs': [ ],
     }
+    for schedule in schedules:
+        solution = schedule.solution
+        envUser = solution.envUser
+        xmlFile = solution_upload_to(solution, 'config.xml')
+        agents, agentFiles, artifactsJar, orgsZip = SolutionSpecification.parse(xmlFile)
+        masArgs['agents'] = agents
+        
+        solutionFiles['agents'].extend(agentFiles)
+        solutionFiles['artifacts'].append(artifactsJar)
+        solutionFiles['orgs'].append(orgsZip)
 
     conn = None
     args = (subenvironment, solutionFiles, masArgs)
