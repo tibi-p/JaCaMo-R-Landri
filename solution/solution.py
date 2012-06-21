@@ -1,6 +1,6 @@
 from xml.dom.minidom import Document
 
-class Solution():
+class Solution(object):
     
     asl_list = [{'agentID':'ag1','cardinality':1, 'file':'ag1.asl'},
                 {'agentID':'ag2','cardinality':2, 'file':'ag2.asl'}]
