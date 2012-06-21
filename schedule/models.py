@@ -1,5 +1,6 @@
 from django.db import models
 from solution.models import Solution
+from subenvironment.models import SubEnvironment
 
 class ScheduleQuerySet(models.query.QuerySet):
     def get_solutions(self):
@@ -29,7 +30,9 @@ class OfflineTest(AbstractSchedule):
         return '%s, #%s' % uniArgs
 
 class Schedule(AbstractSchedule):
+    turn = models.PositiveIntegerField()
     step = models.PositiveIntegerField()
+    location = models.ForeignKey(SubEnvironment)
     lastModified = models.DateTimeField(auto_now=True)
 
     def __unicode__(self):
