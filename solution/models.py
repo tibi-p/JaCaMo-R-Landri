@@ -19,6 +19,9 @@ class Solution(models.Model):
     envUser = models.ForeignKey(EnvUser)
     subEnvironment = models.ForeignKey(SubEnvironment)
     file = models.FileField(upload_to=solution_upload_to)
+    description = models.TextField()
+    lastModified = models.DateTimeField(auto_now=True)
+    isVisible = models.BooleanField()
 
     objects = SolutionManager()
 
