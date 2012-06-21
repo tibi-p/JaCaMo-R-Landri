@@ -1,6 +1,6 @@
 from xml.dom.minidom import Document
 
-class Solution(object):
+class SolutionSpecification(object):
     
     asl_list = [{'agentID':'ag1','cardinality':1, 'file':'ag1.asl'},
                 {'agentID':'ag2','cardinality':2, 'file':'ag2.asl'}]
@@ -31,14 +31,3 @@ class Solution(object):
         root.appendChild(node)
         
         return doc
-    
-   # def __unicode__(self):
-   #     uniArgs = (self.asl_list,self.cartago_jar,self.org_zip)
-   #     return 'Agents %s\nArtifacts %s\nOrganizations %s' % uniArgs
-    
-
-#sol = Solution()
-#x = sol.make_xml()
-#print x.toprettyxml()
-
-#print unicode(sol)
