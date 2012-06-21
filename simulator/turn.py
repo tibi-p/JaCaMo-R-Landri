@@ -6,6 +6,7 @@ from subenvironment.models import SubEnvironment, DefaultExtra
 from multiprocessing import Pipe, Process
 import os
 import tempfile
+from solution.specification import SolutionSpecification
 
 def runTurn(numSteps):
     for step in xrange(numSteps):
@@ -14,7 +15,7 @@ def runTurn(numSteps):
 
 def getSandboxProcess(subenvironment, schedules, usePipe=False):
     masArgs = {
-        'name': "house_building",
+        'name': 'subenv_%d' % (subenvironment.pk,),
         'infra': "Centralised",
         'env': "c4jason.CartagoEnvironment",
         #'env': "Env(2, 2000)",
@@ -23,14 +24,11 @@ def getSandboxProcess(subenvironment, schedules, usePipe=False):
     solutions = schedules.get_solutions()
     for schedule in schedules:
         solution = schedule.solution
-        filename = os.path.basename(solution.file.name)
-        agentName = os.path.splitext(filename)[0]
-        count = schedule.numAgents
-        masArgs['agents'].append({
-            'arch': 'c4jason.CAgentArch',
-            'name': agentName,
-            'no': count,
-        })
+        envUser = solution.envUser
+        xmlFile = solution.xmlFile
+        spec = SolutionSpecification()
+        agents, agentFiles, artifactsJar, orgsZip = spec.parse_agents(xmlFile)
+        masArgs['agents'] = agents
     solutionFiles = {
         'agents': (solution.file.path for solution in solutions),
         'artifacts': [ ],
