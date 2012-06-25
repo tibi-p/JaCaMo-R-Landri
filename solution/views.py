@@ -11,9 +11,14 @@ from solution.models import Solution
 from subenvironment.models import SubEnvironment
 
 def make_solution_form(subEnvKwArgs={ }):
+    description_widget = forms.Textarea({
+        'rows': 5,
+    })
     hidden = subEnvKwArgs.pop('hidden', False)
     if hidden:
         class SolutionForm(forms.models.ModelForm):
+            description = forms.CharField(widget=description_widget)
+
             class Meta:
                 model = Solution
                 exclude = ('envUser', 'subEnvironment')
@@ -23,6 +28,7 @@ def make_solution_form(subEnvKwArgs={ }):
 
         class SolutionForm(forms.models.ModelForm):
             subEnvironment = forms.ModelChoiceField(**subEnvKwArgs)
+            description = forms.CharField(widget=description_widget)
 
             class Meta:
                 model = Solution
@@ -92,16 +98,6 @@ def index_common(request, postSolution=None, postSubEnv=None, others=False):
 
     allSolutions = [ ]
     for subEnvironment in subEnvironments:
-        '''
-        SolutionFormSet = make_solution_formset(userSolutions,
-            SubEnvironment.objects.filter(pk=subEnvironment.pk), singleSubEnv=True)
-        if request.method == 'POST' and subEnvironment == postSubEnv:
-            formset = SolutionFormSet(request.POST, request.FILES)
-            if formset.is_valid():
-                return handle_solution_formset(formset, envUser, subEnvironment)
-        else:
-            formset = SolutionFormSet()
-        '''
         subenvs = SubEnvironment.objects.filter(pk=subEnvironment.pk)
         SolutionForm = make_special_solution_form(userSolutions, subenvs,
             singleSubEnv=True)
