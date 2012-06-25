@@ -2,7 +2,6 @@ from django.db import models
 from envuser.models import EnvUser
 from home.base import create_callback_post_delete, create_callback_post_save
 from subenvironment.models import SubEnvironment
-import os
 
 def solution_upload_to(instance, filename):
     pathArgs = (instance.envUser.id, instance.subEnvironment.id, filename)
@@ -26,20 +25,22 @@ class Solution(models.Model):
     artifacts = models.FileField(upload_to=solution_upload_to)
     organizations = models.FileField(upload_to=solution_upload_to)
     lastModified = models.DateTimeField(auto_now=True)
-    
 
     objects = SolutionManager()
 
     def __init__(self, *args, **kwargs):
         super(Solution, self).__init__(*args, **kwargs)
-        self.original_file = self.file
+        self.original_agents = self.agents
+        self.original_artifacts = self.artifacts
+        self.original_organizations = self.organizations
 
     def __unicode__(self):
         uniArgs = (unicode(self.envUser), unicode(self.subEnvironment))
         return 'Author(%s), Env(%s)' % uniArgs
 
-file_post_save = create_callback_post_save('file')
-file_post_delete = create_callback_post_delete('file')
+for field in [ 'agents', 'artifacts', 'organizations' ]:
+    file_post_save = create_callback_post_save(field)
+    file_post_delete = create_callback_post_delete(field)
 
-models.signals.post_save.connect(file_post_save, sender=Solution)
-models.signals.post_delete.connect(file_post_delete, sender=Solution)
+    models.signals.post_save.connect(file_post_save, sender=Solution)
+    models.signals.post_delete.connect(file_post_delete, sender=Solution)
