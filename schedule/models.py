@@ -29,10 +29,10 @@ class OfflineTest(AbstractSchedule):
         uniArgs = (unicode(self.solution), self.numAgents)
         return '%s, #%s' % uniArgs
 
-class Schedule(AbstractSchedule):
+class Schedule(models.Model):
+    solution = models.OneToOneField(Solution)
     turn = models.PositiveIntegerField()
     step = models.PositiveIntegerField()
-    location = models.ForeignKey(SubEnvironment)
     lastModified = models.DateTimeField(auto_now=True)
 
     def __unicode__(self):
