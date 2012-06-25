@@ -4,6 +4,24 @@
 
 {% block extrastyle %}
 
+<link href="http://ajax.aspnetcdn.com/ajax/jquery.dataTables/1.9.1/css/jquery.dataTables.css" rel="stylesheet" type="text/css"//>
+<link href="http://ajax.aspnetcdn.com/ajax/jquery.dataTables/1.9.1/css/jquery.dataTables_themeroller.css" rel="stylesheet" type="text/css"//>
+<script src="http://ajax.aspnetcdn.com/ajax/jquery.dataTables/1.9.1/jquery.dataTables.min.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+    if (typeof $(document).dataTable === 'undefined') {
+        console.log('DataTables joins operation CDN fallback!');
+        var ds = rlandri.dynamic_scripts;
+        ds.addCSS(ds.dir + 'css/jquery.dataTables.css');
+        ds.addCSS(ds.dir + 'css/jquery.dataTables_themeroller.css');
+        ds.addJavascript(ds.dir + 'js/jquery.dataTables.min.js');
+    }
+</script>
+
+<script src="/resources/jeditable/jquery.jeditable.mini.js" type="text/javascript"></script>
+<script src="/resources/jeditable/jquery.dataTables.editable.js" type="text/javascript"></script>
+<script src="/resources/rlandri/util.js" type="text/javascript"></script>
+
 <script type="text/javascript">
     $(function () {
     {% for subSolutions in allSolutions %}
@@ -20,6 +38,161 @@
             collapsible: true,
         });
     });
+
+    $(document).ready(function () {
+        function createTable(subEnvId, aaData, cellIds, rowIds) {
+            aaData = rlandri.util.parseJSON(aaData, [ ]);
+            cellIds = rlandri.util.parseJSON(cellIds, [ ]);
+            rowIds = rlandri.util.parseJSON(rowIds, [ ]);
+
+            var numRows = aaData.length;
+            for (var i = 0; i < numRows; i++) {
+                var row = aaData[i];
+                var numCols = row.length;
+                for (var j = 0; j < numCols; j++) {
+                    var cell = row[j];
+                    var errors = cell[1];
+                    var tpl = (errors.length > 0) ? '{0} ({1})' : '{0}';
+                    row[j] = $.validator.format(tpl, cell[0], errors);
+                }
+            }
+
+            var aoColumns = [
+                { "sTitle": "Agent Name" },
+                { "sTitle": "Solution" },
+                { "sTitle": "Number of Agents", "sClass": "center numAgentsCol" },
+            ];
+            var tableTpl = '#solution-realtable-{0}';
+            var tableId = $.validator.format(tableTpl, subEnvId);
+            var otTable = $(tableId).dataTable({
+                "aaData": aaData,
+                "aoColumns": aoColumns,
+                "bDestroy": true,
+                "bAutoWidth": false,
+                "bJQueryUI": true,
+                "sPaginationType": "full_numbers",
+            });
+            otTable.makeEditable({
+                sUpdateURL: function (value, settings) {
+                    var cellId = rlandri.util.trimSuffix(this.id, "-realtable");
+                    if (cellId) {
+                        $('#' + cellId).val(value);
+                        var forms = $('#offline-test-form-' + subEnvId);
+                        forms.each(function(idx) {
+                            this.submit();
+                        });
+                    }
+                    return "ok";
+                },
+                sAddURL: '{% url 'simulator.views.add_new_test' %}',
+                sDeleteURL: '{% url 'simulator.views.delete_test' %}',
+                oEditableSettings: {
+                    event: 'click',
+                },
+                aoColumns: [
+                    null,
+                    {
+                        oValidationOptions: {
+                            rules: {
+                                'value': {
+                                    required: true,
+                                    number: true,
+                                    min: 0,
+                                },
+                            },
+                        },
+                    },
+                ],
+                oAddNewRowButtonOptions: {
+                    label: "Add...",
+                    icons: {
+                        primary: 'ui-icon-plus',
+                    },
+                },
+                oDeleteRowButtonOptions: {
+                    label: "Remove",
+                    icons: {
+                        primary: 'ui-icon-trash',
+                    },
+                },
+                oAddNewRowFormOptions: {
+                    title: 'Add a new browser',
+                    show: "blind",
+                    hide: "explode",
+                    width: 600,
+                    modal: true,
+                },
+                sAddNewRowFormId: 'add-new-row-form-' + subEnvId,
+                sAddNewRowButtonId: 'btnAddNewRow-' + subEnvId,
+                sAddNewRowOkButtonId: 'btnAddNewRowOk-' + subEnvId,
+                sAddNewRowCancelButtonId: 'btnAddNewRowCancel-' + subEnvId,
+                sDeleteRowButtonId: 'btnDeleteRow-' + subEnvId,
+                sAddDeleteToolbarSelector: tableId + '_length',
+            });
+
+            function getClickHandler(selector, index) {
+                var index = index || 0;
+                var events = $(selector).data('events');
+                if (events) {
+                    var clickEvents = events.click;
+                    if (clickEvents.length > 0) {
+                        var clickEvent = clickEvents[0];
+                        if (clickEvent)
+                            return clickEvent;
+                    }
+                }
+                return null;
+            }
+
+            var clickEvent = getClickHandler('#btnAddNewRow-' + subEnvId);
+            if (clickEvent) {
+                var handler = clickEvent.handler;
+                clickEvent.handler = function (event) {
+                    var url = "{% url 'simulator.views.get_other_solutions' %}";
+                    $.getJSON(url, {
+                            subEnvId: subEnvId,
+                        },
+                        function (data, textStatus) {
+                            var tpl = '#add-new-row-form-{0} table';
+                            var tid = $.validator.format(tpl, subEnvId);
+                            var table = $(tid);
+                            table.html(data);
+                            var manager = new AttrIndexManager('rel');
+                            table.find(addFormSelector).each(function () {
+                                manager.updateRel(this);
+                            });
+                            handler(event);
+                        });
+                }
+            }
+
+            var nodes = otTable.fnGetNodes();
+            var numNodes = Math.min(nodes.length, cellIds.length);
+            for (var i = 0; i < numNodes; i++) {
+                var cells = nodes[i].cells;
+                var ids = cellIds[i];
+                var numCells = Math.min(cells.length, ids.length);
+                for (var j = 0; j < numCells; j++) {
+                    var cellId = ids[j] + "-realtable";
+                    cells[j].id = cellId;
+                }
+            }
+            numNodes = Math.min(nodes.length, rowIds.length);
+            for (var i = 0; i < numNodes; i++) {
+                nodes[i].id = rowIds[i];
+            }
+        }
+
+    {% for subSolutions in allSolutions %}
+        {% for entry in subSolutions.forms %}
+        {% with obj=entry.obj is_novel=entry.is_novel %}
+        {% if not is_novel %}
+            createTable('{{ obj.id|escapejs }}');
+        {% endif %}
+        {% endwith %}
+        {% endfor %}
+    {% endfor %}
+    });
 </script>
 
 {% endblock %}
@@ -34,20 +207,21 @@
     </h3>
     <div>
         <div id="solution-accordion-{{ subEnvironment.id}}">
-        {% for is_novel, paramId, formset in subSolutions.forms %}
+        {% for entry in subSolutions.forms %}
+        {% with form=entry.form obj=entry.obj is_novel=entry.is_novel %}
             <h3>
             {% if is_novel %}
-                <a href="#"> {{ formset.0.name.value }} </a>
-            {% else %}
                 <a href="#"> New Solution </a>
+            {% else %}
+                <a href="#"> {{ form.0.name.value }} </a>
             {% endif %}
             </h3>
             <div>
                 <form enctype="multipart/form-data"
                 {% if is_novel %}
-                    action="{% url 'solution.views.index_change' paramId %}"
+                    action="{% url 'solution.views.index_add' obj.id %}"
                 {% else %}
-                    action="{% url 'solution.views.index_add' paramId %}"
+                    action="{% url 'solution.views.index_change' obj.id %}"
                 {% endif %}
                     method="post">
                     {% csrf_token %}
@@ -63,12 +237,18 @@
                     <td>{{field}}</td></tr>
                     {% endfor %}
                     -->
-                    {{ formset.as_table }}
+                    {{ form.as_table }}
                     </table>
 
                     <input type="submit" value="Submit Solutions" />
                 </form>
+
+                {% if not is_novel %}
+                <table id="solution-realtable-{{ obj.id }}">
+                {% endif %}
+                </table>
             </div>
+        {% endwith %}
         {% endfor %}
         </div>
     </div>

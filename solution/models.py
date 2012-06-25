@@ -2,6 +2,7 @@ from django.db import models
 from envuser.models import EnvUser
 from home.base import create_callback_post_delete, create_callback_post_save
 from subenvironment.models import SubEnvironment
+import os
 
 def solution_upload_to(instance, filename):
     pathArgs = (instance.envUser.id, instance.subEnvironment.id, filename)
@@ -35,8 +36,11 @@ class Solution(models.Model):
         self.original_organizations = self.organizations
 
     def __unicode__(self):
-        uniArgs = (unicode(self.envUser), unicode(self.subEnvironment))
-        return 'Author(%s), Env(%s)' % uniArgs
+        agents = os.path.basename(self.agents.name)
+        artifacts = os.path.basename(self.artifacts.name)
+        organizations = os.path.basename(self.organizations.name)
+        uniArgs = (self.name, agents, artifacts, organizations)
+        return '%s (%s, %s, %s)' % uniArgs
 
 for field in [ 'agents', 'artifacts', 'organizations' ]:
     file_post_save = create_callback_post_save(field)

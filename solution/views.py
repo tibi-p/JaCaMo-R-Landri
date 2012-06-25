@@ -46,13 +46,8 @@ def make_special_solution_form(userSolutions, subenvs, singleSubEnv=False):
     return make_solution_form(subEnvKwArgs)
 
 def make_solution_formset(userSolutions, subenvs, singleSubEnv=False):
-    subEnvKwArgs = { }
-    if singleSubEnv:
-        subEnvKwArgs['hidden'] = True
-    else:
-        subEnvKwArgs['queryset'] = subenvs
-
-    SolutionForm = make_solution_form(subEnvKwArgs)
+    SolutionForm = make_special_solution_form(userSolutions, subenvs,
+        singleSubEnv)
     solutions = userSolutions.filter(subEnvironment__in=subenvs)
     BaseSolutionFormSet = make_base_custom_formset(solutions)
     return modelformset_factory(Solution, form=SolutionForm,
@@ -116,7 +111,11 @@ def index_common(request, postSolution=None, postSubEnv=None, others=False):
                     })
             else:
                 formset = SolutionFormSet()
-            forms.append((True, solution.pk, formset))
+            forms.append({
+                'form': formset,
+                'obj': solution,
+                'is_novel': False,
+            })
 
         if is_post and subEnvironment == postSubEnv:
             form = SolutionForm(request.POST, request.FILES)
@@ -127,7 +126,11 @@ def index_common(request, postSolution=None, postSubEnv=None, others=False):
                 })
         else:
             form = SolutionForm()
-        forms.append((False, subEnvironment.pk, form))
+        forms.append({
+            'form': form,
+            'obj': subEnvironment,
+            'is_novel': True,
+        })
 
         allSolutions.append({
             'subEnvironment': subEnvironment,
@@ -136,7 +139,7 @@ def index_common(request, postSolution=None, postSubEnv=None, others=False):
 
     SolutionFormSet = make_solution_formset(userSolutions,
         unsubEnvironments)
-    if request.method == 'POST' and others:
+    if is_post and others:
         othersFormset = SolutionFormSet(request.POST, request.FILES)
         if othersFormset.is_valid():
             return handle_solution_formset(othersFormset, {
