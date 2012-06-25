@@ -6,7 +6,7 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render_to_response
 from django.template import RequestContext
 from envuser.models import EnvUser
-from home.base import make_base_custom_formset
+from home.base import fill_object, make_base_custom_formset
 from solution.models import Solution
 from subenvironment.models import SubEnvironment
 
@@ -103,7 +103,8 @@ def index_common(request, postSolution=None, postSubEnv=None, others=False):
             formset = SolutionFormSet()
         '''
         subenvs = SubEnvironment.objects.filter(pk=subEnvironment.pk)
-        SolutionForm = make_special_solution_form(userSolutions, subenvs)
+        SolutionForm = make_special_solution_form(userSolutions, subenvs,
+            singleSubEnv=True)
         solutions = userSolutions.filter(subEnvironment__in=subenvs)
 
         forms = [ ]
@@ -113,11 +114,23 @@ def index_common(request, postSolution=None, postSubEnv=None, others=False):
             if is_post and solution == postSolution:
                 formset = SolutionFormSet(request.POST, request.FILES)
                 if formset.is_valid():
-                    return handle_formset(formset, envUser, subEnvironment)
+                    return handle_solution_formset(formset, {
+                        'envUser': envUser,
+                        'subEnvironment': subEnvironment,
+                    })
             else:
-                form = SolutionFormSet()#instance=solution)
-            forms.append((True, solution.pk, form))
-        form = SolutionForm()
+                formset = SolutionFormSet()
+            forms.append((True, solution.pk, formset))
+
+        if is_post and subEnvironment == postSubEnv:
+            form = SolutionForm(request.POST, request.FILES)
+            if form.is_valid():
+                return handle_solution_form(form, {
+                    'envUser': envUser,
+                    'subEnvironment': subEnvironment,
+                })
+        else:
+            form = SolutionForm()
         forms.append((False, subEnvironment.pk, form))
 
         allSolutions.append({
@@ -128,10 +141,11 @@ def index_common(request, postSolution=None, postSubEnv=None, others=False):
     SolutionFormSet = make_solution_formset(userSolutions,
         unsubEnvironments)
     if request.method == 'POST' and others:
-        print request.POST, request.FILES
         othersFormset = SolutionFormSet(request.POST, request.FILES)
         if othersFormset.is_valid():
-            return handle_formset(othersFormset, envUser)
+            return handle_solution_formset(othersFormset, {
+                'envUser': envUser,
+            })
     else:
         othersFormset = SolutionFormSet()
 
@@ -142,11 +156,13 @@ def index_common(request, postSolution=None, postSubEnv=None, others=False):
         },
         context_instance=RequestContext(request))
 
-def handle_formset(form, envUser, subEnvironment=None):
+def handle_solution_formset(form, attributes):
     solutions = form.save(commit=False)
-    for soln in solutions:
-        soln.envUser = envUser
-        if subEnvironment is not None:
-            soln.subEnvironment = subEnvironment
-        soln.save()
+    for solution in solutions:
+        fill_object(solution, attributes)
+    return HttpResponseRedirect(reverse(index))
+
+def handle_solution_form(form, attributes):
+    solution = form.save(commit=False)
+    fill_object(solution, attributes)
     return HttpResponseRedirect(reverse(index))

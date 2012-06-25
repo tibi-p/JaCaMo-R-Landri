@@ -26,3 +26,8 @@ def create_callback_post_delete(field):
         getattr(instance, field).delete(save=False)
 
     return file_post_delete
+
+def fill_object(row, attributes):
+    for key, value in attributes.iteritems():
+        setattr(row, key, value)
+    row.save()
