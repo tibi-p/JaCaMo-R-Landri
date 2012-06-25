@@ -6,19 +6,18 @@
 
 <script type="text/javascript">
     $(function () {
-    
-    	{% for subSolutions in allSolutions %}
-		{% with subSolutions.subEnvironment as subEnvironment %}
-    	 $("#solution-accordion-{{ subEnvironment.id}}").accordion({
+    {% for subSolutions in allSolutions %}
+    {% with subEnvironment=subSolutions.subEnvironment %}
+        $("#solution-accordion-{{ subEnvironment.id}}").accordion({
             autoHeight: false,
-            collapsible: true
+            collapsible: true,
         });
-        {% endwith %}
-        {% endfor %}
-    
+    {% endwith %}
+    {% endfor %}
+
         $("#subenv-accordion").accordion({
             autoHeight: false,
-            collapsible: true
+            collapsible: true,
         });
     });
 </script>
@@ -29,43 +28,49 @@
 
 <div id="subenv-accordion">
 {% for subSolutions in allSolutions %}
-{% with subSolutions.subEnvironment as subEnvironment %}
+{% with subEnvironment=subSolutions.subEnvironment %}
     <h3>
         <a href="#"> {{ subEnvironment }} </a>
     </h3>
-    <div id="solution-accordion-{{ subEnvironment.id}}">
-   
-    {% for form in subSolutions.forms %}
-    <h3>
-    	{% if form.name.value %}
-        	<a href="#"> {{ form.name.value }} </a>
-        {% else %}
-        	<a href="#">  New Solution</a>
-        {% endif %}
-    </h3>
     <div>
-    <form enctype="multipart/form-data"
-        action="{% url 'solution.views.index_post' subEnvironment.pk %}"
-        method="post"> 
-        {% csrf_token %}
-       
-       <table>
-       {% for hidden in form.hidden_fields %}
-    
-    
-       {{ hidden }}
-       {% endfor %}
+        <div id="solution-accordion-{{ subEnvironment.id}}">
+        {% for is_novel, paramId, formset in subSolutions.forms %}
+            <h3>
+            {% if is_novel %}
+                <a href="#"> {{ formset.0.name.value }} </a>
+            {% else %}
+                <a href="#"> New Solution </a>
+            {% endif %}
+            </h3>
+            <div>
+                <form enctype="multipart/form-data"
+                {% if is_novel %}
+                    action="{% url 'solution.views.index_change' paramId %}"
+                {% else %}
+                    action="{% url 'solution.views.index_add' paramId %}"
+                {% endif %}
+                    method="post">
+                    {% csrf_token %}
 
-       {% for field in form.visible_fields %}
-	   <tr><th>{{field.label_tag}}</th>
-	   <td>{{field}}</td></tr>
-       {% endfor %}
-       </table>
-       
-        <input type="submit" value="Submit Solutions" />
-    </form>
-    </div>
-    {% endfor %}
+                    <table>
+                    <!--
+                    {% for hidden in form.hidden_fields %}
+                        {{ hidden }}
+                    {% endfor %}
+
+                    {% for field in form.visible_fields %}
+	                <tr><th>{{field.label_tag}}</th>
+                    <td>{{field}}</td></tr>
+                    {% endfor %}
+                    -->
+                    {{ formset.as_table }}
+                    </table>
+
+                    <input type="submit" value="Submit Solutions" />
+                </form>
+            </div>
+        {% endfor %}
+        </div>
     </div>
 {% endwith %}
 {% endfor %}
@@ -74,7 +79,7 @@
     </h3>
     <div>
     <form enctype="multipart/form-data"
-        action="{% url 'solution.views.index_post' 0 %}"
+        action="{% url 'solution.views.index_change' 0 %}"
         method="post"> {% csrf_token %}
         <table>
             {{ othersFormset }}
