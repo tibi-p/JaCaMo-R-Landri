@@ -41,7 +41,7 @@ def make_solution_formset(userSolutions, subenvs, singleSubEnv=False):
     solutions = userSolutions.filter(subEnvironment__in=subenvs)
     BaseSolutionFormSet = make_base_custom_formset(solutions)
     return modelformset_factory(Solution, form=SolutionForm,
-        formset=BaseSolutionFormSet, can_delete=True)
+        formset=BaseSolutionFormSet)
 
 @login_required
 def index(request):
@@ -65,6 +65,7 @@ def index_common(request, postSubEnv=None, others=False):
     unsubEnvironments = SubEnvironment.objects.get_unsolved_by_user(user)
     allSolutions = [ ]
     for subEnvironment in subEnvironments:
+        '''
         SolutionFormSet = make_solution_formset(userSolutions,
             SubEnvironment.objects.filter(pk=subEnvironment.pk), singleSubEnv=True)
         if request.method == 'POST' and subEnvironment == postSubEnv:
@@ -73,10 +74,34 @@ def index_common(request, postSubEnv=None, others=False):
                 return handle_solution_formset(formset, envUser, subEnvironment)
         else:
             formset = SolutionFormSet()
+        '''
+        
+        subenvs = SubEnvironment.objects.filter(pk=subEnvironment.pk)
+        
+        print "subenvs:",subenvs
+        
+        SolutionForm = make_solution_form({
+                                           'hidden':True,
+                                           'queryset':subenvs,
+                                           })
+        
+        solutions = userSolutions.filter(subEnvironment__in=subenvs)
+        
+        forms = []
+        
+        print "solutions: ",solutions
+        
+        for solution in solutions:
+            forms.append(SolutionForm(instance=solution))
+            
+        forms.append(SolutionForm())
+        
         allSolutions.append({
             'subEnvironment': subEnvironment,
-            'formset': formset,
+            'forms': forms,
         })
+        
+        print "forms: ",forms
 
     SolutionFormSet = make_solution_formset(userSolutions,
         unsubEnvironments)

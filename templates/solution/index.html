@@ -6,7 +6,17 @@
 
 <script type="text/javascript">
     $(function () {
-        $("#solution-accordion").accordion({
+    
+    	{% for subSolutions in allSolutions %}
+		{% with subSolutions.subEnvironment as subEnvironment %}
+    	 $("#solution-accordion-{{ subEnvironment.id}}").accordion({
+            autoHeight: false,
+            collapsible: true
+        });
+        {% endwith %}
+        {% endfor %}
+    
+        $("#subenv-accordion").accordion({
             autoHeight: false,
             collapsible: true
         });
@@ -17,21 +27,45 @@
 
 {% block app-content %}
 
-<div id="solution-accordion">
+<div id="subenv-accordion">
 {% for subSolutions in allSolutions %}
 {% with subSolutions.subEnvironment as subEnvironment %}
     <h3>
         <a href="#"> {{ subEnvironment }} </a>
     </h3>
+    <div id="solution-accordion-{{ subEnvironment.id}}">
+   
+    {% for form in subSolutions.forms %}
+    <h3>
+    	{% if form.name.value %}
+        	<a href="#"> {{ form.name.value }} </a>
+        {% else %}
+        	<a href="#">  New Solution</a>
+        {% endif %}
+    </h3>
     <div>
     <form enctype="multipart/form-data"
         action="{% url 'solution.views.index_post' subEnvironment.pk %}"
-        method="post"> {% csrf_token %}
-        <table>
-            {{ subSolutions.formset }}
-        </table>
+        method="post"> 
+        {% csrf_token %}
+       
+       <table>
+       {% for hidden in form.hidden_fields %}
+    
+    
+       {{ hidden }}
+       {% endfor %}
+
+       {% for field in form.visible_fields %}
+	   <tr><th>{{field.label_tag}}</th>
+	   <td>{{field}}</td></tr>
+       {% endfor %}
+       </table>
+       
         <input type="submit" value="Submit Solutions" />
     </form>
+    </div>
+    {% endfor %}
     </div>
 {% endwith %}
 {% endfor %}

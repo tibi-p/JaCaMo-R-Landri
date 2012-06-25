@@ -16,16 +16,19 @@ class SolutionManager(models.Manager):
         return queryset.filter(**qfilter)
 
 class Solution(models.Model):
+    name = models.CharField(max_length=200)
     envUser = models.ForeignKey(EnvUser)
     subEnvironment = models.ForeignKey(SubEnvironment)
-    file = models.FileField(upload_to=solution_upload_to)
     description = models.TextField()
-    lastModified = models.DateTimeField(auto_now=True)
     isVisible = models.BooleanField()
+    agents = models.FileField(upload_to=solution_upload_to)
+    artifacts = models.FileField(upload_to=solution_upload_to)
+    organizations = models.FileField(upload_to=solution_upload_to)
+    lastModified = models.DateTimeField(auto_now=True)
+    
 
     objects = SolutionManager()
 
     def __unicode__(self):
-        filename = os.path.basename(self.file.name)
-        uniArgs = (unicode(self.envUser), unicode(self.subEnvironment), filename)
-        return 'Author(%s), Env(%s), File(%s)' % uniArgs
+        uniArgs = (unicode(self.envUser), unicode(self.subEnvironment))
+        return 'Author(%s), Env(%s)' % uniArgs
