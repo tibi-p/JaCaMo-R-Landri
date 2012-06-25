@@ -8,3 +8,21 @@ def make_base_custom_formset(queryset):
             super(BaseCustomFormSet, self).__init__(*args, **kwargs)
 
     return BaseCustomFormSet
+
+def create_callback_post_save(field):
+    original_field = 'original_%s' % (field,)
+
+    def file_post_save(sender, instance, created, **kwargs):
+        if not created:
+            getattr(instance, original_field).delete(save=False)
+        setattr(instance, original_field, getattr(instance, field))
+
+    return file_post_save
+
+def create_callback_post_delete(field):
+    def file_post_delete(sender, instance, **kwargs):
+        print 'file_post_delete'
+        print 'fpd', getattr(instance, field)
+        getattr(instance, field).delete(save=False)
+
+    return file_post_delete

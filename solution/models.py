@@ -1,5 +1,6 @@
 from django.db import models
 from envuser.models import EnvUser
+from home.base import create_callback_post_delete, create_callback_post_save
 from subenvironment.models import SubEnvironment
 import os
 
@@ -25,7 +26,17 @@ class Solution(models.Model):
 
     objects = SolutionManager()
 
+    def __init__(self, *args, **kwargs):
+        super(Solution, self).__init__(*args, **kwargs)
+        self.original_file = self.file
+
     def __unicode__(self):
         filename = os.path.basename(self.file.name)
         uniArgs = (unicode(self.envUser), unicode(self.subEnvironment), filename)
         return 'Author(%s), Env(%s), File(%s)' % uniArgs
+
+file_post_save = create_callback_post_save('file')
+file_post_delete = create_callback_post_delete('file')
+
+models.signals.post_save.connect(file_post_save, sender=Solution)
+models.signals.post_delete.connect(file_post_delete, sender=Solution)

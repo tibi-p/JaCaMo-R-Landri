@@ -103,6 +103,14 @@
         <div id="subenvironment-details">
         </div>
     {% endif %}
+    <br>
+    <form action="">
+    {% csrf_token %}
+        <table>
+            {{ form.as_table }}
+        </table>
+        <input type="submit" value="Simulate" />
+    </form>
 {% else %}
     <p>The requested SubEnvironment is invalid.</p>
 {% endif %}

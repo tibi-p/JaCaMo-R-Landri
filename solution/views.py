@@ -93,7 +93,7 @@ def index_common(request, postSubEnv=None, others=False):
             'allSolutions': allSolutions,
             'othersFormset': othersFormset,
         },
-        context_instance = RequestContext(request))
+        context_instance=RequestContext(request))
 
 def handle_solution_formset(formset, envUser, subEnvironment=None):
     solutions = formset.save(commit=False)

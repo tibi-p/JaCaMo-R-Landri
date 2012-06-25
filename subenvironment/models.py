@@ -1,6 +1,7 @@
 from django.db import models
 from city.models import Ring
 from envuser.models import EnvUser
+from home.base import create_callback_post_delete, create_callback_post_save
 import functools
 
 class SubEnvironmentManager(models.Manager):
@@ -79,13 +80,8 @@ class Artifact(BaseFileComponent):
 class Organization(BaseFileComponent):
     file = models.FileField(upload_to=functools.partial(dir_upload_to, 'organizations'))
 
-def file_post_save(sender, instance, created, **kwargs):
-    if not created:
-        instance.original_file.delete(save=False)
-    instance.original_file = instance.file
-
-def file_post_delete(sender, instance, **kwargs):
-    instance.file.delete(save=False)
+file_post_save = create_callback_post_save('file')
+file_post_delete = create_callback_post_delete('file')
 
 def for_each_subclass(base, callback):
     if base._meta.abstract:
