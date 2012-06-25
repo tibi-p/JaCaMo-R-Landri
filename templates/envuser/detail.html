@@ -36,9 +36,21 @@ td.user-property {
                     'children': [
                     {% for solution in subSolutions.someSolutions %}
                     {
-                        'data': '{{ solution.file|basename|escapejs }}',
+                        'data': '{{ solution.agents|basename|escapejs }}',
                         'metadata': {
-                            'link': '{{ solution.file.url|escapejs }}',
+                            'link': '{{ solution.agents.url|escapejs }}',
+                        },
+                    },
+                    {
+                        'data': '{{ solution.artifacts|basename|escapejs }}',
+                        'metadata': {
+                            'link': '{{ solution.artifacts.url|escapejs }}',
+                        },
+                    },
+                    {
+                        'data': '{{ solution.organizations|basename|escapejs }}',
+                        'metadata': {
+                            'link': '{{ solution.organizations.url|escapejs }}',
                         },
                     },
                     {% endfor %}
