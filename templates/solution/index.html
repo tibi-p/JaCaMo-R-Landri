@@ -110,26 +110,6 @@ table.dataTable tr.even.row_selected td {
     });
 
     $(document).ready(function () {
-        var names = { };
-        var maxIndex = 0;
-        var AttrIndexManager = function (attr) {
-            this.names = { };
-            this.maxIndex = 0;
-            this.attr = attr;
-        }
-        AttrIndexManager.prototype.updateRel = function (elem) {
-            var name = elem.name;
-            var index;
-            if (name in names) {
-                index = names[name];
-            } else {
-                index = maxIndex;
-                names[name] = maxIndex;
-                maxIndex++;
-            }
-            elem.setAttribute(this.attr, index);
-        }
-
         var solutions = [
         {% for subSolutions in allSolutions %}
             {% for entry in subSolutions.forms %}
@@ -146,10 +126,8 @@ table.dataTable tr.even.row_selected td {
         for (var i in solutions) {
             var solutionId = solutions[i];
             var addFormId = $.validator.format(addFormTpl, solutionId);
-            var manager = new AttrIndexManager('rel');
-            $(addFormId).find(addFormSelector).each(function () {
-                manager.updateRel(this);
-            });
+            var manager = new rlandri.util.AttrIndexManager('rel');
+            manager.updateObj($(addFormId).find(addFormSelector));
         }
 
         function createTable(solutionId, aaData, cellIds, rowIds) {
@@ -265,22 +243,19 @@ table.dataTable tr.even.row_selected td {
                             solutionId: solutionId,
                         },
                         function (data, textStatus) {
-                            console.log(data);
                             var tpl = '#add-new-row-form-{0} table';
                             var tid = $.validator.format(tpl, solutionId);
                             var table = $(tid);
                             table.html(data);
-                            var manager = new AttrIndexManager('rel');
-                            table.find(addFormSelector).each(function () {
-                                manager.updateRel(this);
-                            });
+                            var manager = new rlandri.util.AttrIndexManager('rel');
+                            manager.updateObj(table.find(addFormSelector));
                             handler(event);
                         });
                 }
             }
 
-            /*var nodes = otTable.fnGetNodes();
-            var numNodes = Math.min(nodes.length, cellIds.length);
+            var nodes = otTable.fnGetNodes();
+            /*var numNodes = Math.min(nodes.length, cellIds.length);
             for (var i = 0; i < numNodes; i++) {
                 var cells = nodes[i].cells;
                 var ids = cellIds[i];
@@ -289,11 +264,11 @@ table.dataTable tr.even.row_selected td {
                     var cellId = ids[j] + "-realtable";
                     cells[j].id = cellId;
                 }
-            }
+            }*/
             numNodes = Math.min(nodes.length, rowIds.length);
             for (var i = 0; i < numNodes; i++) {
                 nodes[i].id = rowIds[i];
-            }*/
+            }
         }
 
     {% for subSolutions in allSolutions %}

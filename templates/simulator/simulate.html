@@ -97,26 +97,6 @@ table.dataTable tr.even.row_selected td {
 {% endif %}
 
     $(document).ready(function () {
-        var names = { };
-        var maxIndex = 0;
-        var AttrIndexManager = function (attr) {
-            this.names = { };
-            this.maxIndex = 0;
-            this.attr = attr;
-        }
-        AttrIndexManager.prototype.updateRel = function (elem) {
-            var name = elem.name;
-            var index;
-            if (name in names) {
-                index = names[name];
-            } else {
-                index = maxIndex;
-                names[name] = maxIndex;
-                maxIndex++;
-            }
-            elem.setAttribute(this.attr, index);
-        }
-
         var subEnvs = [
         {% for test in allTests %}
             {{ test.subEnvironment.id }},
@@ -127,10 +107,8 @@ table.dataTable tr.even.row_selected td {
         for (var i in subEnvs) {
             var subEnvId = subEnvs[i];
             var addFormId = $.validator.format(addFormTpl, subEnvId);
-            var manager = new AttrIndexManager('rel');
-            $(addFormId).find(addFormSelector).each(function () {
-                manager.updateRel(this);
-            });
+            var manager = new rlandri.util.AttrIndexManager('rel');
+            manager.updateObj($(addFormId).find(addFormSelector));
         }
 
         function createTable(subEnvId, aaData, cellIds, rowIds) {
@@ -249,10 +227,8 @@ table.dataTable tr.even.row_selected td {
                             var tid = $.validator.format(tpl, subEnvId);
                             var table = $(tid);
                             table.html(data);
-                            var manager = new AttrIndexManager('rel');
-                            table.find(addFormSelector).each(function () {
-                                manager.updateRel(this);
-                            });
+                            var manager = new rlandri.util.AttrIndexManager('rel');
+                            manager.updateObj(table.find(addFormSelector));
                             handler(event);
                         });
                 }
