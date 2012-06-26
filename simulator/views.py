@@ -97,7 +97,7 @@ def simulate_common(request, targetEnv=None, abstractProcess=None):
         value = field.value()
         if field.name == 'solution':
             solution = solutions.get(pk=value)
-            return os.path.basename(solution.file.name)
+            return os.path.basename(solution.agents.name)
         else:
             return value
 
