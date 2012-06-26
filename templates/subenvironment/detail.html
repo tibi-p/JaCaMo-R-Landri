@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 
+{% load socketio_tags %}
 {% load tag_extras %}
 
 {% block extrastyle %}
@@ -9,7 +10,49 @@
 {% if user.is_superuser or owners|filteruser:user %}
 <script src="/resources/jstree/jquery.jstree.js" type="text/javascript"></script>
 
+{% socketio %}
+
 <script type="text/javascript">
+{% if abstractProcess %}
+{% with subEnv=abstractProcess.subEnvironment procId=abstractProcess.id %}
+    $(document).ready(function () {
+        var accordion = $('#offline-test-accordion');
+        accordion.prepend('<h3> </h3> <div> </div>');
+
+        var h3 = accordion.children(':eq(0)');
+        var tpl = '<a href="#{0}"> {1} </a>';
+        var id = 'accordion-header-process-{{ procId }}';
+        var title = 'Running Simulation ({{ subEnv }})';
+        h3.append($.validator.format(tpl, id, title));
+
+        var div = accordion.children(':eq(1)');
+        div.attr('id', 'div-process-{{ procId }}');
+    });
+
+    $(function () {
+        try {
+            var socket = new io.Socket();
+            socket.on('connect', function () {
+                var id = 'abstract-process-{{ procId }}';
+                socket.subscribe(id);
+            });
+            socket.on('message', function (data) {
+                var id = '#div-process-{{ procId }}';
+                $(id).html(function(index, oldhtml) {
+                    var tpl = '<div> {0} </div>';
+                    var delta = $.validator.format(tpl, data);
+                    return oldhtml + delta;
+                });
+                console.log(data);
+            });
+            socket.connect();
+        } catch (e) {
+            console.log(e);
+        }
+    });
+{% endwith %}
+{% endif %}
+
     $(function () {
         $("#subenvironment-details").jstree({
             'json_data': {
