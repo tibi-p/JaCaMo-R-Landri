@@ -45,8 +45,8 @@
        {% for entry in subSolutions.forms %}
        {% with form=entry.form obj=entry.obj is_novel=entry.is_novel %}
        {% if not is_novel %}
-       
-       var $dialog = $('<div></div>')
+       (function () {
+         var $dialog = $('<div></div>')
 			.dialog({
 				autoOpen: false,
 				modal: true,
@@ -59,8 +59,9 @@
 				{
 					text: "Yes",
 					click: function() {$.post("{% url 'solution.views.index_remove' obj.id %}");
+						console.log("{% url 'solution.views.index_remove' obj.id %}");
 						$(this).dialog("close");
-						window.location.reload();
+						// window.location.reload();
 					},
 				}]
 			});
@@ -70,6 +71,7 @@
 			// prevent the default action, e.g., following a link
 			return false;
 		});
+		})();
 		 
 		{% endif %}
 		{% endwith %}
