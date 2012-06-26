@@ -89,7 +89,7 @@ table.dataTable tr.even.row_selected td {
 					click: function() {$.post("{% url 'solution.views.index_remove' obj.id %}");
 						console.log("{% url 'solution.views.index_remove' obj.id %}");
 						$(this).dialog("close");
-						// window.location.reload();
+						window.location.reload();
 					},
 				}]
 			});

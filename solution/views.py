@@ -11,8 +11,17 @@ from home.base import fill_object, make_base_custom_formset
 from solution.models import Solution, solution_upload_to
 from subenvironment.models import SubEnvironment
 from specification import SolutionSpecification
+from zipfile import ZipFile
 import json
 import os
+
+
+def get_agent_code_from_zip(filename):
+    
+    print filename
+    with ZipFile(filename, 'r') as zipFile:
+        return zipFile.namelist()
+    
 
 def tweak_keywords(keywords, attr, defaults):
     queryset = keywords.get(attr, None)
@@ -256,13 +265,15 @@ def get_other_agents(request):
         if not user.is_superuser:
             unusedFilter['envUser__user'] = user
         unusedQueryset = EnvAgent.objects.filter(**unusedFilter)
+        
+        agentFiles= get_agent_code_from_zip(solution.agents.file.name)
+        choices = [(fileName,fileName) for fileName in agentFiles]
         # TODO create choices here
+        # INSPECT solution.agents 
         AgentForm = make_custom_agent_form({
             'queryset': unusedQueryset,
         }, {
-            'choices': [
-                ('xx', 'xx'),
-            ],
+            'choices': choices,
         })
         jsonObj = AgentForm().as_table()
     else:
