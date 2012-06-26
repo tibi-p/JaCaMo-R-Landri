@@ -240,13 +240,19 @@
                     {{ form.as_table }}
                     </table>
 
-                    <input type="submit" value="Submit Solutions" />
+					{% if is_novel %}
+                    <input type="submit" value="Submit Solution" />
+                    {% else %}
+                    <input type="submit" value="Submit Changes" />
+                    {% endif %}
                 </form>
 
                 {% if not is_novel %}
                 <table id="solution-realtable-{{ obj.id }}">
-                {% endif %}
                 </table>
+                <input type ="button" value="Delete Solution"/>
+                {% endif %}
+                
             </div>
         {% endwith %}
         {% endfor %}
