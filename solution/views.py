@@ -1,5 +1,6 @@
 from django import forms
 from django.contrib.auth.decorators import login_required
+from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.forms.models import modelformset_factory
 from django.http import HttpResponseRedirect
@@ -7,8 +8,10 @@ from django.shortcuts import get_object_or_404, render_to_response
 from django.template import RequestContext
 from envuser.models import EnvUser
 from home.base import fill_object, make_base_custom_formset
-from solution.models import Solution
+from solution.models import Solution,solution_upload_to
 from subenvironment.models import SubEnvironment
+from specification import SolutionSpecification
+import os
 
 def make_solution_form(subEnvKwArgs={ }):
     description_widget = forms.Textarea({
@@ -164,4 +167,11 @@ def handle_solution_formset(form, attributes):
 def handle_solution_form(form, attributes):
     solution = form.save(commit=False)
     fill_object(solution, attributes)
+    
+    xml = SolutionSpecification.make_xml([],str(solution.artifacts),str(solution.organizations))
+    
+    filename = solution_upload_to(solution,"config_"+str(solution.id)+".xml")
+    with open(os.path.join(settings.MEDIA_ROOT,filename), "w") as xmlConfigFile:
+        xmlConfigFile.write(xml.toprettyxml())
+    
     return HttpResponseRedirect(reverse(index))
