@@ -174,7 +174,12 @@ table.dataTable tr.even.row_selected td {
                     }
                     return "ok";
                 },
-                sAddURL: '{% url 'solution.views.add_agent' %}',
+                sAddURL: function addSolution(oTable, params) {
+                    var nodes = oTable.fnGetNodes();
+                    console.log(nodes);
+                    console.log(params);
+                    return 0;
+                },
                 sDeleteURL: '{% url 'solution.views.delete_agent' %}',
                 oEditableSettings: {
                     event: 'click',
@@ -238,6 +243,7 @@ table.dataTable tr.even.row_selected td {
             if (clickEvent) {
                 var handler = clickEvent.handler;
                 clickEvent.handler = function (event) {
+                    /*
                     var url = "{% url 'solution.views.get_other_agents' %}";
                     $.getJSON(url, {
                             solutionId: solutionId,
@@ -251,6 +257,38 @@ table.dataTable tr.even.row_selected td {
                             manager.updateObj(table.find(addFormSelector));
                             handler(event);
                         });
+                    */
+                    var $dummyTable = $('#add-dummy-row-form table');
+                    var $dummySelect = $dummyTable.find('select[name="agent_name"]');
+                    // Construct a map with all of the agent options
+                    var agentOptions = { };
+                    $dummySelect.find('option').each(function (i, option) {
+                        agentOptions[option.text] = option;
+                    });
+                    // Remove from the map the agents that already have code
+                    var nodes = otTable.fnGetNodes();
+                    for (var i = 0; i < nodes.length; i++) {
+                        var cells = nodes[i].cells;
+                        try {
+                            delete agentOptions[cells[0].innerText];
+                        } catch (e) {
+                            console.log(e);
+                        }
+                    }
+
+                    // Change the underlying form to include only the remaining agents
+                    var tpl = '#add-new-row-form-{0} table';
+                    var tid = $.validator.format(tpl, solutionId);
+                    var $table = $(tid);
+                    var $select = $table.find('select[name="agent_name"]');
+                    $select.empty();
+                    for (var name in agentOptions) {
+                        var option = agentOptions[name];
+                        $select.append($(option).clone());
+                    }
+                    var manager = new rlandri.util.AttrIndexManager('rel');
+                    manager.updateObj($table.find(addFormSelector));
+                    handler(event);
                 }
             }
 
@@ -372,12 +410,17 @@ table.dataTable tr.even.row_selected td {
     {% if not is_novel %}
         <form id="add-new-row-form-{{ obj.id }}" action="#" title="Add a new agent">
             <table>
-                {{ agentForm.as_table }}
+                {{ entry.agent_form.as_table }}
             </table>
         </form>
     {% endif %}
     {% endwith %}
     {% endfor %}
 {% endfor %}
+<form id="add-dummy-row-form" action="#" title="Add a new agent" style="display: none;">
+    <table>
+        {{ agentForm.as_table }}
+    </table>
+</form>
 
 {% endblock %}

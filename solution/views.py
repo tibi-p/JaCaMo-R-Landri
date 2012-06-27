@@ -131,6 +131,11 @@ def index_common(request, postSolution=None, postSubEnv=None, others=False):
     subEnvironments = SubEnvironment.objects.get_solved_by_user(user)
     unsubEnvironments = SubEnvironment.objects.get_unsolved_by_user(user)
 
+    agentFilter = { }
+    if not user.is_superuser:
+        agentFilter['envUser__user'] = user
+    agentQueryset = EnvAgent.objects.filter(**agentFilter)
+
     allSolutions = [ ]
     for subEnvironment in subEnvironments:
         subenvs = SubEnvironment.objects.filter(pk=subEnvironment.pk)
@@ -151,8 +156,16 @@ def index_common(request, postSolution=None, postSubEnv=None, others=False):
                     })
             else:
                 formset = SolutionFormSet()
+            agentFiles = get_agent_code_from_zip(solution.agents.file.name)
+            choices = [ (filename, filename) for filename in agentFiles ]
+            AgentForm = make_custom_agent_form({
+                'queryset': agentQueryset,
+            }, {
+                'choices': choices,
+            })
             forms.append({
                 'form': formset,
+                'agent_form': AgentForm(),
                 'obj': solution,
                 'is_novel': False,
             })
@@ -188,7 +201,11 @@ def index_common(request, postSolution=None, postSubEnv=None, others=False):
     else:
         othersFormset = SolutionFormSet()
 
-    AgentForm = make_custom_agent_form()
+    AgentForm = make_custom_agent_form({
+        'queryset': agentQueryset,
+    }, {
+        'choices': [ ],
+    })
     return render_to_response('solution/index.html',
         {
             'allSolutions': allSolutions,
