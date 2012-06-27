@@ -1,15 +1,7 @@
-from xml.dom.minidom import Document
-from xml.dom.minidom import parse
+from xml.dom.minidom import Document, parse
 
 class SolutionSpecification(object):
 
-    '''  
-    asl_list = [{'agentID':'ag1','cardinality':1, 'file':'ag1.asl'},
-                {'agentID':'ag2','cardinality':2, 'file':'ag2.asl'}]
-    artifacts_jar = 'artifacts.jar'
-    org_zip = 'orgs.zip'
-    '''
-    
     @staticmethod
     def add_agents_to_xml(xmlFile,asl_list):
         doc =  parse(xmlFile)
@@ -21,8 +13,8 @@ class SolutionSpecification(object):
         
         for dic in asl_list:
             agentNode = doc.createElement('asl')
-            for attr in dic.keys():
-                agentNode.setAttribute(attr,unicode(dic[attr]))
+            for key, value in dic.iteritems():
+                agentNode.setAttribute(key, value)
             node.appendChild(agentNode)
         root.appendChild(node)
         
@@ -76,4 +68,3 @@ class SolutionSpecification(object):
         orgsZip = node.getAttribute('file')
             
         return agents,agentFileNames,artifactsJar,orgsZip
-

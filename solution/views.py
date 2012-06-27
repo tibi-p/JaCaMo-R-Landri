@@ -1,6 +1,6 @@
 from django import forms
-from django.contrib.auth.decorators import login_required
 from django.conf import settings
+from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
 from django.forms.models import modelformset_factory
 from django.http import HttpResponse, HttpResponseRedirect
@@ -11,10 +11,18 @@ from home.base import fill_object, make_base_custom_formset
 from solution.models import Solution, solution_upload_to
 from subenvironment.models import SubEnvironment
 from specification import SolutionSpecification
-from zipfile import ZipFile
 from validate import Validator
 import json
 import os
+from zipfile import ZipFile
+
+def get_config_filename(solution):
+    basename = 'config_%s.xml' % (solution.id,)
+    return solution_upload_to(solution, basename)
+
+def get_config_filepath(solution):
+    filename = get_config_filename(solution)
+    return os.path.join(settings.MEDIA_ROOT, filename)
 
 def get_agent_code_from_zip(filename):
     
@@ -58,7 +66,7 @@ def make_solution_form(envUser, subEnvKwArgs={ }):
             def clean_artifacts(self):
                 artifacts = self.cleaned_data['artifacts']
                 userID = envUser.id
-                if not Validator.validateSolution(artifacts,userID):
+                if not Validator.validateSolution(artifacts, userID):
                     raise forms.ValidationError("Should upload a valid .jar with artifacts")
                 return artifacts
 
@@ -76,7 +84,7 @@ def make_solution_form(envUser, subEnvKwArgs={ }):
             def clean_artifacts(self):
                 artifacts = self.cleaned_data['artifacts']
                 userID = envUser.id
-                if not Validator.validateSolution(artifacts,userID):
+                if not Validator.validateSolution(artifacts, userID):
                     raise forms.ValidationError("Should upload a valid .jar with artifacts")
                 return artifacts
 
@@ -235,9 +243,8 @@ def handle_solution_form(form, attributes):
     fill_object(solution, attributes)
     
     xml = SolutionSpecification.make_xml([], str(solution.artifacts), str(solution.organizations))
-    
-    filename = solution_upload_to(solution, "config_" + str(solution.id) + ".xml")
-    with open(os.path.join(settings.MEDIA_ROOT, filename), "w") as xmlConfigFile:
+    config = get_config_filepath(solution)
+    with open(config, "w") as xmlConfigFile:
         xmlConfigFile.write(xml.toprettyxml())
     
     return HttpResponseRedirect(reverse(index))
@@ -283,31 +290,28 @@ def delete_agent(request):
     return HttpResponse(response, mimetype="text/plain")
 
 @login_required
-def get_other_agents(request):
-    params = request.GET
+def change_agent_mapping(request, solutionId):
     user = request.user
+    response = 'failure'
 
-    if request.method == 'GET' and u'solutionId' in params:
-        solutionId = params[u'solutionId']
-        solution = get_object_or_404(Solution, pk=solutionId)
-        unusedFilter = {
-        }
-        if not user.is_superuser:
-            unusedFilter['envUser__user'] = user
-        unusedQueryset = EnvAgent.objects.filter(**unusedFilter)
-        
-        agentFiles = get_agent_code_from_zip(solution.agents.file.name)
-        choices = [(fileName, fileName) for fileName in agentFiles]
-        # TODO create choices here
-        # INSPECT solution.agents 
-        AgentForm = make_custom_agent_form({
-            'queryset': unusedQueryset,
-        }, {
-            'choices': choices,
-        })
-        jsonObj = AgentForm().as_table()
-    else:
-        jsonObj = ''
+    if request.method == 'POST':
+        params = request.POST
+        if u'json' in params:
+            try:
+                solution = get_solution_or_404(user, id=solutionId)
+                config = get_config_filepath(solution)
+                agents = json.loads(params[u'json'])
+                # TODO server-side validation goes here
+                dom = SolutionSpecification.add_agents_to_xml(config, agents)
+                with open(config, "w") as f:
+                    f.write(dom.toprettyxml())
+                response = 'ok'
+            except ValueError, e:
+                response = str(e)
 
-    jsonStr = json.dumps(jsonObj)
-    return HttpResponse(jsonStr, mimetype="application/json")
+    return HttpResponse(response, mimetype="text/plain")
+
+def get_solution_or_404(user, **kwargs):
+    if not user.is_superuser:
+        kwargs['envUser__user'] = user
+    return get_object_or_404(Solution, **kwargs)
