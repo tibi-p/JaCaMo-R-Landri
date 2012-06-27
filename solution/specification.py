@@ -9,15 +9,14 @@ class SolutionSpecification(object):
     artifacts_jar = 'artifacts.jar'
     org_zip = 'orgs.zip'
     '''
-     
     
-    #Generate XML file from object
     @staticmethod
-    def make_xml(asl_list,artifacts_jar,org_zip):
-        doc = Document()
-        root = doc.createElement('solution')
-        doc.appendChild(root)
+    def add_agents_to_xml(xmlFile,asl_list):
+        doc =  parse(xmlFile)
         
+        root=doc.getElementsByTagName("solution")[0]
+        old= root.getElementsByTagName("asl-list")[0]
+        doc.documentElement.removeChild(old)
         node = doc.createElement('asl-list')
         
         for dic in asl_list:
@@ -26,6 +25,15 @@ class SolutionSpecification(object):
                 agentNode.setAttribute(attr,unicode(dic[attr]))
             node.appendChild(agentNode)
         root.appendChild(node)
+        
+        return doc
+    
+    #Generate XML file from object
+    @staticmethod
+    def make_xml(artifacts_jar,org_zip):
+        doc = Document()
+        root = doc.createElement('solution')
+        doc.appendChild(root)
         
         node = doc.createElement('artifacts')
         node.setAttribute('file',artifacts_jar)

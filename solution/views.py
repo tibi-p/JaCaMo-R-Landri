@@ -12,6 +12,7 @@ from solution.models import Solution, solution_upload_to
 from subenvironment.models import SubEnvironment
 from specification import SolutionSpecification
 from zipfile import ZipFile
+from validate import Validator
 import json
 import os
 
@@ -54,10 +55,12 @@ def make_solution_form(envUser, subEnvKwArgs={ }):
         class SolutionForm(forms.models.ModelForm):
             description = forms.CharField(widget=description_widget)
 
-            def clean(self):
-                cleaned_data = super(SolutionForm, self).clean()
-                print cleaned_data
-                return cleaned_data
+            def clean_artifacts(self):
+                artifacts = self.cleaned_data['artifacts']
+                userID = envUser.id
+                if not Validator.validateSolution(artifacts,userID):
+                    raise forms.ValidationError("Should upload a valid .jar with artifacts")
+                return artifacts
 
             class Meta:
                 model = Solution
@@ -69,6 +72,13 @@ def make_solution_form(envUser, subEnvKwArgs={ }):
         class SolutionForm(forms.models.ModelForm):
             subEnvironment = forms.ModelChoiceField(**subEnvKwArgs)
             description = forms.CharField(widget=description_widget)
+
+            def clean_artifacts(self):
+                artifacts = self.cleaned_data['artifacts']
+                userID = envUser.id
+                if not Validator.validateSolution(artifacts,userID):
+                    raise forms.ValidationError("Should upload a valid .jar with artifacts")
+                return artifacts
 
             class Meta:
                 model = Solution
