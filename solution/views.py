@@ -15,13 +15,11 @@ from zipfile import ZipFile
 import json
 import os
 
-
 def get_agent_code_from_zip(filename):
     
     print filename
     with ZipFile(filename, 'r') as zipFile:
         return zipFile.namelist()
-    
 
 def tweak_keywords(keywords, attr, defaults):
     queryset = keywords.get(attr, None)
@@ -47,7 +45,7 @@ def make_custom_agent_form(agent_kwargs={ }, asl_kwargs={ }):
 
     return AgentForm
 
-def make_solution_form(subEnvKwArgs={ }):
+def make_solution_form(envUser, subEnvKwArgs={ }):
     description_widget = forms.Textarea({
         'rows': 5,
     })
@@ -55,6 +53,11 @@ def make_solution_form(subEnvKwArgs={ }):
     if hidden:
         class SolutionForm(forms.models.ModelForm):
             description = forms.CharField(widget=description_widget)
+
+            def clean(self):
+                cleaned_data = super(SolutionForm, self).clean()
+                print cleaned_data
+                return cleaned_data
 
             class Meta:
                 model = Solution
@@ -73,17 +76,17 @@ def make_solution_form(subEnvKwArgs={ }):
 
     return SolutionForm
 
-def make_special_solution_form(userSolutions, subenvs, singleSubEnv=False):
+def make_special_solution_form(envUser, subenvs, singleSubEnv=False):
     subEnvKwArgs = { }
     if singleSubEnv:
         subEnvKwArgs['hidden'] = True
     else:
         subEnvKwArgs['queryset'] = subenvs
 
-    return make_solution_form(subEnvKwArgs)
+    return make_solution_form(envUser, subEnvKwArgs)
 
-def make_solution_formset(userSolutions, subenvs, singleSubEnv=False):
-    SolutionForm = make_special_solution_form(userSolutions, subenvs,
+def make_solution_formset(envUser, userSolutions, subenvs, singleSubEnv=False):
+    SolutionForm = make_special_solution_form(envUser, subenvs,
         singleSubEnv)
     solutions = userSolutions.filter(subEnvironment__in=subenvs)
     BaseSolutionFormSet = make_base_custom_formset(solutions)
@@ -131,7 +134,7 @@ def index_common(request, postSolution=None, postSubEnv=None, others=False):
     allSolutions = [ ]
     for subEnvironment in subEnvironments:
         subenvs = SubEnvironment.objects.filter(pk=subEnvironment.pk)
-        SolutionForm = make_special_solution_form(userSolutions, subenvs,
+        SolutionForm = make_special_solution_form(envUser, subenvs,
             singleSubEnv=True)
         solutions = userSolutions.filter(subEnvironment__in=subenvs)
 
@@ -174,7 +177,7 @@ def index_common(request, postSolution=None, postSubEnv=None, others=False):
             'forms': forms,
         })
 
-    SolutionFormSet = make_solution_formset(userSolutions,
+    SolutionFormSet = make_solution_formset(envUser, userSolutions,
         unsubEnvironments)
     if is_post and others:
         othersFormset = SolutionFormSet(request.POST, request.FILES)
@@ -266,8 +269,8 @@ def get_other_agents(request):
             unusedFilter['envUser__user'] = user
         unusedQueryset = EnvAgent.objects.filter(**unusedFilter)
         
-        agentFiles= get_agent_code_from_zip(solution.agents.file.name)
-        choices = [(fileName,fileName) for fileName in agentFiles]
+        agentFiles = get_agent_code_from_zip(solution.agents.file.name)
+        choices = [(fileName, fileName) for fileName in agentFiles]
         # TODO create choices here
         # INSPECT solution.agents 
         AgentForm = make_custom_agent_form({
