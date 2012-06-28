@@ -27,8 +27,8 @@ class Solution(models.Model):
     description = models.TextField()
     isVisible = models.BooleanField()
     agents = models.FileField(upload_to=solution_upload_to)
-    artifacts = models.FileField(upload_to=solution_upload_to)
-    organizations = models.FileField(upload_to=solution_upload_to)
+    artifacts = models.FileField(upload_to=solution_upload_to, blank=True)
+    organizations = models.FileField(upload_to=solution_upload_to, blank=True)
     lastModified = models.DateTimeField(auto_now=True)
 
     objects = SolutionManager()

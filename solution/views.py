@@ -12,7 +12,6 @@ from subenvironment.models import SubEnvironment
 from specification import SolutionSpecification
 from validate import Validator
 import json
-import os
 from zipfile import BadZipfile, ZipFile
 
 def get_agent_code_from_zip(filename):
@@ -46,6 +45,13 @@ def make_custom_agent_form(agent_kwargs={ }, asl_kwargs={ }):
 
     return AgentForm
 
+def validate_artifacts(artifacts, userID):
+    if artifacts is not None:
+        if not Validator.validateSolution(artifacts, userID):
+            error_msg = "Should upload a valid .jar with artifacts"
+            raise forms.ValidationError(error_msg)
+    return artifacts
+
 def make_solution_form(envUser, subEnvKwArgs={ }):
     description_widget = forms.Textarea({
         'rows': 5,
@@ -57,10 +63,7 @@ def make_solution_form(envUser, subEnvKwArgs={ }):
 
             def clean_artifacts(self):
                 artifacts = self.cleaned_data['artifacts']
-                userID = envUser.id
-                if not Validator.validateSolution(artifacts, userID):
-                    raise forms.ValidationError("Should upload a valid .jar with artifacts")
-                return artifacts
+                return validate_artifacts(artifacts, envUser.id)
 
             class Meta:
                 model = Solution
@@ -75,10 +78,7 @@ def make_solution_form(envUser, subEnvKwArgs={ }):
 
             def clean_artifacts(self):
                 artifacts = self.cleaned_data['artifacts']
-                userID = envUser.id
-                if not Validator.validateSolution(artifacts, userID):
-                    raise forms.ValidationError("Should upload a valid .jar with artifacts")
-                return artifacts
+                return validate_artifacts(artifacts, envUser.id)
 
             class Meta:
                 model = Solution
@@ -231,8 +231,7 @@ def index_common(request, postSolution=None, postSubEnv=None, others=False):
     }, {
         'choices': [ ],
     })
-   
-    
+
     return render_to_response('solution/index.html',
         {
             'allSolutions': allSolutions,
