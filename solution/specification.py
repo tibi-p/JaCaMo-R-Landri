@@ -60,14 +60,14 @@ class SolutionSpecification(object):
         nodes = dom.getElementsByTagName('asl')
         for node in nodes:
             print node
-            agentId = node.getAttribute('agentID')
-            agentName = "agent_" + str(agentId)
+            
+            agentId = node.getAttribute('agentId')
             
             cardinality = node.getAttribute('cardinality')
             
             agents.append({
                 'arch' : 'c4jason.CAgentArch',
-                'name' : agentName,
+                'name' : agentId,
                 'no' : cardinality
                            })
         
