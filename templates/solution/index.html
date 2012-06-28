@@ -222,21 +222,7 @@ table.dataTable tr.even.row_selected td {
                 sAddDeleteToolbarSelector: tableId + '_length',
             });
 
-            function getClickHandler(selector, index) {
-                var index = index || 0;
-                var events = $(selector).data('events');
-                if (events) {
-                    var clickEvents = events.click;
-                    if (clickEvents.length > 0) {
-                        var clickEvent = clickEvents[0];
-                        if (clickEvent)
-                            return clickEvent;
-                    }
-                }
-                return null;
-            }
-
-            var clickEvent = getClickHandler('#btnAddNewRow-' + solutionId);
+            var clickEvent = rlandri.util.getClickHandler('#btnAddNewRow-' + solutionId);
             if (clickEvent) {
                 var handler = clickEvent.handler;
                 clickEvent.handler = function (event) {
@@ -247,7 +233,6 @@ table.dataTable tr.even.row_selected td {
                     $dummySelect.find('option').each(function (i, option) {
                         agentOptions[option.value] = option;
                     });
-                    console.log(agentOptions);
                     // Remove from the map the agents that already have code
                     var nodes = otTable.fnGetNodes();
                     for (var i = 0; i < nodes.length; i++) {

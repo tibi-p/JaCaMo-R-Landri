@@ -247,7 +247,7 @@ def handle_solution_formset(form, attributes, are_novel=False):
     if are_novel:
         for solution in solutions:
             # TODO modify to .name & test
-            xml = SolutionSpecification.make_xml(str(solution.artifacts), str(solution.organizations))
+            xml = SolutionSpecification.make_xml(solution)
             config = solution.get_config_filepath()
             with open(config, "w") as xmlConfigFile:
                 xmlConfigFile.write(xml.toprettyxml())
@@ -258,7 +258,7 @@ def handle_solution_form(form, attributes):
     fill_object(solution, attributes)
     
     # TODO modify to .path & test
-    xml = SolutionSpecification.make_xml(str(solution.artifacts), str(solution.organizations))
+    xml = SolutionSpecification.make_xml(solution)
     config = solution.get_config_filepath()
     with open(config, "w") as xmlConfigFile:
         xmlConfigFile.write(xml.toprettyxml())

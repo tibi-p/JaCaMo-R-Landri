@@ -21,25 +21,28 @@ class SolutionSpecification(object):
         root.appendChild(node)
         
         return doc
-    
+
     #Generate XML file from object
     @staticmethod
-    def make_xml(artifacts_jar, org_zip):
+    def make_xml(solution):
         doc = Document()
         root = doc.createElement('solution')
         doc.appendChild(root)
-        
-        node = doc.createElement('artifacts')
-        node.setAttribute('file', artifacts_jar)
-        root.appendChild(node)
-        
-        node = doc.createElement('organizations')
-        node.setAttribute('file', org_zip)
-        root.appendChild(node)
-        
+
+        artifacts = solution.artifacts
+        if artifacts:
+            node = doc.createElement('artifacts')
+            node.setAttribute('file', artifacts.name)
+            root.appendChild(node)
+
+        organizations = solution.organizations
+        if organizations:
+            node = doc.createElement('organizations')
+            node.setAttribute('file', organizations.name)
+            root.appendChild(node)
+
         return doc
-    
-    
+
     @staticmethod
     def parseAgentMapping(xmlFile):
         lst = []
@@ -95,7 +98,7 @@ class SolutionSpecification(object):
         except IOError, e:
             # TODO log me
             print e
-            dom = SolutionSpecification.make_xml(solution.artifacts.path, solution.organizations.path)
+            dom = SolutionSpecification.make_xml(solution)
             with open(config_xml, 'w') as f:
                 f.write(dom.toprettyxml())
             return SolutionSpecification.parse(config_xml)

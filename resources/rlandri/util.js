@@ -1,4 +1,18 @@
 rlandri.util = {
+    getClickHandler: function (selector, index) {
+        var index = index || 0;
+        var events = $(selector).data('events');
+        if (events) {
+            var clickEvents = events.click;
+            if (clickEvents.length > 0) {
+                var clickEvent = clickEvents[0];
+                if (clickEvent)
+                    return clickEvent;
+            }
+        }
+        return null;
+    },
+
     parseJSON: function (data, defValue) {
         var obj = defValue;
         try {
