@@ -22,7 +22,7 @@ class Validator(object):
     def validateSolution(jarFile,userID):
         try:
             with ZipFile(jarFile, 'r') as jar:
-                path = Validator.ORG_PREFIX+Validator.PROJECT_PREFIX+'user'+str(userID)
+                path = Validator.ORG_PREFIX+Validator.PROJECT_PREFIX+'user'+str(userID) + "/"
                 for name in jar.namelist():
                     if 'META-INF/MANIFEST.MF' != name:
                         if not name.startswith(path):
