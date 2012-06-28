@@ -40,6 +40,21 @@ class SolutionSpecification(object):
     
     
     @staticmethod
+    def parseAgentMapping(xmlFile):
+        
+        lst = []
+        dom =  parse(xmlFile)
+        
+        
+        nodes = dom.getElementsByTagName('asl')
+        for node in nodes:
+            agentName = node.getAttribute('agentId')
+            file = node.getAttribute('file')
+            cardinality = node.getAttribute('cardinality')
+            lst.append([[agentName,''],[file,''],[cardinality,'']])
+        return lst
+    
+    @staticmethod
     def parse(xmlFile):  
       
         agents = []

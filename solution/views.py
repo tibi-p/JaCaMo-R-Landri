@@ -231,11 +231,16 @@ def index_common(request, postSolution=None, postSubEnv=None, others=False):
     }, {
         'choices': [ ],
     })
+    
+    config = get_config_filepath(solution)
+    tableEntries = SolutionSpecification.parseAgentMapping(config)
+    
     return render_to_response('solution/index.html',
         {
             'allSolutions': allSolutions,
             'othersFormset': othersFormset,
             'agentForm': AgentForm(),
+            'aaData': json.dumps(tableEntries),
         },
         context_instance=RequestContext(request))
 
