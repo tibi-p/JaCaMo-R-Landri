@@ -6,5 +6,5 @@ class AbstractProcess(models.Model):
     created = models.DateTimeField(auto_now_add=True)
 
     def __unicode__(self):
-        uniArgs = (self.envUser, self.solution)
+        uniArgs = (self.solution,)
         return 'process: solution(%s)' % uniArgs
