@@ -15,6 +15,7 @@ from validate import Validator
 import json
 import os
 from zipfile import ZipFile
+from zipfile import BadZipfile
 
 def get_config_filename(solution):
     basename = 'config_%s.xml' % (solution.id,)
@@ -27,8 +28,12 @@ def get_config_filepath(solution):
 def get_agent_code_from_zip(filename):
     
     print filename
-    with ZipFile(filename, 'r') as zipFile:
-        return zipFile.namelist()
+    try:
+        with ZipFile(filename, 'r') as zipFile:
+            return zipFile.namelist()
+    except BadZipfile:
+        return []
+        
 
 def tweak_keywords(keywords, attr, defaults):
     queryset = keywords.get(attr, None)
@@ -174,7 +179,13 @@ def index_common(request, postSolution=None, postSubEnv=None, others=False):
                     })
             else:
                 formset = SolutionFormSet()
-            agentFiles = get_agent_code_from_zip(solution.agents.file.name)
+                
+            ##FIXME: Make sure this error is treated correctly
+            try:
+                agentFiles = get_agent_code_from_zip(solution.agents.file.name)
+            except IOError:
+                agentFiles = []
+                
             choices = [ (filename, filename) for filename in agentFiles ]
             AgentForm = make_custom_agent_form({
                 'queryset': agentQueryset,
