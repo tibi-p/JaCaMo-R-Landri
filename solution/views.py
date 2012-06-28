@@ -14,9 +14,7 @@ from specification import SolutionSpecification
 from validate import Validator
 import json
 import os
-from zipfile import ZipFile
-from zipfile import BadZipfile
-from google.protobuf.text_format import PrintField
+from zipfile import BadZipfile, ZipFile
 
 def get_config_filename(solution):
     basename = 'config_%s.xml' % (solution.id,)
