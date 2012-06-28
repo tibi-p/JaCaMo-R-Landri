@@ -16,6 +16,7 @@ import json
 import os
 from zipfile import ZipFile
 from zipfile import BadZipfile
+from google.protobuf.text_format import PrintField
 
 def get_config_filename(solution):
     basename = 'config_%s.xml' % (solution.id,)
@@ -253,7 +254,7 @@ def handle_solution_form(form, attributes):
     solution = form.save(commit=False)
     fill_object(solution, attributes)
     
-    xml = SolutionSpecification.make_xml([], str(solution.artifacts), str(solution.organizations))
+    xml = SolutionSpecification.make_xml(str(solution.artifacts), str(solution.organizations))
     config = get_config_filepath(solution)
     with open(config, "w") as xmlConfigFile:
         xmlConfigFile.write(xml.toprettyxml())
@@ -312,8 +313,18 @@ def change_agent_mapping(request, solutionId):
                 solution = get_solution_or_404(user, id=solutionId)
                 config = get_config_filepath(solution)
                 agents = json.loads(params[u'json'])
+                
+                print "AGENTS",agents
+                Validator.validateAgentMapping(agents)
+                
+                print config
+                with file(config) as f:
+                    print f.read()
                 # TODO server-side validation goes here
                 dom = SolutionSpecification.add_agents_to_xml(config, agents)
+                
+                print dom.toprettyxml()
+                
                 with open(config, "w") as f:
                     f.write(dom.toprettyxml())
                 response = 'ok'
