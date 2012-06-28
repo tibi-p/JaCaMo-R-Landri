@@ -172,7 +172,13 @@ table.dataTable tr.even.row_selected td {
                     return "ok";
                 },
                 sAddURL: function (oTable, params) {
-                    return 0;
+                    try {
+                        var firstParameter = params[0];
+                        return firstParameter.value;
+                    } catch (e) {
+                        console.log(e);
+                        return 0;
+                    }
                 },
                 sDeleteURL: '{% url 'solution.views.delete_agent' %}',
                 oEditableSettings: {
@@ -239,14 +245,15 @@ table.dataTable tr.even.row_selected td {
                     // Construct a map with all of the agent options
                     var agentOptions = { };
                     $dummySelect.find('option').each(function (i, option) {
-                        agentOptions[option.text] = option;
+                        agentOptions[option.value] = option;
                     });
+                    console.log(agentOptions);
                     // Remove from the map the agents that already have code
                     var nodes = otTable.fnGetNodes();
                     for (var i = 0; i < nodes.length; i++) {
-                        var cells = nodes[i].cells;
+                        var id = nodes[i].id;
                         try {
-                            delete agentOptions[cells[0].innerText];
+                            delete agentOptions[id];
                         } catch (e) {
                             console.log(e);
                         }
@@ -290,10 +297,16 @@ table.dataTable tr.even.row_selected td {
                 var nodes = otTable.fnGetNodes();
                 var agents = [ ];
                 for (var i = 0; i < nodes.length; i++) {
-                    var cells = nodes[i].cells;
+                    var row = nodes[i];
+                    var cells = row.cells;
                     var entry = { };
-                    for (var j = 0; j < cells.length; j++)
-                        entry[keys[j]] = cells[j].innerText;
+                    for (var j = 0; j < cells.length; j++) {
+                        var key = keys[j];
+                        if (j == 0)
+                            entry[key] = row.id;
+                        else
+                            entry[key] = cells[j].innerText;
+                    }
                     agents.push(entry);
                 }
                 var url = '{% url 'solution.views.change_agent_mapping' 0 %}';
@@ -314,11 +327,11 @@ table.dataTable tr.even.row_selected td {
 
     {% for subSolutions in allSolutions %}
         {% for entry in subSolutions.forms %}
-        {% with obj=entry.obj is_novel=entry.is_novel %}
+        {% with obj=entry.obj is_novel=entry.is_novel table=entry.table %}
         {% if not is_novel %}
-            createTable('{{ obj.id|escapejs }}', '{{ entry.aaData|escapejs }}',
+            createTable('{{ obj.id|escapejs }}', '{{ table.aaData|escapejs }}',
                 '',
-                ''
+                '{{ table.rowIds|escapejs }}'
             );
         {% endif %}
         {% endwith %}
@@ -359,20 +372,10 @@ table.dataTable tr.even.row_selected td {
                     {% csrf_token %}
 
                     <table>
-                    <!--
-                    {% for hidden in form.hidden_fields %}
-                        {{ hidden }}
-                    {% endfor %}
-
-                    {% for field in form.visible_fields %}
-	                <tr><th>{{field.label_tag}}</th>
-                    <td>{{field}}</td></tr>
-                    {% endfor %}
-                    -->
                     {{ form.as_table }}
                     </table>
 
-					{% if is_novel %}
+                    {% if is_novel %}
                     <input type="submit" value="Submit Solution" />
                     {% else %}
                     <input type="submit" value="Submit Changes" />

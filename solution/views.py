@@ -128,7 +128,7 @@ def index_add(request, subEnvId):
 
 @login_required
 def index_remove(request, solutionId):
-    solution = get_object_or_404(Solution, pk=solutionId)
+    solution = get_solution_or_404(request.user, pk=solutionId)
     solution.delete()
     return index_common(request)
 
@@ -172,23 +172,27 @@ def index_common(request, postSolution=None, postSubEnv=None, others=False):
                 agentFiles = get_agent_code_from_zip(solution.agents.path)
             except IOError:
                 agentFiles = []
-            
-             
-            config = get_config_filepath(solution)
-            tableEntries = SolutionSpecification.parseAgentMapping(config)
-                
+
             choices = [ (filename, filename) for filename in agentFiles ]
             AgentForm = make_custom_agent_form({
                 'queryset': agentQueryset,
             }, {
                 'choices': choices,
             })
+
+            config = get_config_filepath(solution)
+            aaData = SolutionSpecification.parseAgentMapping(config)
+            rowIds = [ row[0][0] for row in aaData ]
+
             forms.append({
                 'form': formset,
                 'agent_form': AgentForm(),
                 'obj': solution,
                 'is_novel': False,
-                'aaData': json.dumps(tableEntries),
+                'table': {
+                    'aaData': json.dumps(aaData),
+                    'rowIds': json.dumps(rowIds),
+                },
             })
 
         if is_post and subEnvironment == postSubEnv:
@@ -263,28 +267,6 @@ def handle_solution_form(form, attributes):
     return HttpResponseRedirect(reverse(index))
 
 @login_required
-def add_agent(request):
-    user = request.user
-    response = 'failure'
-
-    if request.method == 'POST':
-        unusedFilter = {
-        }
-        if not user.is_superuser:
-            unusedFilter['envUser__user'] = user
-        unusedQueryset = Solution.objects.filter(**unusedFilter)
-        AgentForm = make_custom_agent_form({
-            'queryset': unusedQueryset,
-        })
-        form = AgentForm(request.POST, request.FILES)
-        if form.is_valid():
-            cleaned_data = form.cleaned_data
-            # TODO add stuff here
-            print cleaned_data
-
-    return HttpResponse(response, mimetype="text/plain")
-
-@login_required
 def delete_agent(request):
     user = request.user
     response = 'failure'
@@ -322,6 +304,7 @@ def change_agent_mapping(request, solutionId):
                 with file(config) as f:
                     print f.read()
                 # TODO server-side validation goes here
+                # also check IDs!!
                 dom = SolutionSpecification.add_agents_to_xml(config, agents)
                 
                 print dom.toprettyxml()

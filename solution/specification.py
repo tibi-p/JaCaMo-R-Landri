@@ -67,7 +67,7 @@ class SolutionSpecification(object):
             
             agents.append({
                 'arch' : 'c4jason.CAgentArch',
-                'name' : agentId,
+                'name' : 'agent_%s' % (agentId,),
                 'no' : cardinality
                            })
         
