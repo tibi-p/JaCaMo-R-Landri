@@ -1,3 +1,4 @@
+from django.core.files.storage import default_storage
 from models import get_config_filepath
 from xml.dom.minidom import Document, parse
 
@@ -54,21 +55,16 @@ class SolutionSpecification(object):
 
     @staticmethod
     def parse(xmlFile):
-      
         agents = []
-        agentFileNames = []
-      
         dom = parse(xmlFile)
-       
-        
         nodes = dom.getElementsByTagName('asl')
         for node in nodes:
+            print node
             agentId = node.getAttribute('agentID')
             agentName = "agent_" + str(agentId)
             
             cardinality = node.getAttribute('cardinality')
             
-            agentFileNames.append(node.getAttribute('file'))
             agents.append({
                 'arch' : 'c4jason.CAgentArch',
                 'name' : agentName,
@@ -76,12 +72,21 @@ class SolutionSpecification(object):
                            })
         
         node = dom.getElementsByTagName('artifacts')[0]
-        artifactsJar = node.getAttribute('file')
+        filename = node.getAttribute('file')
+        print filename
+        filename = default_storage.path(filename)
+        print filename
+        artifactsJar = filename
         
         node = dom.getElementsByTagName('organizations')[0]
-        orgsZip = node.getAttribute('file')
+        filename = node.getAttribute('file')
+        print filename
+        filename = default_storage.path(filename)
+        print filename
+        artifactsJar = filename
+        orgsZip = filename
             
-        return agents, agentFileNames, artifactsJar, orgsZip
+        return agents, artifactsJar, orgsZip
 
     @staticmethod
     def parse_repair_xml(solution):
