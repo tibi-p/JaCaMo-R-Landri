@@ -7,8 +7,9 @@ class SolutionSpecification(object):
         doc =  parse(xmlFile)
         
         root=doc.getElementsByTagName("solution")[0]
-        old= root.getElementsByTagName("asl-list")[0]
-        doc.documentElement.removeChild(old)
+        old = root.getElementsByTagName("asl-list")
+        if old:
+            doc.documentElement.removeChild(old[0])
         node = doc.createElement('asl-list')
         
         for dic in asl_list:
@@ -37,6 +38,21 @@ class SolutionSpecification(object):
         
         return doc
     
+    
+    @staticmethod
+    def parseAgentMapping(xmlFile):
+        
+        lst = []
+        dom =  parse(xmlFile)
+        
+        
+        nodes = dom.getElementsByTagName('asl')
+        for node in nodes:
+            agentName = node.getAttribute('agentId')
+            file = node.getAttribute('file')
+            cardinality = node.getAttribute('cardinality')
+            lst.append([[agentName,''],[file,''],[cardinality,'']])
+        return lst
     
     @staticmethod
     def parse(xmlFile):  

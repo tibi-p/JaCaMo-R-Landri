@@ -316,7 +316,7 @@ table.dataTable tr.even.row_selected td {
         {% for entry in subSolutions.forms %}
         {% with obj=entry.obj is_novel=entry.is_novel %}
         {% if not is_novel %}
-            createTable('{{ obj.id|escapejs }}', '',
+            createTable('{{ obj.id|escapejs }}', '{{ aaData|escapejs }}',
                 '',
                 ''
             );

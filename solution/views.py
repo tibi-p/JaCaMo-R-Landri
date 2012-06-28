@@ -14,8 +14,7 @@ from specification import SolutionSpecification
 from validate import Validator
 import json
 import os
-from zipfile import ZipFile
-from zipfile import BadZipfile
+from zipfile import BadZipfile, ZipFile
 
 def get_config_filename(solution):
     basename = 'config_%s.xml' % (solution.id,)
@@ -26,14 +25,11 @@ def get_config_filepath(solution):
     return os.path.join(settings.MEDIA_ROOT, filename)
 
 def get_agent_code_from_zip(filename):
-    
-    print filename
     try:
         with ZipFile(filename, 'r') as zipFile:
             return zipFile.namelist()
     except BadZipfile:
-        return []
-        
+        return [ ]
 
 def tweak_keywords(keywords, attr, defaults):
     queryset = keywords.get(attr, None)
@@ -182,7 +178,7 @@ def index_common(request, postSolution=None, postSubEnv=None, others=False):
                 
             ##FIXME: Make sure this error is treated correctly
             try:
-                agentFiles = get_agent_code_from_zip(solution.agents.file.name)
+                agentFiles = get_agent_code_from_zip(solution.agents.path)
             except IOError:
                 agentFiles = []
                 
@@ -235,11 +231,16 @@ def index_common(request, postSolution=None, postSubEnv=None, others=False):
     }, {
         'choices': [ ],
     })
+    
+    config = get_config_filepath(solution)
+    tableEntries = SolutionSpecification.parseAgentMapping(config)
+    
     return render_to_response('solution/index.html',
         {
             'allSolutions': allSolutions,
             'othersFormset': othersFormset,
             'agentForm': AgentForm(),
+            'aaData': json.dumps(tableEntries),
         },
         context_instance=RequestContext(request))
 
@@ -253,7 +254,8 @@ def handle_solution_form(form, attributes):
     solution = form.save(commit=False)
     fill_object(solution, attributes)
     
-    xml = SolutionSpecification.make_xml([], str(solution.artifacts), str(solution.organizations))
+    # TODO modify to .path & test
+    xml = SolutionSpecification.make_xml(str(solution.artifacts), str(solution.organizations))
     config = get_config_filepath(solution)
     with open(config, "w") as xmlConfigFile:
         xmlConfigFile.write(xml.toprettyxml())
@@ -312,8 +314,18 @@ def change_agent_mapping(request, solutionId):
                 solution = get_solution_or_404(user, id=solutionId)
                 config = get_config_filepath(solution)
                 agents = json.loads(params[u'json'])
+                
+                print "AGENTS", agents
+                Validator.validateAgentMapping(agents)
+                
+                print config
+                with file(config) as f:
+                    print f.read()
                 # TODO server-side validation goes here
                 dom = SolutionSpecification.add_agents_to_xml(config, agents)
+                
+                print dom.toprettyxml()
+                
                 with open(config, "w") as f:
                     f.write(dom.toprettyxml())
                 response = 'ok'
