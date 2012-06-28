@@ -23,6 +23,7 @@ def create_callback_post_delete(field):
     def file_post_delete(sender, instance, **kwargs):
         print 'file_post_delete'
         print 'fpd', getattr(instance, field)
+        # TODO handle errors
         getattr(instance, field).delete(save=False)
 
     return file_post_delete

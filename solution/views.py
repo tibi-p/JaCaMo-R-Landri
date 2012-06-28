@@ -25,14 +25,11 @@ def get_config_filepath(solution):
     return os.path.join(settings.MEDIA_ROOT, filename)
 
 def get_agent_code_from_zip(filename):
-    
-    print filename
     try:
         with ZipFile(filename, 'r') as zipFile:
             return zipFile.namelist()
     except BadZipfile:
-        return []
-        
+        return [ ]
 
 def tweak_keywords(keywords, attr, defaults):
     queryset = keywords.get(attr, None)
@@ -181,7 +178,7 @@ def index_common(request, postSolution=None, postSubEnv=None, others=False):
                 
             ##FIXME: Make sure this error is treated correctly
             try:
-                agentFiles = get_agent_code_from_zip(solution.agents.file.name)
+                agentFiles = get_agent_code_from_zip(solution.agents.path)
             except IOError:
                 agentFiles = []
                 
@@ -252,6 +249,7 @@ def handle_solution_form(form, attributes):
     solution = form.save(commit=False)
     fill_object(solution, attributes)
     
+    # TODO modify to .path & test
     xml = SolutionSpecification.make_xml(str(solution.artifacts), str(solution.organizations))
     config = get_config_filepath(solution)
     with open(config, "w") as xmlConfigFile:
@@ -312,7 +310,7 @@ def change_agent_mapping(request, solutionId):
                 config = get_config_filepath(solution)
                 agents = json.loads(params[u'json'])
                 
-                print "AGENTS",agents
+                print "AGENTS", agents
                 Validator.validateAgentMapping(agents)
                 
                 print config

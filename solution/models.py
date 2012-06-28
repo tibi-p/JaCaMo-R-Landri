@@ -42,9 +42,15 @@ class Solution(models.Model):
         uniArgs = (self.name, agents, artifacts, organizations)
         return '%s (%s, %s, %s)' % uniArgs
 
-for field in [ 'agents', 'artifacts', 'organizations' ]:
-    file_post_save = create_callback_post_save(field)
-    file_post_delete = create_callback_post_delete(field)
+solution_fields = [ 'agents', 'artifacts', 'organizations' ]
+file_post_save = [ ]
+file_post_delete = [ ]
 
-    models.signals.post_save.connect(file_post_save, sender=Solution)
-    models.signals.post_delete.connect(file_post_delete, sender=Solution)
+for field in solution_fields:
+    file_post_save.append(create_callback_post_save(field))
+    file_post_delete.append(create_callback_post_delete(field))
+
+# TODO test some more
+for i in xrange(len(solution_fields)):
+    models.signals.post_save.connect(file_post_save[i], sender=Solution)
+    models.signals.post_delete.connect(file_post_delete[i], sender=Solution)
