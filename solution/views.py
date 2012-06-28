@@ -184,6 +184,10 @@ def index_common(request, postSolution=None, postSubEnv=None, others=False):
                 agentFiles = get_agent_code_from_zip(solution.agents.file.name)
             except IOError:
                 agentFiles = []
+            
+             
+            config = get_config_filepath(solution)
+            tableEntries = SolutionSpecification.parseAgentMapping(config)
                 
             choices = [ (filename, filename) for filename in agentFiles ]
             AgentForm = make_custom_agent_form({
@@ -196,6 +200,7 @@ def index_common(request, postSolution=None, postSubEnv=None, others=False):
                 'agent_form': AgentForm(),
                 'obj': solution,
                 'is_novel': False,
+                'aaData': json.dumps(tableEntries),
             })
 
         if is_post and subEnvironment == postSubEnv:
@@ -234,16 +239,13 @@ def index_common(request, postSolution=None, postSubEnv=None, others=False):
     }, {
         'choices': [ ],
     })
-    
-    config = get_config_filepath(solution)
-    tableEntries = SolutionSpecification.parseAgentMapping(config)
+   
     
     return render_to_response('solution/index.html',
         {
             'allSolutions': allSolutions,
             'othersFormset': othersFormset,
             'agentForm': AgentForm(),
-            'aaData': json.dumps(tableEntries),
         },
         context_instance=RequestContext(request))
 
