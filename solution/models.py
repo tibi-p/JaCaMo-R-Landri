@@ -1,4 +1,3 @@
-from django.conf import settings
 from django.db import models
 from envuser.models import EnvUser
 from home.base import create_callback_post_delete, create_callback_post_save
@@ -12,10 +11,6 @@ def solution_upload_to(instance, filename):
 def get_config_filename(solution):
     basename = 'config_%s.xml' % (solution.id,)
     return solution_upload_to(solution, basename)
-
-def get_config_filepath(solution):
-    filename = get_config_filename(solution)
-    return os.path.join(settings.MEDIA_ROOT, filename)
 
 class SolutionManager(models.Manager):
     def get_sent_by_user_for_env(self, user, subEnvironment):
@@ -51,15 +46,33 @@ class Solution(models.Model):
         uniArgs = (self.name, agents, artifacts, organizations)
         return '%s (%s, %s, %s)' % uniArgs
 
-solution_fields = [ 'agents', 'artifacts', 'organizations' ]
-file_post_save = [ ]
-file_post_delete = [ ]
+    def get_config_filepath(self):
+        from django.core.files.storage import default_storage
+        filename = get_config_filename(self)
+        return default_storage.path(filename)
 
-for field in solution_fields:
-    file_post_save.append(create_callback_post_save(field))
-    file_post_delete.append(create_callback_post_delete(field))
+file_post_saves = [ ]
+file_post_deletes = [ ]
 
-# TODO test some more
-for i in xrange(len(solution_fields)):
-    models.signals.post_save.connect(file_post_save[i], sender=Solution)
-    models.signals.post_delete.connect(file_post_delete[i], sender=Solution)
+for field in [ 'agents', 'artifacts', 'organizations' ]:
+    file_post_saves.append(create_callback_post_save(field))
+    file_post_deletes.append(create_callback_post_delete(field))
+
+# TODO implement me
+def config_post_save(sender, instance, created, **kwargs):
+    pass
+
+def config_post_delete(sender, instance, **kwargs):
+    try:
+        os.remove(instance.get_config_filepath())
+    except OSError, e:
+        # TODO log me
+        print e
+
+for file_post_save in file_post_saves:
+    models.signals.post_save.connect(file_post_save, sender=Solution)
+models.signals.post_save.connect(config_post_save, sender=Solution)
+
+for file_post_delete in file_post_deletes:
+    models.signals.post_delete.connect(file_post_delete, sender=Solution)
+models.signals.post_delete.connect(config_post_delete, sender=Solution)

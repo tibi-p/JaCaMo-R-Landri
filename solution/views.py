@@ -7,7 +7,7 @@ from django.shortcuts import get_object_or_404, render_to_response
 from django.template import RequestContext
 from envuser.models import EnvAgent, EnvUser
 from home.base import fill_object, make_base_custom_formset
-from solution.models import Solution, get_config_filepath
+from solution.models import Solution
 from subenvironment.models import SubEnvironment
 from specification import SolutionSpecification
 from validate import Validator
@@ -180,7 +180,7 @@ def index_common(request, postSolution=None, postSubEnv=None, others=False):
                 'choices': choices,
             })
 
-            config = get_config_filepath(solution)
+            config = solution.get_config_filepath()
             aaData = SolutionSpecification.parseAgentMapping(config)
             rowIds = [ row[0][0] for row in aaData ]
 
@@ -249,7 +249,7 @@ def handle_solution_formset(form, attributes, are_novel=False):
         for solution in solutions:
             # TODO modify to .name & test
             xml = SolutionSpecification.make_xml(str(solution.artifacts), str(solution.organizations))
-            config = get_config_filepath(solution)
+            config = solution.get_config_filepath()
             with open(config, "w") as xmlConfigFile:
                 xmlConfigFile.write(xml.toprettyxml())
     return HttpResponseRedirect(reverse(index))
@@ -260,7 +260,7 @@ def handle_solution_form(form, attributes):
     
     # TODO modify to .path & test
     xml = SolutionSpecification.make_xml(str(solution.artifacts), str(solution.organizations))
-    config = get_config_filepath(solution)
+    config = solution.get_config_filepath()
     with open(config, "w") as xmlConfigFile:
         xmlConfigFile.write(xml.toprettyxml())
     
@@ -294,7 +294,7 @@ def change_agent_mapping(request, solutionId):
         if u'json' in params:
             try:
                 solution = get_solution_or_404(user, id=solutionId)
-                config = get_config_filepath(solution)
+                config = solution.get_config_filepath()
                 agents = json.loads(params[u'json'])
                 
                 print "AGENTS", agents

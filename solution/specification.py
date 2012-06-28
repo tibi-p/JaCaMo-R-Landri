@@ -1,5 +1,4 @@
 from django.core.files.storage import default_storage
-from models import get_config_filepath
 from xml.dom.minidom import Document, parse
 
 class SolutionSpecification(object):
@@ -90,7 +89,7 @@ class SolutionSpecification(object):
 
     @staticmethod
     def parse_repair_xml(solution):
-        config_xml = get_config_filepath(solution)
+        config_xml = solution.get_config_filepath()
         try:
             return SolutionSpecification.parse(config_xml)
         except IOError, e:
