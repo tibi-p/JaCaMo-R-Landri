@@ -1,5 +1,4 @@
 from django import forms
-from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
 from django.forms.models import modelformset_factory
@@ -8,21 +7,13 @@ from django.shortcuts import get_object_or_404, render_to_response
 from django.template import RequestContext
 from envuser.models import EnvAgent, EnvUser
 from home.base import fill_object, make_base_custom_formset
-from solution.models import Solution, solution_upload_to
+from solution.models import Solution, get_config_filepath
 from subenvironment.models import SubEnvironment
 from specification import SolutionSpecification
 from validate import Validator
 import json
 import os
 from zipfile import BadZipfile, ZipFile
-
-def get_config_filename(solution):
-    basename = 'config_%s.xml' % (solution.id,)
-    return solution_upload_to(solution, basename)
-
-def get_config_filepath(solution):
-    filename = get_config_filename(solution)
-    return os.path.join(settings.MEDIA_ROOT, filename)
 
 def get_agent_code_from_zip(filename):
     try:

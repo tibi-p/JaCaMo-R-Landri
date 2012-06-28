@@ -65,7 +65,7 @@ def simulate_post(request, subEnvId):
     return simulate_common(request, targetEnv=subEnvironment)
 
 @login_required
-def simulate_proc(request, procId):
+def simulate_process(request, procId):
     process = AbstractProcess.objects.get(pk=procId)
     return simulate_common(request, abstractProcess=process)
 
@@ -263,16 +263,21 @@ def get_other_solutions(request):
 runningInfo = defaultdict(lambda: { })
 
 @login_required
-def run_simulation(request):
+def run_simulation(request, section):
+    params = request.POST
     user = request.user
     response = 'failure'
 
-    if request.method == 'POST':
-        envUser = get_object_or_404(EnvUser, user=user)
-        subEnvId = request.POST[u'subEnvId']
-        subEnvironment = get_object_or_404(SubEnvironment, id=subEnvId)
-        # TODO AbstractProcess.objects.all().delete()
-        abstractProcess = AbstractProcess(envUser=envUser, subEnvironment=subEnvironment)
+    if request.method == 'POST' and u'solution' in params:
+        solutionFilter = {
+            'id': request.POST[u'solution'],
+        }
+        if not user.is_superuser:
+            solutionFilter['envUser__user'] = user
+        solution = get_object_or_404(Solution, **solutionFilter)
+        # TODO
+        AbstractProcess.objects.all().delete()
+        abstractProcess = AbstractProcess(solution=solution)
         abstractProcess.save()
         '''
         tests = queryOfflineTests(user, subEnvironment)
@@ -288,7 +293,9 @@ def run_simulation(request):
                 break
         #return HttpResponse("ok", mimetype="application/json")
         '''
-        url = reverse(simulate_proc, args=[ abstractProcess.id ])
+        simulate_view = [ section, 'views', 'simulate_process' ]
+        simulate_view = '.'.join(simulate_view)
+        url = reverse(simulate_view, args=[ abstractProcess.id ])
         return HttpResponseRedirect(url)
 
     return HttpResponse(response, mimetype="text/plain")

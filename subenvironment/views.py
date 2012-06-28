@@ -2,6 +2,7 @@ from django import forms
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, render_to_response
 from django.template import RequestContext
+from simulator.models import AbstractProcess
 from solution.models import Solution
 from subenvironment.models import SubEnvironment
 
@@ -23,10 +24,21 @@ def index(request):
 
 @login_required
 def detail(request, subEnvironmentId):
+    subEnvironment = get_object_or_404(SubEnvironment, pk=subEnvironmentId)
+    return detail_common(request, subEnvironment=subEnvironment)
+
+@login_required
+def simulate_process(request, processId):
+    process = get_object_or_404(AbstractProcess, pk=processId)
+    return detail_common(request, abstractProcess=process)
+
+def detail_common(request, subEnvironment=None, abstractProcess=None):
     user = request.user
 
-    subEnvironment = get_object_or_404(SubEnvironment, pk=subEnvironmentId)
-    solutionFilter = { 'subEnvironment': subEnvironmentId }
+    if not subEnvironment and abstractProcess:
+        subEnvironment = abstractProcess.solution.subEnvironment
+
+    solutionFilter = { 'subEnvironment': subEnvironment }
     if not user.is_superuser:
         solutionFilter['envUser__user'] = user
     SolutionSelectorForm = make_solution_selector_form({
@@ -37,5 +49,6 @@ def detail(request, subEnvironmentId):
         {
             'subEnvironment': subEnvironment,
             'form': SolutionSelectorForm(),
+            'abstractProcess': abstractProcess,
         },
         context_instance=RequestContext(request))

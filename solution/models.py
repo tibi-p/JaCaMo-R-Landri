@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.db import models
 from envuser.models import EnvUser
 from home.base import create_callback_post_delete, create_callback_post_save
@@ -7,6 +8,14 @@ import os
 def solution_upload_to(instance, filename):
     pathArgs = (instance.envUser.id, instance.subEnvironment.id, filename)
     return 'users/%s/solutions/%s/%s' % pathArgs
+
+def get_config_filename(solution):
+    basename = 'config_%s.xml' % (solution.id,)
+    return solution_upload_to(solution, basename)
+
+def get_config_filepath(solution):
+    filename = get_config_filename(solution)
+    return os.path.join(settings.MEDIA_ROOT, filename)
 
 class SolutionManager(models.Manager):
     def get_sent_by_user_for_env(self, user, subEnvironment):

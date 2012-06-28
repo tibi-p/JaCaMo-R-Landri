@@ -2,19 +2,18 @@ from django.db.models import F
 from envuser.models import EnvAgent
 from simulator.sandbox import JaCaMoSandbox
 from schedule.models import Schedule
-from solution.models import solution_upload_to
+from solution.specification import SolutionSpecification
 from subenvironment.models import SubEnvironment, DefaultExtra
 from multiprocessing import Pipe, Process
 import os
 import tempfile
-from solution.specification import SolutionSpecification
 
 def runTurn(numSteps):
     for step in xrange(numSteps):
         runStep(step)
     EnvAgent.objects.all().update(timePool=None)
 
-def getSandboxProcess(subenvironment, schedules, usePipe=False):
+def getSandboxProcess(subenvironment, solutions, usePipe=False):
     masArgs = {
         'name': 'subenv_%d' % (subenvironment.pk,),
         'infra': "Centralised",
@@ -27,13 +26,11 @@ def getSandboxProcess(subenvironment, schedules, usePipe=False):
         'artifacts': [ ],
         'orgs': [ ],
     }
-    for schedule in schedules:
-        solution = schedule.solution
+    for solution in solutions:
         envUser = solution.envUser
-        xmlFile = solution_upload_to(solution, 'config.xml')
-        agents, agentFiles, artifactsJar, orgsZip = SolutionSpecification.parse(xmlFile)
+        agents, agentFiles, artifactsJar, orgsZip = SolutionSpecification.parse_repair_xml(solution)
         masArgs['agents'] = agents
-        
+
         solutionFiles['agents'].extend(agentFiles)
         solutionFiles['artifacts'].append(artifactsJar)
         solutionFiles['orgs'].append(orgsZip)

@@ -1,12 +1,10 @@
 from django.db import models
-from envuser.models import EnvUser
-from subenvironment.models import SubEnvironment
+from solution.models import Solution
 
 class AbstractProcess(models.Model):
-    envUser = models.ForeignKey(EnvUser)
-    subEnvironment = models.ForeignKey(SubEnvironment)
+    solution = models.ForeignKey(Solution)
     created = models.DateTimeField(auto_now_add=True)
 
     def __unicode__(self):
-        uniArgs = (self.envUser, self.subEnvironment, self.created)
-        return 'process: user(%s) subenv(%s) created(%s)' % uniArgs
+        uniArgs = (self.envUser, self.solution)
+        return 'process: solution(%s)' % uniArgs
