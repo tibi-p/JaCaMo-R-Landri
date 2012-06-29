@@ -61,34 +61,27 @@ class SolutionSpecification(object):
         dom = parse(xmlFile)
         nodes = dom.getElementsByTagName('asl')
         for node in nodes:
-            print node
-            
             agentId = node.getAttribute('agentId')
-            
+            filename = node.getAttribute('file')
             cardinality = node.getAttribute('cardinality')
-            
             agents.append({
-                'arch' : 'c4jason.CAgentArch',
-                'name' : 'agent_%s' % (agentId,),
-                'no' : cardinality
-                           })
-        
-        node = dom.getElementsByTagName('artifacts')[0]
-        filename = node.getAttribute('file')
-        print filename
-        filename = default_storage.path(filename)
-        print filename
-        artifactsJar = filename
-        
-        node = dom.getElementsByTagName('organizations')[0]
-        filename = node.getAttribute('file')
-        print filename
-        filename = default_storage.path(filename)
-        print filename
-        artifactsJar = filename
-        orgsZip = filename
-            
-        return agents, artifactsJar, orgsZip
+                'arch': 'c4jason.CAgentArch',
+                'name': 'agent_%s' % (agentId,),
+                'code': filename,
+                'no': cardinality,
+            })
+
+        artifacts = None
+        nodes = dom.getElementsByTagName('artifacts')
+        if nodes:
+            artifacts = node_attr_filepath(nodes[0], 'file')
+
+        organizations = None
+        nodes = dom.getElementsByTagName('organizations')
+        if nodes:
+            organizations = node_attr_filepath(nodes[0], 'file')
+
+        return agents, artifacts, organizations
 
     @staticmethod
     def parse_repair_xml(solution):
@@ -102,3 +95,7 @@ class SolutionSpecification(object):
             with open(config_xml, 'w') as f:
                 f.write(dom.toprettyxml())
             return SolutionSpecification.parse(config_xml)
+
+def node_attr_filepath(node, attr):
+    filename = node.getAttribute(attr)
+    return default_storage.path(filename)

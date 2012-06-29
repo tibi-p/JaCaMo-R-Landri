@@ -28,12 +28,14 @@ def getSandboxProcess(subenvironment, solutions, usePipe=False):
     }
     for solution in solutions:
         envUser = solution.envUser
-        agents, artifactsJar, orgsZip = SolutionSpecification.parse_repair_xml(solution)
+        agents, artifacts, orgs = SolutionSpecification.parse_repair_xml(solution)
         masArgs['agents'] = agents
 
         solutionFiles['agents'].append(solution.agents.path)
-        solutionFiles['artifacts'].append(artifactsJar)
-        solutionFiles['orgs'].append(orgsZip)
+        if artifacts:
+            solutionFiles['artifacts'].append(artifacts)
+        if orgs:
+            solutionFiles['orgs'].append(orgs)
 
     conn = None
     args = (subenvironment, solutionFiles, masArgs)

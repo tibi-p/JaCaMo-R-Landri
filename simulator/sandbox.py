@@ -62,9 +62,9 @@ class JaCaMoSandbox(object):
         ags = [ ]
         for agent in agents:
             if 'arch' in agent:
-                agTpl = '\t\t%(name)s agentArchClass %(arch)s #%(no)s;'
+                agTpl = '\t\t%(name)s %(code)s agentArchClass %(arch)s #%(no)s;'
             else:
-                agTpl = '\t\t%(name)s #%(no)s;'
+                agTpl = '\t\t%(name)s %(code)s #%(no)s;'
             ags.append(agTpl % agent)
         ags = '\n'.join(ags)
 
