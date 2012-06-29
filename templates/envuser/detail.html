@@ -41,18 +41,22 @@ td.user-property {
                             'link': '{{ solution.agents.url|escapejs }}',
                         },
                     },
+                    {% if solution.artifacts %}
                     {
                         'data': '{{ solution.artifacts|basename|escapejs }}',
                         'metadata': {
                             'link': '{{ solution.artifacts.url|escapejs }}',
                         },
                     },
+                    {% endif %}
+                    {% if solution.organizations %}
                     {
                         'data': '{{ solution.organizations|basename|escapejs }}',
                         'metadata': {
                             'link': '{{ solution.organizations.url|escapejs }}',
                         },
                     },
+                    {% endif %}
                     {% endfor %}
                     ]
                 },
