@@ -37,9 +37,11 @@
     }
 </script>
 
+<link href="/resources/qtip/jquery.qtip.min.css" rel="stylesheet" type="text/css"//>
 <script src="/resources/jeditable/jquery.jeditable.mini.js" type="text/javascript"></script>
 <script src="/resources/jeditable/jquery.dataTables.editable.js" type="text/javascript"></script>
 <script src="/resources/json/json2.js" type="text/javascript"></script>
+<script src="/resources/qtip/jquery.qtip.min.js" type="text/javascript"></script>
 <script src="/resources/rlandri/util.js" type="text/javascript"></script>
 
 <style type="text/css">
@@ -56,14 +58,18 @@ table.dataTable tr.even.row_selected td {
     {% for subSolutions in allSolutions %}
     {% with subEnvironment=subSolutions.subEnvironment %}
         $("#solution-accordion-{{ subEnvironment.id }}").accordion({
+            animated: 'bounceslide',
             autoHeight: false,
+            navigation: true,
             collapsible: true,
         });
     {% endwith %}
     {% endfor %}
 
         $("#subenv-accordion").accordion({
+            animated: 'bounceslide',
             autoHeight: false,
+            navigation: true,
             collapsible: true,
         });
 
@@ -322,6 +328,29 @@ table.dataTable tr.even.row_selected td {
         {% endwith %}
         {% endfor %}
     {% endfor %}
+
+        var qtipStyle = {
+            classes: 'ui-tooltip-tipsy ui-tooltip-shadow',
+        };
+        $("th.numAgentsCol").qtip({
+            content: {
+                text: 'Click any cell to edit it',
+            },
+            position: {
+                at: 'top center',
+                my: 'bottom left',
+            },
+            style: qtipStyle,
+        });
+        $("td.numAgentsCol").qtip({
+            content: {
+                text: 'Click the cell to edit it',
+            },
+            position: {
+                at: 'bottom center',
+            },
+            style: qtipStyle,
+        });
     });
 </script>
 

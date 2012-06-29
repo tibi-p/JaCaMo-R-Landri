@@ -104,7 +104,6 @@
                     var delta = $.validator.format(tpl, data);
                     return oldhtml + delta;
                 });
-                console.log(data);
             });
             socket.connect();
         } catch (e) {
@@ -159,8 +158,7 @@
                 {{ subEnvironment }}
             </a>
         </h3>
-        <div id='div-process-{{ procId|escapejs }}'>
-            Trollare
+        <div id='div-process-{{ abstractProcess.id|escapejs }}'>
         </div>
     </div>
     {% endif %}
