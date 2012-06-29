@@ -295,21 +295,11 @@ def change_agent_mapping(request, solutionId):
                 solution = get_solution_or_404(user, id=solutionId)
                 config = solution.get_config_filepath()
                 agents = json.loads(params[u'json'])
-                
-                print "AGENTS", agents
                 Validator.validateAgentMapping(agents)
-                
-                print config
-                with file(config) as f:
-                    print f.read()
                 # TODO server-side validation goes here
                 # also check IDs!!
-                dom = SolutionSpecification.add_agents_to_xml(config, agents)
-                
-                print dom.toprettyxml()
-                
-                with open(config, "w") as f:
-                    f.write(dom.toprettyxml())
+                tree = SolutionSpecification.add_agents_to_xml(config, agents)
+                tree.write(config)
                 response = 'ok'
             except ValueError, e:
                 response = str(e)

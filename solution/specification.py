@@ -1,26 +1,25 @@
 from django.core.files.storage import default_storage
 from xml.dom.minidom import Document, parse
+from xml.etree.cElementTree import ElementTree, SubElement
 
 class SolutionSpecification(object):
 
     @staticmethod
-    def add_agents_to_xml(xmlFile, asl_list):
-        doc = parse(xmlFile)
-        
-        root = doc.getElementsByTagName("solution")[0]
-        old = root.getElementsByTagName("asl-list")
-        if old:
-            doc.documentElement.removeChild(old[0])
-        node = doc.createElement('asl-list')
-        
-        for dic in asl_list:
-            agentNode = doc.createElement('asl')
-            for key, value in dic.iteritems():
-                agentNode.setAttribute(key, value)
-            node.appendChild(agentNode)
-        root.appendChild(node)
-        
-        return doc
+    def add_agents_to_xml(config_xml, asl_list):
+        tree = ElementTree()
+        tree.parse(config_xml)
+
+        root = tree.getroot()
+        nodes = root.findall('asl-list')
+        for node in nodes:
+            root.remove(node)
+        node = SubElement(root, 'asl-list')
+        for entry in asl_list:
+            agentNode = SubElement(node, 'asl')
+            for key, value in entry.iteritems():
+                agentNode.attrib[key] = value
+
+        return tree
 
     #Generate XML file from object
     @staticmethod
