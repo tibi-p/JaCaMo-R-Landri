@@ -24,10 +24,11 @@ public class Coordinator extends Artifact {
 			System.err.println("Parse exception for mas2j file");
 		}*/
 	}
-	
-	@OPERATION
-	void startSubenv(){
-		if(getOpUserName().equals("prime_agent")) signal("startSubenv");
-	}
-}
 
+	@OPERATION
+	void startSubenv() {
+		if (getOpUserName().equals("prime_agent_s_generic"))
+			signal("startSubenv");
+	}
+
+}
