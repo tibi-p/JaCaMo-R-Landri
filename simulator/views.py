@@ -15,7 +15,7 @@ from collections import defaultdict
 
 @login_required
 def run(request):
-    runTurn(5)
+    runTurn(10)
     subEnvironmentList = SubEnvironment.objects.all()
     return render_to_response('simulator/run.html',
         { },
@@ -53,6 +53,7 @@ def make_base_schedule_formset(queryset):
 
     return BaseScheduleFormSet
 
+@login_required
 def schedule(request):
     user = request.user
 

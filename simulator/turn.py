@@ -11,7 +11,13 @@ import tempfile
 def runTurn(numSteps):
     for step in xrange(numSteps):
         runStep(step)
-    EnvAgent.objects.all().update(timePool=None)
+    defaultValue = None
+    for field in EnvAgent._meta.fields:
+        if field.name == 'timePool':
+            defaultValue = field.default
+            break
+    if defaultValue is not None:
+        EnvAgent.objects.all().update(timePool=defaultValue)
 
 def getSandboxProcess(subenvironment, solutions, usePipe=False):
     masArgs = {
@@ -26,16 +32,18 @@ def getSandboxProcess(subenvironment, solutions, usePipe=False):
         'artifacts': [ ],
         'orgs': [ ],
     }
+    specs = [ ]
     for solution in solutions:
         envUser = solution.envUser
         agents, artifacts, orgs = SolutionSpecification.parse_repair_xml(solution)
-        masArgs['agents'] = agents
+        specs.append(agents)
 
         solutionFiles['agents'].append(solution.agents.path)
         if artifacts:
             solutionFiles['artifacts'].append(artifacts)
         if orgs:
             solutionFiles['orgs'].append(orgs)
+    masArgs['agents'] = [ elem for row in specs for elem in row ]
 
     conn = None
     args = (subenvironment, solutionFiles, masArgs)
@@ -51,8 +59,7 @@ def runStep(step):
             'step': step,
         })
         if canRunSubEnvironment(subEnvironment, schedules):
-            print step, subEnvironment, schedules, schedules.get_solutions()
-            process, _ = getSandboxProcess(subEnvironment, schedules)
+            process, _ = getSandboxProcess(subEnvironment, schedules.get_solutions())
             for envUser in schedules.get_envusers():
                 for envAgent in envUser.envagent_set.all():
                     envAgent.timePool = F('timePool') - 1
@@ -76,8 +83,8 @@ def runInSandbox(subenvironment, solutionFiles, masArgs, pipe=None):
     sandbox.ant(pipe)
     sandbox.clean()
 
-def canRunSubEnvironment(subEnvironment, tests):
-    return sum(test.numAgents for test in tests) >= 1
+def canRunSubEnvironment(subEnvironment, schedules):
+    return schedules.count() > 0
 
 def getPathList(subenvironment, key_set):
     queryset = getattr(subenvironment, key_set).all()
