@@ -1,0 +1,1 @@
+<solution><asl-list><asl agentId="3" cardinality="2" file="companyD.asl" /><asl agentId="5" cardinality="1" file="companyB.asl" /><asl agentId="4" cardinality="1" file="giacomo.asl" /></asl-list></solution>
