@@ -26,9 +26,14 @@ import org.apache.log4j.*;
  */
 public class SubenvLogger extends Artifact {
 	/*
-	 * @cache: keep a mapping between agents and output
+	 * @cache: Keep a mapping between agents and output
 	 * 			streams towards a file so we don't reopen
 	 * 			files every time we want to write the logs
+	 * 
+	 * @subEnvName: The name of the subenvironment that
+	 * 				will be logged
+	 * 
+	 * @homeFolder: The folder where the logs will be put.
 	 */
 	HashMap<String, Logger> loggers;
 	ArrayList<String> override;
