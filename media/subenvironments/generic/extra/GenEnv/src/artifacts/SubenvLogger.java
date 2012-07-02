@@ -1,14 +1,19 @@
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.FilenameFilter;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Properties;
 
 import cartago.Artifact;
 import cartago.OPERATION;
@@ -27,9 +32,22 @@ public class SubenvLogger extends Artifact {
 	 */
 	HashMap<String, Logger> loggers;
 	ArrayList<String> override;
-	String subEnvName;
+	String subEnvName, homeFolder;
 	
 	public void init(){
+		Properties prop = new Properties();
+		
+		try {
+			prop.load(new FileInputStream("config.properties"));
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+			return;
+		} catch (IOException e) {
+			e.printStackTrace();
+			return;
+		}
+		
+		homeFolder = prop.getProperty("django_directory");
 		loggers = new HashMap<String, Logger>();
 		override = new ArrayList<String>();
 		//find the mas2jFile to extract the subenvironment name
@@ -90,9 +108,8 @@ public class SubenvLogger extends Artifact {
 			return loggers.get(agent);
 		}
 		else{
-			File agDir = new File ("media/agents/" + agentBaseName);
-			/* FIXME temporary trick to make the home dir in the tmp folders */
-			if(!agDir.exists()) agDir.mkdirs(); //make the agent's home directory
+			File agDir = new File (homeFolder + "/" + agentBaseName);
+			if(!agDir.exists()) agDir.mkdir(); //make the agent's home directory if it doesn't exist
 			
 			Date date = Calendar.getInstance().getTime();
 			DateFormat day = new SimpleDateFormat("dd-MM-yy");
