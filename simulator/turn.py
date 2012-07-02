@@ -5,14 +5,13 @@ from schedule.models import Schedule
 from solution.specification import SolutionSpecification
 from subenvironment.models import SubEnvironment, DefaultExtra
 from multiprocessing import Pipe, Process
-import os
 import tempfile
 
 def runTurn(numSteps):
     for step in xrange(numSteps):
         runStep(step)
     defaultValue = None
-    for field in EnvAgent._meta.fields:
+    for field in EnvAgent._meta.fields: #@UndefinedVariable
         if field.name == 'timePool':
             defaultValue = field.default
             break
