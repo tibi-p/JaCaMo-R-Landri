@@ -296,10 +296,11 @@ table.dataTable tr.even.row_selected td {
                         if (j == 0)
                             entry[key] = row.id;
                         else
-                            entry[key] = cells[j].innerText;
+                            entry[key] = cells[j].innerHTML;
                     }
                     agents.push(entry);
                 }
+                console.log(agents);
                 var url = '{% url 'solution.views.change_agent_mapping' 0 %}';
                 url = url.replace('0/', solutionId + '/');
                 $.post(url, {
