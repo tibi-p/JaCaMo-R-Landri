@@ -65,7 +65,7 @@ class SolutionSpecification(object):
             cardinality = node.getAttribute('cardinality')
             agents.append({
                 'arch': 'c4jason.CAgentArch',
-                'name': 'agent_%s' % (agentId,),
+                'name': 'agent_%s_' % (agentId,),
                 'code': filename,
                 'no': cardinality,
             })

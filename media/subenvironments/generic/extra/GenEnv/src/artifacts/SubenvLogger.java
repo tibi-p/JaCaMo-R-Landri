@@ -75,36 +75,29 @@ public class SubenvLogger extends Artifact {
 		 * 					e.g.: "Rambo4 -> 'Rambo'
 		 * 					Used to identify clones
 		 */
-		String agentBaseName;
-		
-		if(Character.isDigit(agent.charAt(agent.length() - 1))){
-			/*
-			 * if agent's name ends in a number, remove that number
-			 * to form the base name
-			 */
-			int index = agent.length() - 2;
-			
-			while(Character.isDigit(agent.charAt(index))){
-				index--;
-			}
-			
-			agentBaseName = agent.substring(0, index + 1);
+		int pos = agent.lastIndexOf('_');
+		if (pos < 1) {
+			String msg = "The agent name does not respect the required format";
+			throw new IllegalArgumentException(msg);
 		}
-		else{
-			agentBaseName = agent;
+
+		String agentBaseName = agent.substring(0, pos);
+		// Remove final underscore if cardinality is 1
+		if (pos == agent.length() - 1)
+			agent = agentBaseName;
+
+		if (loggers.containsKey(agent)) {
+			return loggers.get(agent);
 		}
-		
-		if(loggers.containsKey(agent)) return loggers.get(agent);
 		else{
 			File agDir = new File ("media/agents/" + agentBaseName);
-			/*temporary trick to make the home dir in the tmp folders*/
+			/* FIXME temporary trick to make the home dir in the tmp folders */
 			if(!agDir.exists()) agDir.mkdirs(); //make the agent's home directory
 			
 			Date date = Calendar.getInstance().getTime();
 			DateFormat day = new SimpleDateFormat("dd-MM-yy");
 			
 			File agLog = new File(agDir.getAbsolutePath() + "/" + subEnvName + "_" + day.format(date) + ".log"); //the log for that day
-			System.out.println(agLog.getAbsolutePath());
 			if(!agLog.exists()){ //make sure file exists 
 				try {
 					agLog.createNewFile();
