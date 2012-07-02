@@ -38,8 +38,8 @@ public class SubenvLogger extends Artifact {
 				return name.endsWith("mas2j");
 			}
 		})[0];
-
 		subEnvName = mas2jFile.substring(mas2jFile.lastIndexOf('_') + 1, mas2jFile.length() - 6);
+		
 	}
 	
 	@OPERATION
@@ -97,12 +97,14 @@ public class SubenvLogger extends Artifact {
 		if(loggers.containsKey(agent)) return loggers.get(agent);
 		else{
 			File agDir = new File ("media/agents/" + agentBaseName);
-			if(!agDir.exists()) agDir.mkdir(); //make the agent's home directory
+			/*temporary trick to make the home dir in the tmp folders*/
+			if(!agDir.exists()) agDir.mkdirs(); //make the agent's home directory
 			
 			Date date = Calendar.getInstance().getTime();
 			DateFormat day = new SimpleDateFormat("dd-MM-yy");
 			
 			File agLog = new File(agDir.getAbsolutePath() + "/" + subEnvName + "_" + day.format(date) + ".log"); //the log for that day
+			System.out.println(agLog.getAbsolutePath());
 			if(!agLog.exists()){ //make sure file exists 
 				try {
 					agLog.createNewFile();
