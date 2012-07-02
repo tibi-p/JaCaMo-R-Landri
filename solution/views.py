@@ -52,6 +52,12 @@ def validate_artifacts(artifacts, userID):
             raise forms.ValidationError(error_msg)
     return artifacts
 
+def validate_agents(agents,userID):
+    if not Validator.validateAgentZip(agents, userID):
+        error_msg = "Should upload a valid .zip with agents"
+        raise forms.ValidationError(error_msg)
+    return agents
+
 def make_solution_form(envUser, subEnvKwArgs={ }):
     description_widget = forms.Textarea({
         'rows': 5,
@@ -64,6 +70,10 @@ def make_solution_form(envUser, subEnvKwArgs={ }):
             def clean_artifacts(self):
                 artifacts = self.cleaned_data['artifacts']
                 return validate_artifacts(artifacts, envUser.id)
+            
+            def clean_agents(self):
+                agents = self.cleaned_data['agents']
+                return validate_agents(agents,envUser.id)
 
             class Meta:
                 model = Solution
@@ -79,6 +89,10 @@ def make_solution_form(envUser, subEnvKwArgs={ }):
             def clean_artifacts(self):
                 artifacts = self.cleaned_data['artifacts']
                 return validate_artifacts(artifacts, envUser.id)
+            
+            def clean_agents(self):
+                agents = self.cleaned_data['agents']
+                return validate_agents(agents,envUser.id)
 
             class Meta:
                 model = Solution

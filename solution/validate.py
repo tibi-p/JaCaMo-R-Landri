@@ -30,3 +30,16 @@ class Validator(object):
         except BadZipfile:
             return False
         return True
+   
+    
+    @staticmethod
+    def validateAgentZip(agentZip,userID):
+        try:
+            with ZipFile(agentZip,'r') as zipFile:
+                for name in zipFile.namelist():
+                    if not name.endswith('_'+str(userID)+'.asl'):
+                        return False
+        except BadZipfile:
+            return False
+        return True
+    
