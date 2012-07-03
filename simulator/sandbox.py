@@ -19,12 +19,19 @@ def absposixpath(filename):
         filename = filename.replace(os.sep, os.altsep)
     return filename
 
-def checkExtension(filename, ext):
+def get_extension(filename):
     if os.path.isfile(filename):
         extPair = os.path.splitext(filename)
-        return extPair[1] == ('.%s' % ext)
+        return extPair[1]
     else:
-        return False
+        return None
+
+def extension_eq(file_ext, ext):
+    return file_ext == ('.%s' % (ext,))
+
+def checkExtension(filename, ext):
+    file_ext = get_extension(filename)
+    return extension_eq(file_ext, ext)
 
 def filterListDir(directory, ext):
     files = os.listdir(directory)
@@ -33,6 +40,7 @@ def filterListDir(directory, ext):
 
 def transferFiles(files, directory):
     for source in files:
+        file_ext = get_extension(source)
         if checkExtension(source, 'zip'):
             with ZipFile(source) as f:
                 names = [ name for name in f.namelist() if
@@ -47,6 +55,15 @@ class JaCaMoSandbox(object):
         self.root = root
 
     def populate(self, solutionFiles, subenvFiles):
+        libraries = filterListDir(os.path.join('lib', 'rlandri'), 'jar')
+        subprocess.call([
+            "java",
+            "-classpath",
+            os.pathsep.join(libraries),
+            "org.aria.rlandri.tools.JaCaMoConfig",
+            self.root,
+        ])
+
         for dirname, filelist in solutionFiles.iteritems():
             directory = os.path.join(self.root, 'src', dirname)
             silent_md(os.makedirs, directory)
