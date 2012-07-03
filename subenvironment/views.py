@@ -9,6 +9,7 @@ from subenvironment.models import SubEnvironment
 def make_solution_selector_form(solutionArgs={ }):
     if solutionArgs.get('queryset', None) is None:
         solutionArgs['queryset'] = Solution.objects.all()
+    solutionArgs['empty_label'] = None
 
     class SolutionSelectorForm(forms.Form):
         solution = forms.ModelChoiceField(**solutionArgs)
