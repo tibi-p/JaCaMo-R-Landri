@@ -7,8 +7,10 @@ from solution.models import Solution
 from subenvironment.models import SubEnvironment
 
 def make_solution_selector_form(solutionArgs={ }):
+    # TODO use not in instead... check other places too
     if solutionArgs.get('queryset', None) is None:
         solutionArgs['queryset'] = Solution.objects.all()
+    # TODO fix me using is None
     solutionArgs['empty_label'] = None
 
     class SolutionSelectorForm(forms.Form):
