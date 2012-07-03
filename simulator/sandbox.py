@@ -29,19 +29,23 @@ def get_extension(filename):
 def extension_eq(file_ext, ext):
     return file_ext == ('.%s' % (ext,))
 
-def checkExtension(filename, ext):
+def has_extension(filename, ext):
     file_ext = get_extension(filename)
     return extension_eq(file_ext, ext)
 
-def filterListDir(directory, ext):
+def filter_listdir(directory, ext):
     files = os.listdir(directory)
     files = map(functools.partial(os.path.join, directory), files)
-    return filter(functools.partial(checkExtension, ext=ext), files)
+    return filter(functools.partial(has_extension, ext=ext), files)
 
 def transferFiles(files, directory):
+    libraries = [ ]
+
     for source in files:
         file_ext = get_extension(source)
-        if checkExtension(source, 'zip'):
+        if extension_eq(file_ext, 'jar'):
+            libraries.append(source)
+        elif extension_eq(file_ext, 'zip'):
             with ZipFile(source) as f:
                 names = [ name for name in f.namelist() if
                     not os.path.isabs(name) and os.pardir not in name ]
@@ -50,12 +54,21 @@ def transferFiles(files, directory):
             dest = os.path.join(directory, os.path.basename(source))
             shutil.copyfile(source, os.path.join(dest))
 
+    return libraries
+
 class JaCaMoSandbox(object):
     def __init__(self, root):
         self.root = root
+        self.libs = filter_listdir(os.path.join('lib', 'jacamo'), 'jar')
+
+    def handle_filelist(self, dirname, filelist):
+        directory = os.path.join(self.root, 'src', dirname)
+        silent_md(os.makedirs, directory)
+        libs = transferFiles(filelist, directory)
+        self.libs.extend(libs)
 
     def populate(self, solutionFiles, subenvFiles):
-        libraries = filterListDir(os.path.join('lib', 'rlandri'), 'jar')
+        libraries = filter_listdir(os.path.join('lib', 'rlandri'), 'jar')
         subprocess.call([
             "java",
             "-classpath",
@@ -65,14 +78,10 @@ class JaCaMoSandbox(object):
         ])
 
         for dirname, filelist in solutionFiles.iteritems():
-            directory = os.path.join(self.root, 'src', dirname)
-            silent_md(os.makedirs, directory)
-            transferFiles(filelist, directory)
+            self.handle_filelist(dirname, filelist)
 
         for dirname, filelist in subenvFiles.iteritems():
-            directory = os.path.join(self.root, 'src', dirname)
-            silent_md(os.makedirs, directory)
-            transferFiles(filelist, directory)
+            self.handle_filelist(dirname, filelist)
 
     def writeMAS(self, name, infra, env, agents):
         # create agents string
@@ -86,8 +95,7 @@ class JaCaMoSandbox(object):
         ags = '\n'.join(ags)
 
         # create classpath string
-        libs = filterListDir(os.path.join('lib', 'jacamo'), 'jar')
-        path = '\n'.join('\t\t"%s";' % (absposixpath(lib),) for lib in libs)
+        path = '\n'.join('\t\t"%s";' % (absposixpath(lib),) for lib in self.libs)
 
         #template filling
         with open("templates/template.mas2j") as f:
@@ -101,17 +109,16 @@ class JaCaMoSandbox(object):
 
     def buildMAS(self, name):
         path = os.path.join(self.root, name)
-        libraries = filterListDir(os.path.join('lib', 'jacamo'), 'jar')
         subprocess.call([
             "java",
             "-classpath",
-            os.pathsep.join(libraries),
+            os.pathsep.join(self.libs),
             "jason.mas2j.parser.mas2j",
             path,
         ])
 
     def ant(self, pipe):
-        libraries = filterListDir(os.path.join('lib', 'ant'), 'jar')
+        libraries = filter_listdir(os.path.join('lib', 'ant'), 'jar')
         popenArgs = { }
         if pipe is not None:
             popenArgs['stdout'] = subprocess.PIPE
@@ -139,5 +146,5 @@ class JaCaMoSandbox(object):
         shutil.rmtree(os.path.join(self.root, 'bin'), True)
         for filename in os.listdir(self.root):
             relfile = os.path.join(self.root, filename)
-            if checkExtension(relfile, 'mas2j'):
+            if has_extension(relfile, 'mas2j'):
                 os.remove(relfile)
