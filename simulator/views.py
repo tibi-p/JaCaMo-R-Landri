@@ -98,6 +98,7 @@ def run_simulation(request, section):
         if not user.is_superuser:
             solutionFilter['envUser__user'] = user
         solution = get_object_or_404(Solution, **solutionFilter)
+        
         # TODO
         AbstractProcess.objects.all().delete()
         abstractProcess = AbstractProcess(solution=solution)

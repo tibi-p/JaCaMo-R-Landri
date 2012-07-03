@@ -12,6 +12,9 @@ def make_solution_selector_form(solutionArgs={ }):
         solutionArgs['queryset'] = Solution.objects.all()
     # TODO fix me using is None
     solutionArgs['empty_label'] = None
+    
+    if len(solutionArgs['queryset']) == 0:
+        return None
 
     class SolutionSelectorForm(forms.Form):
         solution = forms.ModelChoiceField(**solutionArgs)
@@ -37,7 +40,7 @@ def simulate_process(request, processId):
 
 def detail_common(request, subEnvironment=None, abstractProcess=None):
     user = request.user
-
+    
     if not subEnvironment and abstractProcess:
         subEnvironment = abstractProcess.solution.subEnvironment
 
@@ -47,11 +50,14 @@ def detail_common(request, subEnvironment=None, abstractProcess=None):
     SolutionSelectorForm = make_solution_selector_form({
         'queryset': Solution.objects.filter(**solutionFilter),
     });
-
+    if SolutionSelectorForm:
+        solutionForm = SolutionSelectorForm()
+    else:
+        solutionForm = None
     return render_to_response('subenvironment/detail.html',
-        {
-            'subEnvironment': subEnvironment,
-            'form': SolutionSelectorForm(),
-            'abstractProcess': abstractProcess,
-        },
-        context_instance=RequestContext(request))
+           {
+               'subEnvironment': subEnvironment,
+               'form': solutionForm,
+               'abstractProcess': abstractProcess,
+           },
+           context_instance=RequestContext(request))
