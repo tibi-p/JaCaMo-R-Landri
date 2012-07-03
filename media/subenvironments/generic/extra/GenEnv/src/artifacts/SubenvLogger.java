@@ -25,6 +25,9 @@ import org.apache.log4j.*;
  *
  */
 public class SubenvLogger extends Artifact {
+
+	public static final String LOG_REL_PATH = "media/agents";
+
 	/*
 	 * @cache: Keep a mapping between agents and output
 	 * 			streams towards a file so we don't reopen
@@ -33,26 +36,25 @@ public class SubenvLogger extends Artifact {
 	 * @subEnvName: The name of the subenvironment that
 	 * 				will be logged
 	 * 
-	 * @homeFolder: The folder where the logs will be put.
+	 * @logDirectory: The folder where the logs will be put.
 	 */
 	HashMap<String, Logger> loggers;
 	ArrayList<String> override;
-	String subEnvName, homeFolder;
-	
+	String subEnvName;
+	File logDirectory = new File(".");
+
 	public void init(){
-		Properties prop = new Properties();
-		
 		try {
+			Properties prop = new Properties();
 			prop.load(new FileInputStream("config.properties"));
+			String djangoDirectory = prop.getProperty("django_directory");
+			logDirectory = new File(djangoDirectory, LOG_REL_PATH);
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
-			return;
 		} catch (IOException e) {
 			e.printStackTrace();
-			return;
 		}
-		
-		homeFolder = prop.getProperty("django_directory");
+
 		loggers = new HashMap<String, Logger>();
 		override = new ArrayList<String>();
 		//find the mas2jFile to extract the subenvironment name
@@ -62,7 +64,6 @@ public class SubenvLogger extends Artifact {
 			}
 		})[0];
 		subEnvName = mas2jFile.substring(mas2jFile.lastIndexOf('_') + 1, mas2jFile.length() - 6);
-		
 	}
 	
 	@OPERATION
@@ -112,14 +113,16 @@ public class SubenvLogger extends Artifact {
 		if (loggers.containsKey(agent)) {
 			return loggers.get(agent);
 		}
-		else{
-			File agDir = new File (homeFolder + "/" + agentBaseName);
+		else {
+			File agDir = new File(logDirectory, agentBaseName);
 			if(!agDir.exists()) agDir.mkdir(); //make the agent's home directory if it doesn't exist
 			
 			Date date = Calendar.getInstance().getTime();
 			DateFormat day = new SimpleDateFormat("dd-MM-yy");
-			
-			File agLog = new File(agDir.getAbsolutePath() + "/" + subEnvName + "_" + day.format(date) + ".log"); //the log for that day
+
+			// the log for that day
+			File agLog = new File(agDir, subEnvName + "_" + day.format(date)
+					+ ".log");
 			if(!agLog.exists()){ //make sure file exists 
 				try {
 					agLog.createNewFile();
