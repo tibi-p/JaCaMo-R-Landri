@@ -143,6 +143,7 @@
         </div>
     {% endif %}
     <br>
+    {% if form %}
     <form action="{% url 'simulator.views.run_simulation' 'subenvironment' %}" method="post">
     {% csrf_token %}
         <table>
@@ -150,7 +151,8 @@
         </table>
         <input type="submit" value="Simulate" />
     </form>
-
+	{% endif %}
+	
     {% if abstractProcess %}
     <div id="simulation-accordion">
         <h3>
