@@ -5,6 +5,7 @@ MAS $name {
 	environment: $env
 
 	agents:
+		prime_agent_s_generic agentArchClass c4jason.CAgentArch;
 $ags
 
 	classpath:

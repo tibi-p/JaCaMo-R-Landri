@@ -22,7 +22,6 @@ def home_context_processor(request):
     if not is_superuser:
         sections.append(SiteSection('Solutions', 'solution.views.index', '#5a69a9'))
     sections.append(SiteSection('Ranking', 'envuser.views.index', '#c26468'))
-    sections.append(SiteSection('Simulator', 'simulator.views.simulate', '#bf7cc7'))
     sections.append(SiteSection('Schedule', 'simulator.views.schedule', '#bf7cc7'))
     sections.append(SiteSection('SubEnvironment', 'subenvironment.views.index', '#bf7cc7'))
     sections.append(SiteSection('Trolling', 'simulator.views.run', '#bf7cc7'))

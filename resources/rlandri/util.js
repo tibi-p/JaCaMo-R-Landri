@@ -1,4 +1,18 @@
 rlandri.util = {
+    getClickHandler: function (selector, index) {
+        var index = index || 0;
+        var events = $(selector).data('events');
+        if (events) {
+            var clickEvents = events.click;
+            if (clickEvents.length > 0) {
+                var clickEvent = clickEvents[0];
+                if (clickEvent)
+                    return clickEvent;
+            }
+        }
+        return null;
+    },
+
     parseJSON: function (data, defValue) {
         var obj = defValue;
         try {
@@ -10,26 +24,6 @@ rlandri.util = {
         return obj;
     },
 
-    constructPrimaryMap: function (dataArr) {
-        var dataMap = { };
-        for (var i in dataArr) {
-            data = dataArr[i];
-            dataMap[data.pk] = data;
-        }
-        return dataMap;
-    },
-
-    getModelField: function (obj, key) {
-        var value;
-        if (obj) {
-            var fields = obj.fields;
-            if (fields) {
-                value = fields[key];
-            }
-        }
-        return value;
-    },
-
     trimSuffix: function (str, suffix) {
         var index = str.lastIndexOf(suffix);
         if (index >= 0)
@@ -37,4 +31,30 @@ rlandri.util = {
         else
             return '';
     },
+
+    AttrIndexManager: function (attr) {
+        this.names = { };
+        this.maxIndex = 0;
+        this.attr = attr;
+    },
 };
+
+rlandri.util.AttrIndexManager.prototype.updateAttr = function (elem) {
+    var name = elem.name;
+    var index;
+    if (name in this.names) {
+        index = this.names[name];
+    } else {
+        index = this.maxIndex;
+        this.names[name] = this.maxIndex;
+        this.maxIndex++;
+    }
+    elem.setAttribute(this.attr, index);
+}
+
+rlandri.util.AttrIndexManager.prototype.updateObj = function ($obj) {
+    var manager = this;
+    $obj.each(function () {
+        manager.updateAttr(this);
+    });
+}
