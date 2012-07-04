@@ -4,10 +4,353 @@
 
 {% block extrastyle %}
 
+<style type="text/css">
+.offline-test-formtable {
+    display: none;
+}
+.ui-icon {
+    display: block;
+    text-indent: -99999px;
+    overflow: hidden;
+    background-repeat: no-repeat;
+    background-image: url(resources/img/ui-icons_888888_256x240.png);
+}
+.ui-icon-plus {
+    background-position: -16px -128px;
+}
+.ui-icon-trash {
+    background-position: -176px -96px;
+}
+</style>
+
+<link href="http://ajax.aspnetcdn.com/ajax/jquery.dataTables/1.9.1/css/jquery.dataTables.css" rel="stylesheet" type="text/css"//>
+<link href="http://ajax.aspnetcdn.com/ajax/jquery.dataTables/1.9.1/css/jquery.dataTables_themeroller.css" rel="stylesheet" type="text/css"//>
+<script src="http://ajax.aspnetcdn.com/ajax/jquery.dataTables/1.9.1/jquery.dataTables.min.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+    if (typeof $(document).dataTable === 'undefined') {
+        console.log('DataTables joins operation CDN fallback!');
+        var ds = rlandri.dynamic_scripts;
+        ds.addCSS(ds.dir + 'css/jquery.dataTables.css');
+        ds.addCSS(ds.dir + 'css/jquery.dataTables_themeroller.css');
+        ds.addJavascript(ds.dir + 'js/jquery.dataTables.min.js');
+    }
+</script>
+
+<link href="/resources/qtip/jquery.qtip.min.css" rel="stylesheet" type="text/css"//>
+<script src="/resources/jeditable/jquery.jeditable.mini.js" type="text/javascript"></script>
+<script src="/resources/jeditable/jquery.dataTables.editable.js" type="text/javascript"></script>
+<script src="/resources/json/json2.js" type="text/javascript"></script>
+<script src="/resources/qtip/jquery.qtip.min.js" type="text/javascript"></script>
+<script src="/resources/rlandri/util.js" type="text/javascript"></script>
+
+<style type="text/css">
+table.dataTable tr.odd.row_selected td {
+    background-color: #9FAFD1;
+}
+table.dataTable tr.even.row_selected td {
+    background-color: #9FAFD1;
+}
+</style>
+
 <script type="text/javascript">
     $(function () {
-        $("#solution-accordion").accordion({
+    {% for subSolutions in allSolutions %}
+    {% with subEnvironment=subSolutions.subEnvironment %}
+        $("#solution-accordion-{{ subEnvironment.id }}").accordion({
+            animated: 'bounceslide',
             autoHeight: false,
+            navigation: true,
+            collapsible: true,
+        });
+    {% endwith %}
+    {% endfor %}
+
+        $("#subenv-accordion").accordion({
+            animated: 'bounceslide',
+            autoHeight: false,
+            navigation: true,
+            collapsible: true,
+        });
+
+       {% for subSolutions in allSolutions %}
+       {% with subEnvironment=subSolutions.subEnvironment %}
+       {% for entry in subSolutions.forms %}
+       {% with form=entry.form obj=entry.obj is_novel=entry.is_novel %}
+       {% if not is_novel %}
+       (function () {
+         var $dialog = $('<div></div>')
+			.dialog({
+				autoOpen: false,
+				modal: true,
+				title: 'Are you sure you want to delete this solution?',
+				buttons: [
+				{
+					text: "No",
+					click: function() { $(this).dialog("close");},
+				},
+				{
+					text: "Yes",
+					click: function() {$.post("{% url 'solution.views.index_remove' obj.id %}");
+						console.log("{% url 'solution.views.index_remove' obj.id %}");
+						$(this).dialog("close");
+						window.location.reload();
+					},
+				}]
+			});
+
+		$('#delete-{{obj.id}}').click(function() {
+			$dialog.dialog('open');
+			// prevent the default action, e.g., following a link
+			return false;
+		});
+		})();
+
+		{% endif %}
+		{% endwith %}
+		{% endfor %}
+		{% endwith %}
+        {% endfor %}
+        
+    });
+
+    $(document).ready(function () {
+        var solutions = [
+        {% for subSolutions in allSolutions %}
+            {% for entry in subSolutions.forms %}
+            {% with obj=entry.obj is_novel=entry.is_novel %}
+            {% if not is_novel %}
+                {{ obj.id }},
+            {% endif %}
+            {% endwith %}
+            {% endfor %}
+        {% endfor %}
+        ];
+        var addFormTpl = '#add-new-row-form-{0}';
+        var addFormSelector = 'select, input';
+        for (var i in solutions) {
+            var solutionId = solutions[i];
+            var addFormId = $.validator.format(addFormTpl, solutionId);
+            var manager = new rlandri.util.AttrIndexManager('rel');
+            manager.updateObj($(addFormId).find(addFormSelector));
+        }
+
+        function createTable(solutionId, aaData, cellIds, rowIds) {
+            aaData = rlandri.util.parseJSON(aaData, [ ]);
+            cellIds = rlandri.util.parseJSON(cellIds, [ ]);
+            rowIds = rlandri.util.parseJSON(rowIds, [ ]);
+
+            var numRows = aaData.length;
+            for (var i = 0; i < numRows; i++) {
+                var row = aaData[i];
+                var numCols = row.length;
+                for (var j = 0; j < numCols; j++) {
+                    var cell = row[j];
+                    var errors = cell[1];
+                    var tpl = (errors.length > 0) ? '{0} ({1})' : '{0}';
+                    row[j] = $.validator.format(tpl, cell[0], errors);
+                }
+            }
+
+            var aoColumns = [
+                { "sTitle": "Agent Name" },
+                { "sTitle": "Agent Code" },
+                // TODO numAgentsCol ?
+                { "sTitle": "Number of Instances", "sClass": "center numAgentsCol" },
+            ];
+            var tableTpl = '#solution-realtable-{0}';
+            var tableId = $.validator.format(tableTpl, solutionId);
+            var otTable = $(tableId).dataTable({
+                "aaData": aaData,
+                "aoColumns": aoColumns,
+                "bDestroy": true,
+                "bAutoWidth": false,
+                "bJQueryUI": true,
+                "sPaginationType": "full_numbers",
+            });
+            var cardinalityValidation = {
+                required: true,
+                number: true,
+                min: 1,
+            };
+            otTable.makeEditable({
+                sUpdateURL: function (value, settings) {
+                    return "ok";
+                },
+                sAddURL: function (oTable, params) {
+                    try {
+                        var firstParameter = params[0];
+                        return firstParameter.value;
+                    } catch (e) {
+                        console.log(e);
+                        return 0;
+                    }
+                },
+                sDeleteURL: '{% url 'solution.views.delete_agent' %}',
+                oEditableSettings: {
+                    event: 'click',
+                },
+                aoColumns: [
+                    null,
+                    null,
+                    {
+                        oValidationOptions: {
+                            rules: {
+                                'value': cardinalityValidation,
+                            },
+                        },
+                    },
+                ],
+                oAddNewRowButtonOptions: {
+                    label: "Add...",
+                    icons: {
+                        primary: 'ui-icon-plus',
+                    },
+                },
+                oDeleteRowButtonOptions: {
+                    label: "Remove",
+                    icons: {
+                        primary: 'ui-icon-trash',
+                    },
+                },
+                oAddNewRowFormOptions: {
+                    title: 'Add a new agent',
+                    show: "blind",
+                    hide: "explode",
+                    width: 600,
+                    modal: true,
+                },
+                sAddNewRowFormId: 'add-new-row-form-' + solutionId,
+                sAddNewRowButtonId: 'btnAddNewRow-' + solutionId,
+                sAddNewRowOkButtonId: 'btnAddNewRowOk-' + solutionId,
+                sAddNewRowCancelButtonId: 'btnAddNewRowCancel-' + solutionId,
+                sDeleteRowButtonId: 'btnDeleteRow-' + solutionId,
+                sAddDeleteToolbarSelector: tableId + '_length',
+            });
+
+            var clickEvent = rlandri.util.getClickHandler('#btnAddNewRow-' + solutionId);
+            if (clickEvent) {
+                var handler = clickEvent.handler;
+                clickEvent.handler = function (event) {
+                    var $dummyTable = $('#add-dummy-row-form table');
+                    var $dummySelect = $dummyTable.find('select[name="agent_name"]');
+                    // Construct a map with all of the agent options
+                    var agentOptions = { };
+                    $dummySelect.find('option').each(function (i, option) {
+                        agentOptions[option.value] = option;
+                    });
+                    // Remove from the map the agents that already have code
+                    var nodes = otTable.fnGetNodes();
+                    for (var i = 0; i < nodes.length; i++) {
+                        var id = nodes[i].id;
+                        try {
+                            delete agentOptions[id];
+                        } catch (e) {
+                            console.log(e);
+                        }
+                    }
+
+                    // Change the underlying form to include only the remaining agents
+                    var tpl = '#add-new-row-form-{0} table';
+                    var tid = $.validator.format(tpl, solutionId);
+                    var $table = $(tid);
+                    var $select = $table.find('select[name="agent_name"]');
+                    $select.empty();
+                    for (var name in agentOptions) {
+                        var option = agentOptions[name];
+                        $select.append($(option).clone());
+                    }
+                    handler(event);
+                }
+            }
+
+            var nodes = otTable.fnGetNodes();
+            /*
+            var numNodes = Math.min(nodes.length, cellIds.length);
+            for (var i = 0; i < numNodes; i++) {
+                var cells = nodes[i].cells;
+                var ids = cellIds[i];
+                var numCells = Math.min(cells.length, ids.length);
+                for (var j = 0; j < numCells; j++) {
+                    var cellId = ids[j] + "-realtable";
+                    cells[j].id = cellId;
+                }
+            }*/
+            numNodes = Math.min(nodes.length, rowIds.length);
+            for (var i = 0; i < numNodes; i++) {
+                nodes[i].id = rowIds[i];
+            }
+
+            var btnTpl = '#btn-agent-{0}';
+            var btnId = $.validator.format(btnTpl, solutionId);
+            $(btnId).click(function () {
+                var keys = [ 'agentId', 'file', 'cardinality' ];
+                var nodes = otTable.fnGetNodes();
+                var agents = [ ];
+                for (var i = 0; i < nodes.length; i++) {
+                    var row = nodes[i];
+                    var cells = row.cells;
+                    var entry = { };
+                    for (var j = 0; j < cells.length; j++) {
+                        var key = keys[j];
+                        if (j == 0)
+                            entry[key] = row.id;
+                        else
+                            entry[key] = cells[j].innerHTML;
+                    }
+                    agents.push(entry);
+                }
+                console.log(agents);
+                var url = '{% url 'solution.views.change_agent_mapping' 0 %}';
+                url = url.replace('0/', solutionId + '/');
+                $.post(url, {
+                    'json': JSON.stringify(agents),
+                });
+            });
+
+            var rowTpl = '#add-new-row-form-{0}';
+            var rowId = $.validator.format(rowTpl, solutionId);
+            $(rowId).validate({
+                rules: {
+                    cardinality: cardinalityValidation,
+                },
+            });
+        }
+
+    {% for subSolutions in allSolutions %}
+        {% for entry in subSolutions.forms %}
+        {% with obj=entry.obj is_novel=entry.is_novel table=entry.table %}
+        {% if not is_novel %}
+            createTable('{{ obj.id|escapejs }}', '{{ table.aaData|escapejs }}',
+                '',
+                '{{ table.rowIds|escapejs }}'
+            );
+        {% endif %}
+        {% endwith %}
+        {% endfor %}
+    {% endfor %}
+
+        var qtipStyle = {
+            classes: 'ui-tooltip-tipsy ui-tooltip-shadow',
+        };
+        $("th.numAgentsCol").qtip({
+            content: {
+                text: 'Click any cell to edit it',
+            },
+            position: {
+                at: 'top center',
+                my: 'bottom left',
+            },
+            style: qtipStyle,
+        });
+        $("td.numAgentsCol").qtip({
+            content: {
+                text: 'Click the cell to edit it',
+            },
+            position: {
+                at: 'bottom center',
+            },
+            style: qtipStyle,
         });
     });
 </script>
@@ -16,21 +359,59 @@
 
 {% block app-content %}
 
-<div id="solution-accordion">
+<div id="subenv-accordion">
 {% for subSolutions in allSolutions %}
-{% with subSolutions.subEnvironment as subEnvironment %}
+{% with subEnvironment=subSolutions.subEnvironment %}
     <h3>
         <a href="#"> {{ subEnvironment }} </a>
     </h3>
     <div>
-    <form enctype="multipart/form-data"
-        action="{% url 'solution.views.index_post' subEnvironment.pk %}"
-        method="post"> {% csrf_token %}
-        <table>
-            {{ subSolutions.formset }}
-        </table>
-        <input type="submit" value="Submit Solutions" />
-    </form>
+        <div id="solution-accordion-{{ subEnvironment.id }}">
+        {% for entry in subSolutions.forms %}
+        {% with form=entry.form obj=entry.obj is_novel=entry.is_novel %}
+            <h3>
+            {% if is_novel %}
+                <a href="#"> New Solution </a>
+            {% else %}
+                <a href="#"> {{ form.0.name.value }} </a>
+            {% endif %}
+            </h3>
+            <div>
+                <form enctype="multipart/form-data"
+                {% if is_novel %}
+                    action="{% url 'solution.views.index_add' obj.id %}"
+                {% else %}
+                    action="{% url 'solution.views.index_change' obj.id %}"
+                {% endif %}
+                    method="post">
+                    {% csrf_token %}
+
+                    <table>
+                    {{ form.as_table }}
+                    </table>
+
+                    {% if is_novel %}
+                    <input type="submit" value="Submit Solution" />
+                    {% else %}
+                    <input type="submit" value="Submit Changes" />
+                    {% endif %}
+                </form>
+
+                {% if not is_novel %}
+                <table id="solution-realtable-{{ obj.id }}">
+                </table>
+                <div>
+                    <button id="btn-agent-{{ obj.id }}"> Submit Agent Mapping </button>
+                </div>
+                <div>
+                    <button id="delete-{{ obj.id }}"> Delete </button>
+                </div>
+                {% endif %}
+
+            </div>
+        {% endwith %}
+        {% endfor %}
+        </div>
     </div>
 {% endwith %}
 {% endfor %}
@@ -39,7 +420,7 @@
     </h3>
     <div>
     <form enctype="multipart/form-data"
-        action="{% url 'solution.views.index_post' 0 %}"
+        action="{% url 'solution.views.index_add' 0 %}"
         method="post"> {% csrf_token %}
         <table>
             {{ othersFormset }}
@@ -48,5 +429,24 @@
     </form>
     </div>
 </div>
+
+{% for subSolutions in allSolutions %}
+    {% for entry in subSolutions.forms %}
+    {% with obj=entry.obj is_novel=entry.is_novel %}
+    {% if not is_novel %}
+        <form id="add-new-row-form-{{ obj.id }}" action="#" title="Add a new agent">
+            <table>
+                {{ entry.agent_form.as_table }}
+            </table>
+        </form>
+    {% endif %}
+    {% endwith %}
+    {% endfor %}
+{% endfor %}
+<form id="add-dummy-row-form" action="#" title="Add a new agent" style="display: none;">
+    <table>
+        {{ agentForm.as_table }}
+    </table>
+</form>
 
 {% endblock %}

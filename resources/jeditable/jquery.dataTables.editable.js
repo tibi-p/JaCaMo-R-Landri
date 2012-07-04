@@ -424,18 +424,30 @@ returns true if plugin should continue with sending AJAX request, false will abo
 
                     } else {
 
-                        var params = oAddNewRowForm.serialize();
-                        $.ajax({ 'url': properties.sAddURL,
-                            'data': params,
-                            'type': properties.sAddHttpMethod,
-                            'dataType': properties.sAddDataType,
-                            success: fnOnRowAdded,
-                            error: function (response) {
+                        if (jQuery.isFunction(properties.sAddURL)) {
+                            var params = oAddNewRowForm.serializeArray();
+                            var response = properties.sAddURL(oTable, params);
+                            try {
+                                fnOnRowAdded(response);
+                            } catch (e) {
                                 properties.fnEndProcessingMode();
-                                properties.fnShowError(response.responseText, "add");
+                                properties.fnShowError(response, "add");
                                 properties.fnOnAdded("failure");
                             }
-                        });
+                        } else {
+                            var params = oAddNewRowForm.serialize();
+                            $.ajax({ 'url': properties.sAddURL,
+                                'data': params,
+                                'type': properties.sAddHttpMethod,
+                                'dataType': properties.sAddDataType,
+                                success: fnOnRowAdded,
+                                error: function (response) {
+                                    properties.fnEndProcessingMode();
+                                    properties.fnShowError(response.responseText, "add");
+                                    properties.fnOnAdded("failure");
+                                }
+                            });
+                        }
                     }
                 }
             }

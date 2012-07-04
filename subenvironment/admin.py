@@ -1,4 +1,4 @@
-from subenvironment.models import (OwnerRelationship, EnvAgent, Artifact,
+from subenvironment.models import (OwnerRelationship, Agent, Artifact,
     Organization, SubEnvironment, DefaultExtra)
 from django.contrib import admin
 
@@ -6,8 +6,8 @@ class OwnerRelationshipInline(admin.TabularInline):
     model = OwnerRelationship
     extra = 2
 
-class EnvAgentInline(admin.TabularInline):
-    model = EnvAgent
+class AgentInline(admin.TabularInline):
+    model = Agent
     extra = 3
 
 class ArtifactInline(admin.TabularInline):
@@ -19,7 +19,7 @@ class OrganizationInline(admin.TabularInline):
     extra = 3
 
 class SubEnvironmentAdmin(admin.ModelAdmin):
-    inlines = [ OwnerRelationshipInline, EnvAgentInline, ArtifactInline, OrganizationInline ]
+    inlines = [ OwnerRelationshipInline, AgentInline, ArtifactInline, OrganizationInline ]
 
 admin.site.register(SubEnvironment, SubEnvironmentAdmin)
 admin.site.register(DefaultExtra)

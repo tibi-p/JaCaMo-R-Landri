@@ -1,5 +1,4 @@
 from django.contrib import admin
-from schedule.models import OfflineTest, Schedule
+from schedule.models import Schedule
 
-admin.site.register(OfflineTest)
 admin.site.register(Schedule)
