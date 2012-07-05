@@ -5,8 +5,11 @@ import jason.mas2j.MAS2JProject;
 import jason.mas2j.parser.ParseException;
 import jason.mas2j.parser.mas2j;
 
+import java.io.File;
+import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FilenameFilter;
 import java.util.ArrayList;
 
 import cartago.Artifact;
@@ -16,9 +19,18 @@ public class Coordinator extends Artifact {
 	ArrayList<String> participants;
 	
 	void init() {
-		/*try {
+		try{
 			participants = new ArrayList<String>();
-			mas2j parser = new mas2j(new FileInputStream("derp.mas2j"));
+			
+			File mas2jFile = new File(".").listFiles(new FileFilter() {
+				
+				@Override
+				public boolean accept(File arg0) {
+					return arg0.getAbsolutePath().endsWith("mas2j");
+				}
+			})[0];
+			
+			mas2j parser = new mas2j(new FileInputStream(mas2jFile));
 			MAS2JProject project = parser.mas();
 			for(AgentParameters ap : project.getAgents()){
 				participants.add(ap.getAgName());
@@ -27,7 +39,7 @@ public class Coordinator extends Artifact {
 			System.err.println("Could not find mas2j file");
 		} catch (ParseException e){
 			System.err.println("Parse exception for mas2j file");
-		}*/
+		}
 	}
 
 	@OPERATION
