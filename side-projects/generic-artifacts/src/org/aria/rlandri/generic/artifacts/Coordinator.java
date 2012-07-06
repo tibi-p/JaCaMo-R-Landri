@@ -18,8 +18,8 @@ import cartago.OperationException;
 
 public abstract class Coordinator extends Artifact {
 	ArrayList<String> participants;
-	enum EnvStatus { primordial,initiated,running,evaluating,finished};
-	EnvStatus state = EnvStatus.primordial;
+	enum EnvStatus { PRIMORDIAL,INITIATED,RUNNING,EVALUATING,FINISHED};
+	EnvStatus state = EnvStatus.PRIMORDIAL;
 	public static final int realTimeSP = 0, realTimeNeg = 1, turnBasedSimultaneous = 2, turnBasedAlternative = 3;
 	
 	
@@ -46,7 +46,7 @@ public abstract class Coordinator extends Artifact {
 					setupRTSP();
 					break;
 			}
-			state = EnvStatus.initiated;
+			state = EnvStatus.INITIATED;
 		} catch (FileNotFoundException e) {
 			System.err.println("Could not find mas2j file");
 		} catch (ParseException e){

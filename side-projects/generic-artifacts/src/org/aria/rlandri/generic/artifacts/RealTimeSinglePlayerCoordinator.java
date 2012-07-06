@@ -37,7 +37,7 @@ public abstract class RealTimeSinglePlayerCoordinator extends Coordinator {
 	void startSubenv() {
 		if (getOpUserName().equals("prime_agent_s_generic")){
 			signal("startSubenv");
-			state = EnvStatus.running;
+			state = EnvStatus.RUNNING;
 		}
 	}
 }
