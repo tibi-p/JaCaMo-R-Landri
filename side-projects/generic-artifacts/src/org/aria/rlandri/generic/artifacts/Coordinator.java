@@ -12,14 +12,17 @@ import java.io.FileNotFoundException;
 import java.util.ArrayList;
 
 import cartago.Artifact;
+<<<<<<< HEAD
 import cartago.ArtifactConfig;
 import cartago.CartagoException;
+=======
+>>>>>>> refs/heads/master
 import cartago.OPERATION;
-import cartago.OperationException;
+import cartago.OpFeedbackParam;
 
 public abstract class Coordinator extends Artifact {
 	ArrayList<String> participants;
-	enum EnvStatus { PRIMORDIAL,INITIATED,RUNNING,EVALUATING,FINISHED};
+	enum EnvStatus { PRIMORDIAL, INITIATED, RUNNING, EVALUATING, FINISHED};
 	EnvStatus state = EnvStatus.PRIMORDIAL;
 	public static final int realTimeSP = 0, realTimeNeg = 1, turnBasedSimultaneous = 2, turnBasedAlternative = 3;
 	
@@ -30,7 +33,6 @@ public abstract class Coordinator extends Artifact {
 			
 			File mas2jFile = new File(".").listFiles(new FileFilter() {
 				
-				@Override
 				public boolean accept(File arg0) {
 					return arg0.getAbsolutePath().endsWith("mas2j");
 				}
@@ -39,16 +41,9 @@ public abstract class Coordinator extends Artifact {
 			mas2j parser = new mas2j(new FileInputStream(mas2jFile));
 			MAS2JProject project = parser.mas();
 			for(AgentParameters ap : project.getAgents()){
-				participants.add(ap.getAgName());
+				if(!ap.getAgName().contains("prime_agent_s"))
+					participants.add(ap.getAgName());
 			}
-			/*
-			int subenvType = getSubenvType();
-			switch(subenvType){
-				case realTimeSP:
-					setupRTSP();
-					break;
-			}
-			*/
 			state = EnvStatus.INITIATED;
 		} catch (FileNotFoundException e) {
 			System.err.println("Could not find mas2j file");
@@ -57,22 +52,12 @@ public abstract class Coordinator extends Artifact {
 		}
 	}
 
-	private void setupRTSP() {
-		try {
-			makeArtifact("coordinator", "RealTimeSinglePlayerCoordinator", ArtifactConfig.DEFAULT_CONFIG);
-		} catch (OperationException e) {
-			e.printStackTrace();
-		}
-	}
+	@OPERATION
+	abstract void registerAgent(OpFeedbackParam<String> wsp);
 	
-	private int getSubenvType() {
-		// TODO return a subenv type equal to one of the static integers
-		return 0;
-	}
-
-
-
 	@OPERATION
 	abstract void startSubenv();
-
+	
+	@OPERATION
+	abstract void finishSubenv();
 }
