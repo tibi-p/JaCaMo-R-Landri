@@ -10,6 +10,7 @@ import cartago.ArtifactGuardMethod;
 import cartago.CartagoException;
 import cartago.IArtifactOp;
 import cartago.OPERATION;
+import cartago.OpFeedbackParam;
 
 public class SimultaneouslyExecutedCoordinator extends Coordinator {
 
@@ -100,6 +101,20 @@ public class SimultaneouslyExecutedCoordinator extends Coordinator {
 			}
 		} while (cl != null);
 		return null;
+	}
+
+	@Override
+	@OPERATION
+	void registerAgent(OpFeedbackParam<String> wsp) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	@OPERATION
+	void finishSubenv() {
+		// TODO Auto-generated method stub
+		
 	}
 
 }
