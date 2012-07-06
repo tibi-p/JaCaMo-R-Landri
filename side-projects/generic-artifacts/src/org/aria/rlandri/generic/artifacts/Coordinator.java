@@ -14,8 +14,9 @@ import java.util.ArrayList;
 import cartago.Artifact;
 import cartago.ArtifactConfig;
 import cartago.OPERATION;
+import cartago.OperationException;
 
-public class Coordinator extends Artifact {
+public abstract class Coordinator extends Artifact {
 	ArrayList<String> participants;
 	enum EnvStatus { primordial,initiated,running,evaluating,finished};
 	EnvStatus state = EnvStatus.primordial;
@@ -54,7 +55,11 @@ public class Coordinator extends Artifact {
 	}
 
 	private void setupRTSP() {
-		makeArtifact(arg0, "RealTimeSinglePlayerCoordinator", ArtifactConfig.DEFAULT_CONFIG);
+		try {
+			makeArtifact("coordinator", "RealTimeSinglePlayerCoordinator", ArtifactConfig.DEFAULT_CONFIG);
+		} catch (OperationException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	private int getSubenvType() {
@@ -65,11 +70,6 @@ public class Coordinator extends Artifact {
 
 
 	@OPERATION
-	void startSubenv() {
-		if (getOpUserName().equals("prime_agent_s_generic")){
-			signal("startSubenv");
-			state=EnvStatus.running;
-		}
-	}
+	abstract void startSubenv();
 
 }

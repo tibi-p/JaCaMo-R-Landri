@@ -32,4 +32,12 @@ public abstract class RealTimeSinglePlayerCoordinator extends Coordinator {
 	abstract void updateRank();
 	abstract void updateCurrency();
 	abstract void saveState();
+	
+	@OPERATION
+	void startSubenv() {
+		if (getOpUserName().equals("prime_agent_s_generic")){
+			signal("startSubenv");
+			state = EnvStatus.running;
+		}
+	}
 }

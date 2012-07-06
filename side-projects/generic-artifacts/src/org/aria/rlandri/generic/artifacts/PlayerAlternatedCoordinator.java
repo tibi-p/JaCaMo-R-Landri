@@ -7,4 +7,10 @@ package org.aria.rlandri.generic.artifacts;
 
 public class PlayerAlternatedCoordinator extends Coordinator {
 
+	@Override
+	void startSubenv() {
+		// TODO Auto-generated method stub
+		
+	}
+
 }
