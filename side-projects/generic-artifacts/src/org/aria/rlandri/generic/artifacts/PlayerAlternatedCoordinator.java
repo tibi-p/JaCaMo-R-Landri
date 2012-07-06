@@ -6,6 +6,7 @@ import java.util.List;
 import cartago.AgentId;
 import cartago.ArtifactOpMethod;
 import cartago.OPERATION;
+import cartago.OpFeedbackParam;
 
 /**
  * @author Andrei Geacar
@@ -37,7 +38,7 @@ public class PlayerAlternatedCoordinator extends Coordinator {
 	}
 	
 	@OPERATION
-	void register()
+	void registerAgent(OpFeedbackParam<String> wsp)
 	{
 		AgentId aid= this.getOpUserId();
 		String name = this.getOpUserName();
@@ -45,7 +46,9 @@ public class PlayerAlternatedCoordinator extends Coordinator {
 			return;
 		agents.put(name,aid);
 		order.add(name);
+		wsp.set("NA");
 	}
+	
 	
 
 
