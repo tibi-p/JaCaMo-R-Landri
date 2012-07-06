@@ -13,6 +13,7 @@ import java.util.ArrayList;
 
 import cartago.Artifact;
 import cartago.OPERATION;
+import cartago.OpFeedbackParam;
 
 public abstract class Coordinator extends Artifact {
 	ArrayList<String> participants;
@@ -47,7 +48,8 @@ public abstract class Coordinator extends Artifact {
 		}
 	}
 
-	
+	@OPERATION
+	abstract void registerAgent(OpFeedbackParam<String> wsp);
 	
 	@OPERATION
 	abstract void startSubenv();
