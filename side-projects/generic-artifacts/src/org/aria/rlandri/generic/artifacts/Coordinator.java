@@ -12,11 +12,7 @@ import java.io.FileNotFoundException;
 import java.util.ArrayList;
 
 import cartago.Artifact;
-<<<<<<< HEAD
-import cartago.ArtifactConfig;
 import cartago.CartagoException;
-=======
->>>>>>> refs/heads/master
 import cartago.OPERATION;
 import cartago.OpFeedbackParam;
 
