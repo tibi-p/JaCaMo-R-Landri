@@ -16,7 +16,7 @@ import cartago.OPERATION;
 
 public class Coordinator extends Artifact {
 	ArrayList<String> participants;
-	
+	boolean initiated = false, running = false, finished = false;
 	void init() {
 		try{
 			participants = new ArrayList<String>();
@@ -34,6 +34,7 @@ public class Coordinator extends Artifact {
 			for(AgentParameters ap : project.getAgents()){
 				participants.add(ap.getAgName());
 			}
+			initiated = true;
 		} catch (FileNotFoundException e) {
 			System.err.println("Could not find mas2j file");
 		} catch (ParseException e){
@@ -43,8 +44,10 @@ public class Coordinator extends Artifact {
 
 	@OPERATION
 	void startSubenv() {
-		if (getOpUserName().equals("prime_agent_s_generic"))
+		if (getOpUserName().equals("prime_agent_s_generic")){
 			signal("startSubenv");
+			running = true;
+		}
 	}
 
 }
