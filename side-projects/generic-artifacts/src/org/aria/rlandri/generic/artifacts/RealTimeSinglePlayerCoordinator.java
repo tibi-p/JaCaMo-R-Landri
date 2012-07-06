@@ -17,13 +17,18 @@ public abstract class RealTimeSinglePlayerCoordinator extends Coordinator {
 	}
 	@OPERATION
 	private void registerAgent(OpFeedbackParam<String> privateSubenv){
-	    
+	    privateSubenv.set(getOpUserName() + "_private_workspace");
 	}
 	
 	@OPERATION
 	private void getNextAgent(OpFeedbackParam<String> agentName){
 		if(index == participants.size()) agentName.set("no_more");
-		else agentName.set(participants.get(index));
+		else agentName.set(participants.get(index) + "_private_workspace");
+	}
+	
+	@OPERATION
+	private void incrementIndex(){
+		index++;
 	}
 	
 	abstract void registerOperations();

@@ -16,7 +16,7 @@ import cartago.OPERATION;
 
 public abstract class Coordinator extends Artifact {
 	ArrayList<String> participants;
-	enum EnvStatus { PRIMORDIAL,INITIATED,RUNNING,EVALUATING,FINISHED};
+	enum EnvStatus { PRIMORDIAL, INITIATED, RUNNING, EVALUATING, FINISHED};
 	EnvStatus state = EnvStatus.PRIMORDIAL;
 	public static final int realTimeSP = 0, realTimeNeg = 1, turnBasedSimultaneous = 2, turnBasedAlternative = 3;
 	
@@ -27,7 +27,6 @@ public abstract class Coordinator extends Artifact {
 			
 			File mas2jFile = new File(".").listFiles(new FileFilter() {
 				
-				@Override
 				public boolean accept(File arg0) {
 					return arg0.getAbsolutePath().endsWith("mas2j");
 				}
@@ -36,7 +35,8 @@ public abstract class Coordinator extends Artifact {
 			mas2j parser = new mas2j(new FileInputStream(mas2jFile));
 			MAS2JProject project = parser.mas();
 			for(AgentParameters ap : project.getAgents()){
-				participants.add(ap.getAgName());
+				if(!getOpUserName().equals(ap.getAgName()))
+					participants.add(ap.getAgName());
 			}
 			
 			state = EnvStatus.INITIATED;
