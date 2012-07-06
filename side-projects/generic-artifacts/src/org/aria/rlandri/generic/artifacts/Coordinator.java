@@ -12,6 +12,7 @@ import java.io.FileNotFoundException;
 import java.util.ArrayList;
 
 import cartago.Artifact;
+import cartago.ArtifactConfig;
 import cartago.OPERATION;
 
 public class Coordinator extends Artifact {
@@ -38,6 +39,11 @@ public class Coordinator extends Artifact {
 				participants.add(ap.getAgName());
 			}
 			int subenvType = getSubenvType();
+			switch(subenvType){
+				case realTimeSP:
+					setupRTSP();
+					break;
+			}
 			initiated = true;
 		} catch (FileNotFoundException e) {
 			System.err.println("Could not find mas2j file");
@@ -46,8 +52,10 @@ public class Coordinator extends Artifact {
 		}
 	}
 
+	private void setupRTSP() {
+		makeArtifact(arg0, "RealTimeSinglePlayerCoordinator", ArtifactConfig.DEFAULT_CONFIG);
+	}
 	
-
 	private int getSubenvType() {
 		// TODO return a subenv type equal to one of the static integers
 		return 0;
