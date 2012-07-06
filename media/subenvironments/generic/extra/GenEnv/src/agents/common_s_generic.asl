@@ -32,22 +32,23 @@
 		+coord_id(Coord);
 		focus(Coord);
 		.
-	
+
 -!registerCoordinator: true
-	<- 	.wait(10);
+	<-	.wait(10);
 		!registerCoordinator.
-	
+
 +startSubenv[artifact_name(_, "coordinator")]
-	<- 	registerAgent(Wsp);
+	<-	registerAgent(Wsp);
 		+wsp_to_join(Wsp);
 		!joinPrivateWorkspace;
 		!start.
-		
+
 +!joinPrivateWorkspace: wsp_to_join("NA")
-	<- 	-wsp_to_join(_);
-		true.
-	
+	<-	-wsp_to_join(_).
+
 +!joinPrivateWorkspace: not wsp_to_join("NA")
-	<- 	?wsp_to_join(WspName);
+	<-	.print("C");
+		?wsp_to_join(WspName);
+		.print("D");
 		joinWorkspace(WspName, _);
 		-wsp_to_join(_).
