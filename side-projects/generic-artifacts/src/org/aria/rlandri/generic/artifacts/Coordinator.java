@@ -16,7 +16,7 @@ import cartago.OPERATION;
 
 public class Coordinator extends Artifact {
 	ArrayList<String> participants;
-	boolean initiated = false, running = false, finished = false;
+	boolean initiated = false, running = false, finished = false, evaluated = false;
 	void init() {
 		try{
 			participants = new ArrayList<String>();
