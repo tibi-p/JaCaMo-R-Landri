@@ -4,12 +4,13 @@ import java.util.HashMap;
 
 import cartago.AgentId;
 import cartago.ArtifactOpMethod;
+import cartago.CartagoException;
 import cartago.OPERATION;
 import cartago.OpFeedbackParam;
 
 public abstract class RealTimeSinglePlayerCoordinator extends Coordinator {
 	HashMap<AgentId, ArtifactOpMethod> enqueuedOps;
-	public void init(){
+	public void init() throws CartagoException {
 		super.init();
 		enqueuedOps = new HashMap<AgentId, ArtifactOpMethod>();
 	}

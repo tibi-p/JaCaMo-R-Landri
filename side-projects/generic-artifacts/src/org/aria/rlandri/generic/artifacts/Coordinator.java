@@ -13,6 +13,7 @@ import java.util.ArrayList;
 
 import cartago.Artifact;
 import cartago.ArtifactConfig;
+import cartago.CartagoException;
 import cartago.OPERATION;
 import cartago.OperationException;
 
@@ -23,7 +24,7 @@ public abstract class Coordinator extends Artifact {
 	public static final int realTimeSP = 0, realTimeNeg = 1, turnBasedSimultaneous = 2, turnBasedAlternative = 3;
 	
 	
-	void init() {
+	void init() throws CartagoException {
 		try{
 			participants = new ArrayList<String>();
 			
@@ -40,12 +41,14 @@ public abstract class Coordinator extends Artifact {
 			for(AgentParameters ap : project.getAgents()){
 				participants.add(ap.getAgName());
 			}
+			/*
 			int subenvType = getSubenvType();
 			switch(subenvType){
 				case realTimeSP:
 					setupRTSP();
 					break;
 			}
+			*/
 			state = EnvStatus.INITIATED;
 		} catch (FileNotFoundException e) {
 			System.err.println("Could not find mas2j file");
