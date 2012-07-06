@@ -19,14 +19,15 @@
 			!makeCoordinator.
 
 +!makeCoordinator: true
-		<- 	makeArtifact("coordinator",
-			"org.aria.rlandri.generic.artifacts.Coordinator", [], _
-		).
+		<- 	makeArtifact("genericCoordinator",
+				"org.aria.rlandri.generic.artifacts.Coordinator", [], _
+			);
+			lookupArtifact("coordinator", _).
 
 +!makeLogger: true
 		<- 	makeArtifact("logger",
-			"org.aria.rlandri.generic.artifacts.SubenvLogger", [], _
-		).
+				"org.aria.rlandri.generic.artifacts.SubenvLogger", [], _
+			).
 
 +!makeAndJoinDefaultWorkspace: true
 		<- 	createWorkspace("SubenvDefaultWorkspace");
