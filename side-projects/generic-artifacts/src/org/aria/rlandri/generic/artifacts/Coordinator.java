@@ -52,7 +52,7 @@ public abstract class Coordinator extends Artifact {
 	abstract void registerAgent(OpFeedbackParam<String> wsp);
 	
 	@OPERATION
-	abstract void startSubenv();
+	abstract void startSubenv() throws CartagoException;
 	
 	@OPERATION
 	abstract void finishSubenv();

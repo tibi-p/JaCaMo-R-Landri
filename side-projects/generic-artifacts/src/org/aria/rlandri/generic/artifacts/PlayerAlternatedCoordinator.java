@@ -25,14 +25,9 @@ public class PlayerAlternatedCoordinator extends Coordinator {
 	ArtifactOpMethod turnOp;
 	
 	@Override
-	void startSubenv() 
+	void startSubenv() throws CartagoException 
 	{
-		try {
-			super.init();
-		} catch (CartagoException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		super.init();
 		agents= new HashMap<String,AgentId>();
 		order  = new LinkedList<String>();
 	}
