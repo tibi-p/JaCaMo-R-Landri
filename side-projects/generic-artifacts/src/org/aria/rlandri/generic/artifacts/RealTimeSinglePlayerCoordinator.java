@@ -9,14 +9,23 @@ import cartago.OpFeedbackParam;
 
 public abstract class RealTimeSinglePlayerCoordinator extends Coordinator {
 	HashMap<AgentId, ArtifactOpMethod> enqueuedOps;
+	private int index;
 	public void init(){
 		super.init();
+		index = 0;
 		enqueuedOps = new HashMap<AgentId, ArtifactOpMethod>();
 	}
 	@OPERATION
-	private void registerAgent(){
-		
+	private void registerAgent(OpFeedbackParam<String> privateSubenv){
+	    
 	}
+	
+	@OPERATION
+	private void getNextAgent(OpFeedbackParam<String> agentName){
+		if(index == participants.size()) agentName.set("no_more");
+		else agentName.set(participants.get(index));
+	}
+	
 	abstract void registerOperations();
 	
 	@OPERATION
