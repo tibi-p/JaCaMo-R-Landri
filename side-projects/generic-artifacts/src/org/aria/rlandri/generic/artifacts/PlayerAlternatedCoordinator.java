@@ -5,6 +5,7 @@ import java.util.List;
 
 import cartago.AgentId;
 import cartago.ArtifactOpMethod;
+import cartago.CartagoException;
 import cartago.OPERATION;
 import cartago.OpFeedbackParam;
 
@@ -24,7 +25,7 @@ public class PlayerAlternatedCoordinator extends Coordinator {
 	ArtifactOpMethod turnOp;
 	
 	@Override
-	void startSubenv() 
+	void startSubenv() throws CartagoException 
 	{
 		super.init();
 		agents= new HashMap<String,AgentId>();
