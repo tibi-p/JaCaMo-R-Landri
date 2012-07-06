@@ -38,4 +38,5 @@
 		!registerCoordinator.
 	
 +startSubenv[artifact_name(_, "coordinator")]
-	<- 	!start.
+	<- 	registerAgent;
+		!start.

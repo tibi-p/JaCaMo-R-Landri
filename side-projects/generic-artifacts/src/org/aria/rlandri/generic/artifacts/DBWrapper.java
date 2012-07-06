@@ -1,29 +1,59 @@
 package org.aria.rlandri.generic.artifacts;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.Properties;
+
 import cartago.Artifact;
 import cartago.OPERATION;
-import java.sql.*;
 
 /**
- *      Artifact that implements the update on the user's rank and economy
+ * Artifact that implements the update on the user's rank and economy
+ *
+ * @author Eduard Tutescu
  */
 public class DBWrapper extends Artifact {
-    private Statement stat;
-    private Connection conn;
-    private String databasePath = "C:\\Users\\Tibi\\Desktop\\R'Landri\\JaCaMo-R-Landri\\rlandri\\db\\rlandri.sql";
-    
-    private void createConnection() throws Exception {
-        Class.forName("org.sqlite.JDBC");
-        conn = DriverManager.getConnection("jdbc:sqlite:" + databasePath);
-        stat = conn.createStatement();
-        conn.setAutoCommit(true);
-    }
-    
-    private void closeConnection() throws Exception {
-        conn.close();
-    }
-    
-    @OPERATION public int getRank(int userId)  throws Exception {
+
+	private static final String DB_REL_PATH = "rlandri\\db\\rlandri.sql";
+
+	private Statement stat;
+	private Connection conn;
+	private String databasePath = DB_REL_PATH;
+
+	public void init() throws ClassNotFoundException {
+		try {
+			Properties prop = new Properties();
+			prop.load(new FileInputStream("config.properties"));
+			String djangoDirectory = prop.getProperty("django_directory");
+			File databaseFile = new File(djangoDirectory, DB_REL_PATH);
+			databasePath = databaseFile.getAbsolutePath();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		Class.forName("org.sqlite.JDBC");
+	}
+
+	private void createConnection() throws Exception {
+		conn = DriverManager.getConnection("jdbc:sqlite:" + databasePath);
+		stat = conn.createStatement();
+		conn.setAutoCommit(true);
+	}
+
+	private void closeConnection() throws SQLException {
+		conn.close();
+	}
+
+    @OPERATION
+    public int getRank(int userId)  throws Exception {
         createConnection();
         
         // Get the data for the userId provided as argument
@@ -32,8 +62,9 @@ public class DBWrapper extends Artifact {
         closeConnection();
         return rank;
     }
-    
-    @OPERATION public int getEconomy(int userId)  throws Exception {
+
+    @OPERATION
+    public int getEconomy(int userId)  throws Exception {
         createConnection();
         
         // Get the data for the userId provided as argument
