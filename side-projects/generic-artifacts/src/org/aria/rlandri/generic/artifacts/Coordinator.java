@@ -71,5 +71,8 @@ public abstract class Coordinator extends Artifact {
 
 	@OPERATION
 	abstract void startSubenv();
+	
+	@OPERATION
+	abstract void finishSubenv();
 
 }
