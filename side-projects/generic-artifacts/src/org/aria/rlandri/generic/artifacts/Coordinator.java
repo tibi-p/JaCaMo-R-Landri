@@ -17,6 +17,9 @@ import cartago.OPERATION;
 public class Coordinator extends Artifact {
 	ArrayList<String> participants;
 	boolean initiated = false, running = false, finished = false, evaluated = false;
+	public static final int realTimeSP = 0, realTimeNeg = 1, turnBasedSimultaneous = 2, turnBasedAlternative = 3;
+	
+	
 	void init() {
 		try{
 			participants = new ArrayList<String>();
@@ -34,6 +37,7 @@ public class Coordinator extends Artifact {
 			for(AgentParameters ap : project.getAgents()){
 				participants.add(ap.getAgName());
 			}
+			int subenvType = getSubenvType();
 			initiated = true;
 		} catch (FileNotFoundException e) {
 			System.err.println("Could not find mas2j file");
@@ -41,6 +45,15 @@ public class Coordinator extends Artifact {
 			System.err.println("Parse exception for mas2j file");
 		}
 	}
+
+	
+
+	private int getSubenvType() {
+		// TODO return a subenv type equal to one of the static integers
+		return 0;
+	}
+
+
 
 	@OPERATION
 	void startSubenv() {
