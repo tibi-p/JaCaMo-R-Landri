@@ -38,4 +38,16 @@
 		!registerCoordinator.
 	
 +startSubenv[artifact_name(_, "coordinator")]
-	<- 	!start.
+	<- 	registerAgent(Wsp);
+		+wsp_to_join(Wsp);
+		!joinPrivateWorkspace;
+		!start.
+		
++!joinPrivateWorkspace: wsp_to_join("NA")
+	<- 	-wsp_to_join(_);
+		true.
+	
++!joinPrivateWorkspace: not wsp_to_join("NA")
+	<- 	?wsp_to_join(WspName);
+		joinWorkspace(WspName, _);
+		-wsp_to_join(_).

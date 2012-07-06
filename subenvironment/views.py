@@ -7,14 +7,12 @@ from solution.models import Solution
 from subenvironment.models import SubEnvironment
 
 def make_solution_selector_form(solutionArgs={ }):
-    # TODO use not in instead... check other places too
     if solutionArgs.get('queryset', None) is None:
         solutionArgs['queryset'] = Solution.objects.all()
-    # TODO fix me using is None
-    solutionArgs['empty_label'] = None
-    
-    if len(solutionArgs['queryset']) == 0:
-        return None
+    if solutionArgs['queryset'].count() == 0:
+        raise Exception("Empty queryset is not allowed")
+    if 'empty_label' not in solutionArgs:
+        solutionArgs['empty_label'] = None
 
     class SolutionSelectorForm(forms.Form):
         solution = forms.ModelChoiceField(**solutionArgs)
@@ -47,12 +45,12 @@ def detail_common(request, subEnvironment=None, abstractProcess=None):
     solutionFilter = { 'subEnvironment': subEnvironment }
     if not user.is_superuser:
         solutionFilter['envUser__user'] = user
-    SolutionSelectorForm = make_solution_selector_form({
-        'queryset': Solution.objects.filter(**solutionFilter),
-    });
-    if SolutionSelectorForm:
+    try:
+        SolutionSelectorForm = make_solution_selector_form({
+            'queryset': Solution.objects.filter(**solutionFilter),
+        });
         solutionForm = SolutionSelectorForm()
-    else:
+    except:
         solutionForm = None
     return render_to_response('subenvironment/detail.html',
            {
