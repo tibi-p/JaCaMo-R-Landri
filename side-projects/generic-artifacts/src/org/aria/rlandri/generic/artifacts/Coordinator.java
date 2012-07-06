@@ -35,7 +35,7 @@ public abstract class Coordinator extends Artifact {
 			mas2j parser = new mas2j(new FileInputStream(mas2jFile));
 			MAS2JProject project = parser.mas();
 			for(AgentParameters ap : project.getAgents()){
-				if(!getOpUserName().equals(ap.getAgName()))
+				if(!ap.getAgName().contains("prime_agent_s"))
 					participants.add(ap.getAgName());
 			}
 			
