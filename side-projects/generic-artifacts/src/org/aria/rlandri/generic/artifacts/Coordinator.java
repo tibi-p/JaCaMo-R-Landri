@@ -17,6 +17,7 @@ import cartago.OPERATION;
 import cartago.OpFeedbackParam;
 
 public abstract class Coordinator extends Artifact {
+	// TODO transform to map: String -> (AgentId, status)
 	ArrayList<String> participants;
 	enum EnvStatus { PRIMORDIAL, INITIATED, RUNNING, EVALUATING, FINISHED};
 	EnvStatus state = EnvStatus.PRIMORDIAL;

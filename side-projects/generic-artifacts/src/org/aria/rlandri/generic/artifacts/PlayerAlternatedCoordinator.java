@@ -37,6 +37,7 @@ public class PlayerAlternatedCoordinator extends Coordinator {
 		
 	}
 	
+	// TODO use status here
 	@OPERATION
 	void registerAgent(OpFeedbackParam<String> wsp)
 	{
@@ -52,6 +53,7 @@ public class PlayerAlternatedCoordinator extends Coordinator {
 	
 
 
+	// TODO remove this
 	private void startStep()
 	{
 		currentStep+=1;
@@ -64,6 +66,7 @@ public class PlayerAlternatedCoordinator extends Coordinator {
 	{
 		String name= order.get(currentAgent);
 		AgentId aid = agents.get(name);
+		// TODO specify which turn it is
 		signal(aid,"startTurn");
 		currentAgent+=1;
 		
@@ -79,7 +82,6 @@ public class PlayerAlternatedCoordinator extends Coordinator {
 		}
 	}
 	
-	
-	
+	// TODO internal action to run subenv
 	
 }

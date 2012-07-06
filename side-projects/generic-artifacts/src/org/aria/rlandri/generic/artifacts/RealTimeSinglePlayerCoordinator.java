@@ -22,12 +22,14 @@ abstract public class RealTimeSinglePlayerCoordinator extends Coordinator {
 	    privateSubenv.set(getOpUserName() + "_private_workspace");
 	}
 	
+	// TODO test for prime agent
 	@OPERATION
 	private void getNextAgent(OpFeedbackParam<String> wspName){
 		if(index == participants.size()) wspName.set("no_more");
 		else wspName.set(participants.get(index) + "_private_workspace");
 	}
 	
+	// TODO test for prime agent
 	@OPERATION
 	private void incrementIndex(){
 		index++;
@@ -35,6 +37,7 @@ abstract public class RealTimeSinglePlayerCoordinator extends Coordinator {
 	
 	abstract void registerOperations();
 	
+	// TODO PRIME_AGENT_OP
 	@OPERATION
 	void checkStatus(OpFeedbackParam<String> status){}
 	

@@ -27,6 +27,10 @@ public class GameArtifactOpMethod extends ArtifactOpMethod {
 		super.exec(actualParams);
 	}
 
+	// TODO (tibi) check if coordinator is running
+	// TODO (tibi) make abstract stuff
+	// TODO (andrei) check whose turn it is
+	// TODO (mihai) check if running
 	public void exec(Object[] actualParams) throws Exception {
 		String msgFmt = "%s: saving execution with parameters %s";
 		logger.debug(String.format(msgFmt, this, Arrays.toString(actualParams)));
