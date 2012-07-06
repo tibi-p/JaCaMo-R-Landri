@@ -5,6 +5,7 @@ import java.util.List;
 
 import cartago.AgentId;
 import cartago.ArtifactOpMethod;
+import cartago.CartagoException;
 import cartago.OPERATION;
 import cartago.OpFeedbackParam;
 
@@ -26,7 +27,12 @@ public class PlayerAlternatedCoordinator extends Coordinator {
 	@Override
 	void startSubenv() 
 	{
-		super.init();
+		try {
+			super.init();
+		} catch (CartagoException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		agents= new HashMap<String,AgentId>();
 		order  = new LinkedList<String>();
 	}
