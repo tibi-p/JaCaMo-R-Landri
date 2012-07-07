@@ -1,26 +1,27 @@
 package org.aria.rlandri.generic.artifacts;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.FilenameFilter;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
+
+import org.apache.log4j.EnhancedPatternLayout;
+import org.apache.log4j.FileAppender;
+import org.apache.log4j.Layout;
+import org.apache.log4j.Logger;
 
 import cartago.Artifact;
 import cartago.OPERATION;
-
-import org.apache.log4j.*;
 
 /**
  * @author Mihai Poenaru
@@ -30,20 +31,21 @@ public class SubenvLogger extends Artifact {
 
 	public static final String LOG_REL_PATH = "media/agents";
 
-	/*
-	 * @cache: Keep a mapping between agents and output
-	 * 			streams towards a file so we don't reopen
-	 * 			files every time we want to write the logs
-	 * 
-	 * @subEnvName: The name of the subenvironment that
-	 * 				will be logged
-	 * 
-	 * @logDirectory: The folder where the logs will be put.
+	/**
+	 * Keep a mapping between agents and output streams towards a file so we
+	 * don't reopen files every time we want to write the logs.
 	 */
-	HashMap<String, Logger> loggers;
-	ArrayList<String> override;
-	String subEnvName;
-	File logDirectory = new File(".");
+	private Map<String, Logger> loggers;
+	// TODO remove this
+	private ArrayList<String> override;
+	/**
+	 * The name of the subenvironment that will be logged.
+	 */
+	private String subEnvName;
+	/**
+	 * The folder where the logs will be put.
+	 */
+	private File logDirectory = new File(".");
 
 	public void init(){
 		try {
@@ -87,11 +89,10 @@ public class SubenvLogger extends Artifact {
 	}
 	
 	@OPERATION
-	public void logfatal(String line){
+	public void logFatal(String line){
 		Logger l = fetchLogger(getOpUserName());
 		l.fatal(line);
 	}
-	
 	
 	
 	private Logger fetchLogger(String agent) {

@@ -1,7 +1,7 @@
 /**
  * 
  */
-package org.aria.rlandri.generic.artifacts;
+package org.aria.rlandri.generic.artifacts.annotation;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;

@@ -47,8 +47,6 @@
 	<-	-wsp_to_join(_).
 
 +!joinPrivateWorkspace: not wsp_to_join("NA")
-	<-	.print("C");
-		?wsp_to_join(WspName);
-		.print("D");
+	<-	?wsp_to_join(WspName);
 		joinWorkspace(WspName, _);
 		-wsp_to_join(_).

@@ -1,9 +1,16 @@
 package org.aria.rlandri.generic.artifacts;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import org.apache.commons.collections.map.MultiValueMap;
+import org.aria.rlandri.generic.artifacts.annotation.GAME_OPERATION;
+import org.aria.rlandri.generic.artifacts.annotation.GuardedAnnotation;
+import org.aria.rlandri.generic.artifacts.annotation.GuardedAnnotationProcessor;
+import org.aria.rlandri.generic.artifacts.util.ReflectionUtils;
 
 import cartago.AgentId;
 import cartago.ArtifactGuardMethod;
@@ -59,28 +66,35 @@ public class SimultaneouslyExecutedCoordinator extends Coordinator {
 
 	@GAME_OPERATION
 	void hotelCismigiu() {
-		System.out.println("SA TE *UT IN HOTEL CISMIGIU");
+		System.out.println("SA MA MUT IN HOTEL CISMIGIU");
 	}
 
 	private void registerGameOperations() throws CartagoException {
-		for (Class<?> c = getClass(); c != null; c = c.getSuperclass()) {
-			Method[] methods = c.getDeclaredMethods();
-			for (Method method : methods) {
-				if (method.isAnnotationPresent(GAME_OPERATION.class))
-					addGameOperation(method);
+		List<GuardedAnnotation> annotations = new ArrayList<GuardedAnnotation>();
+		annotations.add(new GuardedAnnotation(GAME_OPERATION.class) {
+
+			@Override
+			public void processMethod(Method method) throws CartagoException {
+				addCustomOperation(this, method);
 			}
-		}
+
+		});
+
+		GuardedAnnotationProcessor processor = new GuardedAnnotationProcessor(
+				getClass());
+		processor.processAnnotations(annotations);
 	}
 
-	private void addGameOperation(Method method) throws CartagoException {
-		GAME_OPERATION annotation = method.getAnnotation(GAME_OPERATION.class);
+	private void addCustomOperation(GuardedAnnotation guardedAnnotation,
+			Method method) throws CartagoException {
+		Annotation annotation = guardedAnnotation.getMethodAnnotation(method);
 		System.out.println("-- " + method);
 		System.out.println("-- " + annotation);
-		String guard = annotation.guard();
+		String guard = guardedAnnotation.invokeGuardMethod(annotation);
 		ArtifactGuardMethod guardBody = null;
 		if (!"".equals(guard)) {
-			Method guardMethod = getMethodInHierarchy(guard,
-					method.getParameterTypes());
+			Method guardMethod = ReflectionUtils.getMethodInHierarchy(
+					getClass(), guard, method.getParameterTypes());
 			if (guardMethod == null) {
 				throw new CartagoException("invalid guard: " + guard);
 			} else {
@@ -91,30 +105,18 @@ public class SimultaneouslyExecutedCoordinator extends Coordinator {
 		defineOp(op, guardBody);
 	}
 
-	private Method getMethodInHierarchy(String name, Class<?>[] types) {
-		Class<?> cl = getClass();
-		do {
-			try {
-				return cl.getDeclaredMethod(name, types);
-			} catch (Exception ex) {
-				cl = cl.getSuperclass();
-			}
-		} while (cl != null);
-		return null;
-	}
-
 	@Override
 	@OPERATION
 	void registerAgent(OpFeedbackParam<String> wsp) {
 		// TODO Auto-generated method stub
-		
+		wsp.set("NA");
 	}
 
 	@Override
 	@OPERATION
 	void finishSubenv() {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 }
