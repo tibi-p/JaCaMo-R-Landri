@@ -4,7 +4,6 @@ import java.util.LinkedList;
 import java.util.List;
 
 import cartago.AgentId;
-import cartago.ArtifactOpMethod;
 import cartago.CartagoException;
 import cartago.OPERATION;
 import cartago.OpFeedbackParam;
@@ -16,20 +15,33 @@ import cartago.OpFeedbackParam;
 
 public class PlayerAlternatedCoordinator extends Coordinator {
 
-	int currentStep = 0;
-	int currentAgent = 0;
-	
+	private int currentStep = 0;
+	private int currentAgent = 0;
+
 	HashMap<String,AgentId> agents;
 	List<String> order;
-	
-	ArtifactOpMethod turnOp;
-	
+
+	GameArtifactOpMethod turnOp;
+
+	// constants for testing purposes
+	public static final int STEPS = 10;
+	public static final int TURN_LENGTH = 1000;
+
 	@Override
-	void startSubenv() throws CartagoException 
+	void startSubenv() throws CartagoException
 	{
 		super.init();
 		agents= new HashMap<String,AgentId>();
 		order  = new LinkedList<String>();
+
+	}
+
+	private void runSubEnv() throws InterruptedException
+	{
+		for(currentStep = 1;currentStep<=STEPS;currentStep++)
+		{
+			executeStep();
+		}
 	}
 
 	@Override
@@ -37,10 +49,10 @@ public class PlayerAlternatedCoordinator extends Coordinator {
 	{
 		
 	}
-	
+
 	// TODO use status here
 	@OPERATION
-	void registerAgent(OpFeedbackParam<String> wsp)
+	void registerAgent(OpFeedbackParam<String> wsp) throws InterruptedException
 	{
 		AgentId aid= this.getOpUserId();
 		String name = this.getOpUserName();
@@ -49,40 +61,45 @@ public class PlayerAlternatedCoordinator extends Coordinator {
 		agents.put(name,aid);
 		order.add(name);
 		wsp.set("NA");
+
+		// Subenv starts running when every participant registered
+		if(participants.size()==order.size())
+		{
+			runSubEnv();
+		}
+
 	}
-	
-	
 
-
-	// TODO remove this
-	private void startStep()
+	private void executeStep() throws InterruptedException
 	{
-		currentStep+=1;
-		currentAgent=0;
-		signal("startStep");
+		for(currentAgent=0;currentAgent<order.size();currentAgent++)
+		{
+			startPlayerTurn();
+			wait(TURN_LENGTH);
+			processTurn();
+		}
 	}
-
 
 	private void startPlayerTurn()
 	{
 		String name= order.get(currentAgent);
 		AgentId aid = agents.get(name);
-		// TODO specify which turn it is
-		signal(aid,"startTurn");
+		signal(aid,"startTurn",currentStep);
 		currentAgent+=1;
-		
 	}
-	
 
 	private void  processTurn()
 	{
-		//turnOp.execSavedParameters();
+		try {
+			turnOp.execSavedParameters();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
 		if(currentAgent==order.size())
 		{
 			currentAgent = 0;
 		}
 	}
-	
 	// TODO internal action to run subenv
-	
 }
