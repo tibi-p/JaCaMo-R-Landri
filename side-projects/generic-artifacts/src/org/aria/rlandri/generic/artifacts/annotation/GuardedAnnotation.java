@@ -7,15 +7,18 @@ import java.lang.reflect.Method;
 import org.aria.rlandri.generic.artifacts.util.ReflectionUtils;
 
 import cartago.CartagoException;
+import cartago.IArtifactOp;
 
 public abstract class GuardedAnnotation {
 
 	private final Class<? extends Annotation> annotationClass;
+	private final Class<? extends IArtifactOp> opMethodClass;
 	private final Method guardMethod;
 
-	public GuardedAnnotation(Class<? extends Annotation> annotationClass)
-			throws CartagoException {
+	public GuardedAnnotation(Class<? extends Annotation> annotationClass,
+			Class<? extends IArtifactOp> opMethodClass) throws CartagoException {
 		this.annotationClass = annotationClass;
+		this.opMethodClass = opMethodClass;
 		this.guardMethod = ReflectionUtils.getMethodInHierarchy(
 				annotationClass, "guard");
 		if (this.guardMethod == null)
@@ -24,6 +27,10 @@ public abstract class GuardedAnnotation {
 
 	public Class<? extends Annotation> getAnnotationClass() {
 		return annotationClass;
+	}
+
+	public Class<? extends IArtifactOp> getOpMethodClass() {
+		return opMethodClass;
 	}
 
 	public Method getGuardMethod() {

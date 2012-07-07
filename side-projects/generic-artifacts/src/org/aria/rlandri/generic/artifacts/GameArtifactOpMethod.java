@@ -24,7 +24,8 @@ public class GameArtifactOpMethod extends ArtifactOpMethod {
 	public void execSavedParameters() throws Exception {
 		String msgFmt = "%s: executing op using saved parameters %s";
 		logger.debug(String.format(msgFmt, this, Arrays.toString(actualParams)));
-		super.exec(actualParams);
+		if (actualParams != null)
+			super.exec(actualParams);
 	}
 
 	// TODO (tibi) check if coordinator is running

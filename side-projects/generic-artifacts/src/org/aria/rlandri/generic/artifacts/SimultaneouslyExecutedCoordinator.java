@@ -1,6 +1,8 @@
 package org.aria.rlandri.generic.artifacts;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -34,7 +36,8 @@ public class SimultaneouslyExecutedCoordinator extends Coordinator {
 		operationQueue.put(agentId, op);
 	}
 
-	@PRIME_AGENT_OPERATION
+	// TODO @PRIME_AGENT_OPERATION
+	@OPERATION
 	void startSubenv() {
 		signal("startSubenv");
 		state = EnvStatus.RUNNING;
@@ -56,6 +59,7 @@ public class SimultaneouslyExecutedCoordinator extends Coordinator {
 					try {
 						op.execSavedParameters();
 					} catch (Exception e) {
+						// TODO log it or something
 						e.printStackTrace();
 					}
 				}
@@ -70,7 +74,8 @@ public class SimultaneouslyExecutedCoordinator extends Coordinator {
 
 	private void registerGameOperations() throws CartagoException {
 		List<GuardedAnnotation> annotations = new ArrayList<GuardedAnnotation>();
-		annotations.add(new GuardedAnnotation(GAME_OPERATION.class) {
+		annotations.add(new GuardedAnnotation(GAME_OPERATION.class,
+				GameArtifactOpMethod.class) {
 
 			@Override
 			public void processMethod(Method method) throws CartagoException {
@@ -78,13 +83,14 @@ public class SimultaneouslyExecutedCoordinator extends Coordinator {
 			}
 
 		});
-		annotations.add(new GuardedAnnotation(PRIME_AGENT_OPERATION.class) {
+		annotations.add(new GuardedAnnotation(PRIME_AGENT_OPERATION.class,
+				GameArtifactOpMethod.class) {
 
 			@Override
 			public void processMethod(Method method) throws CartagoException {
 				// TODO this is iffy, do it the right way
-				if (!getOpUserName().startsWith("prime_agent_s_"))
-					failed("Only the prime agent can execute a PRIME_AGENT_OPERATION");
+				// if (!getOpUserName().startsWith("prime_agent_s_"))
+				// failed("Only the prime agent can execute a PRIME_AGENT_OPERATION");
 				addCustomOperation(this, method);
 			}
 
@@ -111,8 +117,29 @@ public class SimultaneouslyExecutedCoordinator extends Coordinator {
 				guardBody = new ArtifactGuardMethod(this, guardMethod);
 			}
 		}
-		IArtifactOp op = new GameArtifactOpMethod(this, method);
-		defineOp(op, guardBody);
+		Class<? extends IArtifactOp> opMethodClass = guardedAnnotation
+				.getOpMethodClass();
+		Constructor<?> constructor = opMethodClass.getConstructors()[0];
+		try {
+			Object obj = constructor.newInstance(this, method);
+			if (obj instanceof IArtifactOp) {
+				// IArtifactOp op = new GameArtifactOpMethod(this, method);
+				IArtifactOp op = (IArtifactOp) obj;
+				defineOp(op, guardBody);
+			}
+		} catch (IllegalArgumentException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (InstantiationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (InvocationTargetException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	@Override

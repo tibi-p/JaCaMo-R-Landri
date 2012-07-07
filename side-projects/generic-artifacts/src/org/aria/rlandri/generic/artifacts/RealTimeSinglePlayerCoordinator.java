@@ -14,7 +14,8 @@ abstract public class RealTimeSinglePlayerCoordinator extends Coordinator {
 	    privateSubenv.set(getOpUserName() + "_private_workspace");
 	}
 
-	@PRIME_AGENT_OPERATION
+	// TODO @PRIME_AGENT_OPERATION
+	@OPERATION
 	private void getNextAgent(OpFeedbackParam<String> wspName) {
 		if (index == participants.size())
 			wspName.set("no_more");
@@ -22,14 +23,16 @@ abstract public class RealTimeSinglePlayerCoordinator extends Coordinator {
 			wspName.set(participants.get(index) + "_private_workspace");
 	}
 
-	@PRIME_AGENT_OPERATION
+	// TODO @PRIME_AGENT_OPERATION
+	@OPERATION
 	private void incrementIndex() {
 		index++;
 	}
 
 	abstract void registerOperations();
 
-	@PRIME_AGENT_OPERATION
+	// TODO @PRIME_AGENT_OPERATION
+	@OPERATION
 	void checkStatus(OpFeedbackParam<String> status) {
 	}
 
@@ -40,7 +43,8 @@ abstract public class RealTimeSinglePlayerCoordinator extends Coordinator {
 		saveState();
 	}
 
-	@PRIME_AGENT_OPERATION
+	// TODO @PRIME_AGENT_OPERATION
+	@OPERATION
 	void startSubenv() {
 		signal("startSubenv");
 		state = EnvStatus.RUNNING;
