@@ -7,7 +7,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 /**
- * Annotation for a game operation.
+ * Annotation for a prime agent operation.
  * 
  * @author Tiberiu Popa
  */
