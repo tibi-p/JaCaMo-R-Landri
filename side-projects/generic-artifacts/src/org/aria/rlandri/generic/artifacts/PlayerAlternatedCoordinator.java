@@ -102,4 +102,20 @@ public class PlayerAlternatedCoordinator extends Coordinator {
 		}
 	}
 	// TODO internal action to run subenv
+
+	@Override
+	protected void updateRank() {
+		// TODO Auto-generated method stub
+	}
+
+	@Override
+	protected void updateCurrency() {
+		// TODO Auto-generated method stub
+	}
+
+	@Override
+	protected void saveState() {
+		// TODO Auto-generated method stub
+	}
+
 }

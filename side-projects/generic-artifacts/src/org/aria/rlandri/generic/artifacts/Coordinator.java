@@ -22,8 +22,7 @@ public abstract class Coordinator extends Artifact {
 	enum EnvStatus { PRIMORDIAL, INITIATED, RUNNING, EVALUATING, FINISHED};
 	EnvStatus state = EnvStatus.PRIMORDIAL;
 	public static final int realTimeSP = 0, realTimeNeg = 1, turnBasedSimultaneous = 2, turnBasedAlternative = 3;
-	
-	
+
 	void init() throws CartagoException {
 		try{
 			participants = new ArrayList<String>();
@@ -38,7 +37,8 @@ public abstract class Coordinator extends Artifact {
 			mas2j parser = new mas2j(new FileInputStream(mas2jFile));
 			MAS2JProject project = parser.mas();
 			for(AgentParameters ap : project.getAgents()){
-				if(!ap.getAgName().contains("prime_agent_s"))
+				// TODO again, very iffy
+				if(!ap.getAgName().startsWith("prime_agent_s_"))
 					participants.add(ap.getAgName());
 			}
 			state = EnvStatus.INITIATED;
@@ -49,6 +49,12 @@ public abstract class Coordinator extends Artifact {
 		}
 	}
 
+	protected abstract void updateRank();
+
+	protected abstract void updateCurrency();
+
+	protected abstract void saveState();
+
 	@OPERATION
 	abstract void registerAgent(OpFeedbackParam<String> wsp) throws Exception;
 	
@@ -57,4 +63,5 @@ public abstract class Coordinator extends Artifact {
 	
 	@OPERATION
 	abstract void finishSubenv();
+
 }

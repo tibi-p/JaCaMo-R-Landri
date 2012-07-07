@@ -10,6 +10,7 @@ import org.apache.commons.collections.map.MultiValueMap;
 import org.aria.rlandri.generic.artifacts.annotation.GAME_OPERATION;
 import org.aria.rlandri.generic.artifacts.annotation.GuardedAnnotation;
 import org.aria.rlandri.generic.artifacts.annotation.GuardedAnnotationProcessor;
+import org.aria.rlandri.generic.artifacts.annotation.PRIME_AGENT_OPERATION;
 import org.aria.rlandri.generic.artifacts.util.ReflectionUtils;
 
 import cartago.AgentId;
@@ -33,12 +34,10 @@ public class SimultaneouslyExecutedCoordinator extends Coordinator {
 		operationQueue.put(agentId, op);
 	}
 
-	@OPERATION
+	@PRIME_AGENT_OPERATION
 	void startSubenv() {
-		if (getOpUserName().equals("prime_agent_s_generic")) {
-			signal("startSubenv");
-			state = EnvStatus.RUNNING;
-		}
+		signal("startSubenv");
+		state = EnvStatus.RUNNING;
 	}
 
 	@OPERATION
@@ -75,6 +74,17 @@ public class SimultaneouslyExecutedCoordinator extends Coordinator {
 
 			@Override
 			public void processMethod(Method method) throws CartagoException {
+				addCustomOperation(this, method);
+			}
+
+		});
+		annotations.add(new GuardedAnnotation(PRIME_AGENT_OPERATION.class) {
+
+			@Override
+			public void processMethod(Method method) throws CartagoException {
+				// TODO this is iffy, do it the right way
+				if (!getOpUserName().startsWith("prime_agent_s_"))
+					failed("Only the prime agent can execute a PRIME_AGENT_OPERATION");
 				addCustomOperation(this, method);
 			}
 
@@ -117,6 +127,21 @@ public class SimultaneouslyExecutedCoordinator extends Coordinator {
 	void finishSubenv() {
 		// TODO Auto-generated method stub
 
+	}
+
+	@Override
+	protected void updateRank() {
+		// TODO Auto-generated method stub
+	}
+
+	@Override
+	protected void updateCurrency() {
+		// TODO Auto-generated method stub
+	}
+
+	@Override
+	protected void saveState() {
+		// TODO Auto-generated method stub
 	}
 
 }
