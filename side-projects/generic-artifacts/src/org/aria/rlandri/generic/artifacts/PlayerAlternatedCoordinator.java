@@ -3,6 +3,8 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.aria.rlandri.generic.artifacts.Coordinator.EnvStatus;
+
 import cartago.AgentId;
 import cartago.CartagoException;
 import cartago.OPERATION;
@@ -27,13 +29,32 @@ public class PlayerAlternatedCoordinator extends Coordinator {
 	public static final int STEPS = 10;
 	public static final int TURN_LENGTH = 1000;
 
-	@Override
-	void startSubenv() throws CartagoException
+	void init()
 	{
-		super.init();
+		//super.init();
 		agents= new HashMap<String,AgentId>();
 		order  = new LinkedList<String>();
+	}
+	
+	// TODO use status here
+		@OPERATION
+		void registerAgent(OpFeedbackParam<String> wsp) throws InterruptedException
+		{
+			AgentId aid= this.getOpUserId();
+			String name = this.getOpUserName();
+			if(order.contains(name))
+				return;
+			agents.put(name,aid);
+			order.add(name);
+			wsp.set("NA");
 
+		}
+	
+	@OPERATION
+	void startSubenv() throws CartagoException, InterruptedException
+	{
+		signal("startSubenv");
+		runSubEnv();
 	}
 
 	private void runSubEnv() throws InterruptedException
@@ -50,26 +71,7 @@ public class PlayerAlternatedCoordinator extends Coordinator {
 		
 	}
 
-	// TODO use status here
-	@OPERATION
-	void registerAgent(OpFeedbackParam<String> wsp) throws InterruptedException
-	{
-		AgentId aid= this.getOpUserId();
-		String name = this.getOpUserName();
-		if(order.contains(name))
-			return;
-		agents.put(name,aid);
-		order.add(name);
-		wsp.set("NA");
-
-		// Subenv starts running when every participant registered
-		if(participants.size()==order.size())
-		{
-			runSubEnv();
-		}
-
-	}
-
+	
 	private void executeStep() throws InterruptedException
 	{
 		for(currentAgent=0;currentAgent<order.size();currentAgent++)
