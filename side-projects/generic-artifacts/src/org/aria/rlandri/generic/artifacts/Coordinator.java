@@ -61,7 +61,9 @@ public abstract class Coordinator extends Artifact {
 	protected abstract void saveState();
 
 	@OPERATION
-	abstract void registerAgent(OpFeedbackParam<String> wsp) throws Exception;
+	void registerAgent(OpFeedbackParam<String> wsp) throws Exception{
+	    agents.put(getOpUserName(), getOpUserId());
+	}
 	
 	@OPERATION
 	abstract void startSubenv() throws Exception;
