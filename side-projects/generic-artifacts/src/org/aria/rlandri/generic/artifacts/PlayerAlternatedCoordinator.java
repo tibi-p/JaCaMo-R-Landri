@@ -12,6 +12,7 @@ import org.aria.rlandri.generic.artifacts.annotation.PRIME_AGENT_OPERATION;
 import cartago.AgentId;
 import cartago.CartagoException;
 import cartago.IArtifactOp;
+import cartago.INTERNAL_OPERATION;
 import cartago.OPERATION;
 import cartago.OpFeedbackParam;
 
@@ -54,7 +55,7 @@ public class PlayerAlternatedCoordinator extends Coordinator {
 	@OPERATION
 	void startSubenv() throws InterruptedException{
 		super.startSubenv();
-		runSubEnv();
+		execInternalOp("runSubEnv");
 	}
 
 	@Override
@@ -70,7 +71,8 @@ public class PlayerAlternatedCoordinator extends Coordinator {
 		processor.processAnnotations(annotations);
 	}
 
-	private void runSubEnv() throws InterruptedException
+	@INTERNAL_OPERATION
+	void runSubEnv() throws InterruptedException
 	{
 		for(currentStep = 1;currentStep<=STEPS;currentStep++)
 		{
@@ -83,7 +85,7 @@ public class PlayerAlternatedCoordinator extends Coordinator {
 		for(currentAgent=0;currentAgent<order.size();currentAgent++)
 		{
 			startPlayerTurn();
-			wait(TURN_LENGTH);
+			await_time(TURN_LENGTH);
 			processTurn();
 		}
 	}
