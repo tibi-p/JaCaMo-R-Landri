@@ -27,7 +27,6 @@ endSign("no_more").
 +!makePrivateWsp: not nextParticipant("no_more")
 		<- 	?nextParticipant(AgentWsp);
 			createWorkspace(AgentWsp);
-			incrementIndex;
 			getNextAgent(ParticipantWsp);
 			-+nextParticipant(ParticipantWsp);
 			!makePrivateWsp.

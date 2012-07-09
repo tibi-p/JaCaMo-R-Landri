@@ -19,14 +19,10 @@ abstract public class RealTimeSinglePlayerCoordinator extends Coordinator {
 	private void getNextAgent(OpFeedbackParam<String> wspName) {
 		if (index == participants.size())
 			wspName.set("no_more");
-		else
+		else{
 			wspName.set(participants.get(index) + "_private_workspace");
-	}
-
-	// TODO @PRIME_AGENT_OPERATION
-	@OPERATION
-	private void incrementIndex() {
-		index++;
+			index++;
+		}
 	}
 
 	abstract void registerOperations();
