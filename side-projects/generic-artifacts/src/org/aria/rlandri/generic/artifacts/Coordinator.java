@@ -213,7 +213,7 @@ public abstract class Coordinator extends Artifact {
 	}
 
 	@PRIME_AGENT_OPERATION
-	void startSubenv() throws InterruptedException {
+	void startSubenv() {
 		signal("startSubenv");
 		state = EnvStatus.RUNNING;
 	}

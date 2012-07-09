@@ -48,9 +48,9 @@ public class PlayerAlternatedCoordinator extends Coordinator {
 	public void addOpMethod(IArtifactOp op, Object[] params) {
 		turnOpClosure = new ParameterizedOperation(op, params);
 	}
-	
-	@OPERATION
-	void startSubenv() throws InterruptedException{
+
+	@PRIME_AGENT_OPERATION
+	void startSubenv() {
 		super.startSubenv();
 		execInternalOp("runSubEnv");
 	}
@@ -64,7 +64,7 @@ public class PlayerAlternatedCoordinator extends Coordinator {
 	}
 
 	@INTERNAL_OPERATION
-	void runSubEnv() throws InterruptedException
+	void runSubEnv()
 	{
 		for(currentStep = 1;currentStep<=STEPS;currentStep++)
 		{
@@ -72,7 +72,7 @@ public class PlayerAlternatedCoordinator extends Coordinator {
 		}
 	}
 
-	private void executeStep() throws InterruptedException
+	private void executeStep()
 	{
 		for(currentAgent=0;currentAgent<order.size();currentAgent++)
 		{
