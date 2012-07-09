@@ -36,12 +36,6 @@ public class SimultaneouslyExecutedCoordinator extends Coordinator {
 		operationQueue.put(agentId, new ParameterizedOperation(op, params));
 	}
 
-	@PRIME_AGENT_OPERATION
-	void startSubenv() {
-		signal("startSubenv");
-		state = EnvStatus.RUNNING;
-	}
-
 	@OPERATION
 	void registerAgent() {
 

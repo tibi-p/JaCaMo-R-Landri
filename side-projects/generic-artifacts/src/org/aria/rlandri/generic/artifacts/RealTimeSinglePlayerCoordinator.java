@@ -68,12 +68,6 @@ abstract public class RealTimeSinglePlayerCoordinator extends Coordinator {
 		saveState();
 	}
 
-	@PRIME_AGENT_OPERATION
-	void startSubenv() {
-		signal("startSubenv");
-		state = EnvStatus.RUNNING;
-	}
-
 	@Override
 	void finishSubenv() {
 		updateRank();

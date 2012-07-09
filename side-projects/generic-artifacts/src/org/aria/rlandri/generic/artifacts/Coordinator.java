@@ -11,6 +11,8 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.util.HashMap;
 
+import org.aria.rlandri.generic.artifacts.annotation.PRIME_AGENT_OPERATION;
+
 import cartago.AgentId;
 import cartago.Artifact;
 import cartago.CartagoException;
@@ -83,8 +85,13 @@ public abstract class Coordinator extends Artifact {
 		agents.put(getOpUserName(), getOpUserId());
 	}
 
-	@OPERATION
-	abstract void startSubenv() throws Exception;
+
+	@PRIME_AGENT_OPERATION
+	void startSubenv() throws InterruptedException {
+		signal("startSubenv");
+		state = EnvStatus.RUNNING;
+	}
+
 
 	@OPERATION
 	abstract void finishSubenv();

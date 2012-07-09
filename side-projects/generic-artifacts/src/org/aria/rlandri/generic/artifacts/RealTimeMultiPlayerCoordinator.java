@@ -14,12 +14,6 @@ abstract public class RealTimeMultiPlayerCoordinator extends Coordinator {
 	}
 
 	@Override
-	void startSubenv() throws Exception {
-		signal("startSubenv");
-		state = EnvStatus.RUNNING;
-	}
-
-	@Override
 	void finishSubenv() {
 		updateRank();
 		updateCurrency();

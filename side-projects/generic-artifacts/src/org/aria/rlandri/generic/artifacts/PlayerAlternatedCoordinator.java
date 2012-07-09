@@ -52,9 +52,8 @@ public class PlayerAlternatedCoordinator extends Coordinator {
 	*/
 	
 	@OPERATION
-	void startSubenv() throws CartagoException, InterruptedException
-	{
-		signal("startSubenv");
+	void startSubenv() throws InterruptedException{
+		super.startSubenv();
 		runSubEnv();
 	}
 
