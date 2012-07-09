@@ -13,8 +13,8 @@ abstract public class RealTimeSinglePlayerCoordinator extends Coordinator {
 	private int index = 0;
 
 	@OPERATION
-	void registerAgent(OpFeedbackParam<String> privateSubenv) throws CartagoException{
-		super.init();
+	void registerAgent(OpFeedbackParam<String> privateSubenv) throws Exception{
+		super.registerAgent(null);
 	    privateSubenv.set(getOpUserName() + "_private_workspace");
 	}
 
