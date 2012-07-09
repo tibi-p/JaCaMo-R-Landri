@@ -9,13 +9,21 @@ import java.io.File;
 import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.HashMap;
 
+import org.aria.rlandri.generic.artifacts.annotation.GuardedAnnotation;
 import org.aria.rlandri.generic.artifacts.annotation.PRIME_AGENT_OPERATION;
+import org.aria.rlandri.generic.artifacts.util.ReflectionUtils;
 
 import cartago.AgentId;
 import cartago.Artifact;
+import cartago.ArtifactGuardMethod;
 import cartago.CartagoException;
+import cartago.IArtifactOp;
 import cartago.OPERATION;
 import cartago.OpFeedbackParam;
 
@@ -53,6 +61,8 @@ public abstract class Coordinator extends Artifact {
 						}
 			}
 			state = EnvStatus.INITIATED;
+
+			registerCustomOperations();
 		} catch (FileNotFoundException e) {
 			throw new CartagoException("Could not find mas2j file");
 		} catch (ParseException e) {
@@ -73,6 +83,42 @@ public abstract class Coordinator extends Artifact {
 		// TODO iffy prime agent check
 		return agentName.startsWith("prime_agent_s_");
 	}
+
+	protected void addCustomOperation(GuardedAnnotation guardedAnnotation,
+			Method method) throws CartagoException {
+		Annotation annotation = guardedAnnotation.getMethodAnnotation(method);
+		System.out.println("-- " + method);
+		System.out.println("-- " + annotation);
+		String guard = guardedAnnotation.invokeGuardMethod(annotation);
+		ArtifactGuardMethod guardBody = null;
+		if (!"".equals(guard)) {
+			Method guardMethod = ReflectionUtils.getMethodInHierarchy(
+					getClass(), guard, method.getParameterTypes());
+			if (guardMethod == null) {
+				throw new CartagoException("invalid guard: " + guard);
+			} else {
+				guardBody = new ArtifactGuardMethod(this, guardMethod);
+			}
+		}
+		Constructor<?> constructor = guardedAnnotation.getOpMethodConstructor();
+		try {
+			Object obj = constructor.newInstance(this, method);
+			if (obj instanceof IArtifactOp) {
+				IArtifactOp op = (IArtifactOp) obj;
+				defineOp(op, guardBody);
+			}
+		} catch (IllegalArgumentException e) {
+			throw new CartagoException(e.getMessage());
+		} catch (InstantiationException e) {
+			throw new CartagoException(e.getMessage());
+		} catch (IllegalAccessException e) {
+			throw new CartagoException(e.getMessage());
+		} catch (InvocationTargetException e) {
+			throw new CartagoException(e.getMessage());
+		}
+	}
+
+	protected abstract void registerCustomOperations() throws CartagoException;
 
 	protected abstract void updateRank();
 

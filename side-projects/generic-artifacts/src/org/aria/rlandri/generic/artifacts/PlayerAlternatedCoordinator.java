@@ -1,7 +1,14 @@
 package org.aria.rlandri.generic.artifacts;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+
+import org.aria.rlandri.generic.artifacts.annotation.GAME_OPERATION;
+import org.aria.rlandri.generic.artifacts.annotation.GuardedAnnotation;
+import org.aria.rlandri.generic.artifacts.annotation.GuardedAnnotationProcessor;
+import org.aria.rlandri.generic.artifacts.annotation.PRIME_AGENT_OPERATION;
 
 import cartago.AgentId;
 import cartago.CartagoException;
@@ -55,6 +62,33 @@ public class PlayerAlternatedCoordinator extends Coordinator {
 	void startSubenv() throws InterruptedException{
 		super.startSubenv();
 		runSubEnv();
+	}
+
+	@Override
+	protected void registerCustomOperations() throws CartagoException {
+		List<GuardedAnnotation> annotations = new ArrayList<GuardedAnnotation>();
+		annotations.add(new GuardedAnnotation(GAME_OPERATION.class,
+				SETBGameArtifactOpMethod.class) {
+
+			@Override
+			public void processMethod(Method method) throws CartagoException {
+				addCustomOperation(this, method);
+			}
+
+		});
+		annotations.add(new GuardedAnnotation(PRIME_AGENT_OPERATION.class,
+				PrimeAgentArtifactOpMethod.class) {
+
+			@Override
+			public void processMethod(Method method) throws CartagoException {
+				addCustomOperation(this, method);
+			}
+
+		});
+
+		GuardedAnnotationProcessor processor = new GuardedAnnotationProcessor(
+				getClass());
+		processor.processAnnotations(annotations);
 	}
 
 	private void runSubEnv() throws InterruptedException
