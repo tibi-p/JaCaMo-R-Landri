@@ -28,15 +28,16 @@ import cartago.OPERATION;
 import cartago.OpFeedbackParam;
 
 public abstract class Coordinator extends Artifact {
-	HashMap<String, AgentId> agents;
+
+	public static final int realTimeSP = 0, realTimeNeg = 1,
+			turnBasedSimultaneous = 2, turnBasedAlternative = 3;
+
+	protected HashMap<String, AgentId> agents;
+	private EnvStatus state = EnvStatus.PRIMORDIAL;
 
 	enum EnvStatus {
 		PRIMORDIAL, INITIATED, RUNNING, EVALUATING, FINISHED
 	};
-
-	EnvStatus state = EnvStatus.PRIMORDIAL;
-	public static final int realTimeSP = 0, realTimeNeg = 1,
-			turnBasedSimultaneous = 2, turnBasedAlternative = 3;
 
 	void init() throws CartagoException {
 		try {

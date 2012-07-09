@@ -1,7 +1,6 @@
 package org.aria.rlandri.generic.artifacts;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -25,7 +24,7 @@ public class PlayerAlternatedCoordinator extends Coordinator {
 	private int currentAgent = 0;
 
 	
-	List<String> order;
+	List<String> order = new LinkedList<String>();
 
 	//GameArtifactOpMethod turnOp;
 
@@ -33,13 +32,6 @@ public class PlayerAlternatedCoordinator extends Coordinator {
 	public static final int STEPS = 10;
 	public static final int TURN_LENGTH = 1000;
 
-	void init()
-	{
-		//super.init();
-		agents= new HashMap<String,AgentId>();
-		order  = new LinkedList<String>();
-	}
-	
 	/*
 
 	// TODO use status here
