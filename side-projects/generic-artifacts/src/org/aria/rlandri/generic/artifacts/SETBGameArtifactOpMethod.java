@@ -5,9 +5,7 @@ import java.util.Arrays;
 
 import org.apache.log4j.Logger;
 
-import cartago.ArtifactOpMethod;
-
-public class SETBGameArtifactOpMethod extends ArtifactOpMethod {
+public class SETBGameArtifactOpMethod extends ValidatorArtifactOpMethod {
 
 	private static final Logger logger = Logger
 			.getLogger(SETBGameArtifactOpMethod.class);
@@ -15,8 +13,9 @@ public class SETBGameArtifactOpMethod extends ArtifactOpMethod {
 	private SimultaneouslyExecutedCoordinator coordinator;
 
 	public SETBGameArtifactOpMethod(
-			SimultaneouslyExecutedCoordinator coordinator, Method method) {
-		super(coordinator, method);
+			SimultaneouslyExecutedCoordinator coordinator, Method method,
+			Method validatorMethod) {
+		super(coordinator, method, validatorMethod);
 		this.coordinator = coordinator;
 	}
 
@@ -31,6 +30,7 @@ public class SETBGameArtifactOpMethod extends ArtifactOpMethod {
 	// TODO (mihai) check if running
 	public void exec(Object[] actualParams) throws Exception {
 		coordinator.failIfNotRunning();
+		validate(coordinator, actualParams);
 		String msgFmt = "%s: saving execution with parameters %s";
 		logger.debug(String.format(msgFmt, this, Arrays.toString(actualParams)));
 		coordinator.addOpMethod(this, actualParams);

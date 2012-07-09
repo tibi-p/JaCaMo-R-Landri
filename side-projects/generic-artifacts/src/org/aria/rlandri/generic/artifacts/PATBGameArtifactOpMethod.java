@@ -5,21 +5,19 @@ import java.util.Arrays;
 
 import org.apache.log4j.Logger;
 
-import cartago.ArtifactOpMethod;
-
-public class PATBGameArtifactOpMethod extends ArtifactOpMethod {
+public class PATBGameArtifactOpMethod extends ValidatorArtifactOpMethod {
 
 	private static final Logger logger = Logger
 			.getLogger(PATBGameArtifactOpMethod.class);
-	
+
 	private PlayerAlternatedCoordinator coordinator;
-	
-	public PATBGameArtifactOpMethod(
-			PlayerAlternatedCoordinator coordinator, Method method) {
-		super(coordinator, method);
+
+	public PATBGameArtifactOpMethod(PlayerAlternatedCoordinator coordinator,
+			Method method, Method validatorMethod) {
+		super(coordinator, method, validatorMethod);
 		this.coordinator = coordinator;
 	}
-	
+
 	public void execSavedParameters(Object[] actualParams) throws Exception {
 		String msgFmt = "%s: executing op using saved parameters %s";
 		logger.debug(String.format(msgFmt, this, Arrays.toString(actualParams)));
@@ -31,9 +29,10 @@ public class PATBGameArtifactOpMethod extends ArtifactOpMethod {
 	// TODO (mihai) check if running
 	public void exec(Object[] actualParams) throws Exception {
 		coordinator.failIfNotRunning();
+		validate(coordinator, actualParams);
 		String msgFmt = "%s: saving execution with parameters %s";
 		logger.debug(String.format(msgFmt, this, Arrays.toString(actualParams)));
 		coordinator.addOpMethod(this, actualParams);
 	}
-	
+
 }

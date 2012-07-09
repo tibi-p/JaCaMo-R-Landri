@@ -13,9 +13,13 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.aria.rlandri.generic.artifacts.annotation.GuardedAnnotation;
+import org.aria.rlandri.generic.artifacts.annotation.GuardedAnnotationProcessor;
 import org.aria.rlandri.generic.artifacts.annotation.PRIME_AGENT_OPERATION;
 import org.aria.rlandri.generic.artifacts.util.ReflectionUtils;
 
@@ -32,7 +36,8 @@ public abstract class Coordinator extends Artifact {
 	public static final int realTimeSP = 0, realTimeNeg = 1,
 			turnBasedSimultaneous = 2, turnBasedAlternative = 3;
 
-	protected HashMap<String, AgentId> agents;
+	protected Map<String, AgentId> agents;
+	private List<GuardedAnnotation> annotations = new ArrayList<GuardedAnnotation>();
 	private EnvStatus state = EnvStatus.PRIMORDIAL;
 
 	enum EnvStatus {
@@ -43,18 +48,25 @@ public abstract class Coordinator extends Artifact {
 
 		public CoordinatorAnnotation(
 				Class<? extends Annotation> annotationClass,
-				Class<? extends IArtifactOp> opMethodClass)
-				throws CartagoException {
-			super(annotationClass, opMethodClass);
+				Class<? extends IArtifactOp> opMethodClass,
+				boolean mandatoryValidator) throws CartagoException {
+			super(annotationClass, opMethodClass, mandatoryValidator);
 		}
 
 		@Override
 		public void processMethod(Method method) throws CartagoException {
-			addCustomOperation(this, method);
+			addCustomAnnotation(this, method);
 		}
 
 	}
 
+	/**
+	 * The basic initialisation of the coordinator. All subclasses that
+	 * reimplement init must make a call to super.
+	 * 
+	 * @throws CartagoException
+	 *             if the artifact could not be properly initialised
+	 */
 	void init() throws CartagoException {
 		try {
 			agents = new HashMap<String, AgentId>();
@@ -79,7 +91,7 @@ public abstract class Coordinator extends Artifact {
 			}
 			state = EnvStatus.INITIATED;
 
-			registerCustomOperations();
+			registerOperations();
 		} catch (FileNotFoundException e) {
 			throw new CartagoException("Could not find mas2j file");
 		} catch (ParseException e) {
@@ -87,25 +99,63 @@ public abstract class Coordinator extends Artifact {
 		}
 	}
 
+	/**
+	 * Fails if the coordinator is not currently in the running state.
+	 */
 	public void failIfNotRunning() {
 		if (state != EnvStatus.RUNNING)
 			failed("The coordinator is not in running mode");
 	}
 
+	/**
+	 * Returns <tt>true</tt> if the calling agent is the prime agent.
+	 * 
+	 * @return <tt>true</tt> if the calling agent is the prime agent
+	 */
 	public boolean isPrimeAgent() {
 		return isPrimeAgent(getOpUserName());
 	}
 
+	/**
+	 * Returns <tt>true</tt> if <tt>agentName</tt> is the prime agent.
+	 * 
+	 * @return <tt>true</tt> if <tt>agentName</tt> is the prime agent
+	 */
 	public boolean isPrimeAgent(String agentName) {
 		// TODO iffy prime agent check
 		return agentName.startsWith("prime_agent_s_");
 	}
 
-	protected void addCustomOperation(GuardedAnnotation guardedAnnotation,
+	/**
+	 * Appends the custom annotation to the list of operations.
+	 * 
+	 * @param annotation
+	 *            the custom annotation to be added
+	 */
+	protected void addOperation(GuardedAnnotation annotation) {
+		annotations.add(annotation);
+	}
+
+	/**
+	 * Fills the list of operations with the desired custom annotations.
+	 * 
+	 * @throws CartagoException
+	 *             if the custom annotations fail to be valid
+	 */
+	protected abstract void fillOperations() throws CartagoException;
+
+	protected abstract void updateRank();
+
+	protected abstract void updateCurrency();
+
+	protected abstract void saveState();
+
+	private void addCustomAnnotation(GuardedAnnotation guardedAnnotation,
 			Method method) throws CartagoException {
 		Annotation annotation = guardedAnnotation.getMethodAnnotation(method);
 		System.out.println("-- " + method);
 		System.out.println("-- " + annotation);
+
 		String guard = guardedAnnotation.invokeGuardMethod(annotation);
 		ArtifactGuardMethod guardBody = null;
 		if (!"".equals(guard)) {
@@ -117,9 +167,23 @@ public abstract class Coordinator extends Artifact {
 				guardBody = new ArtifactGuardMethod(this, guardMethod);
 			}
 		}
+
+		String validator = guardedAnnotation.invokeValidatorMethod(annotation);
+		Method validatorMethod = null;
+		if (!"".equals(validator)) {
+			validatorMethod = ReflectionUtils.getMethodInHierarchy(getClass(),
+					validator, method.getParameterTypes());
+			if (validatorMethod == null) {
+				throw new CartagoException("invalid validator: " + validator);
+			}
+		} else if (guardedAnnotation.isValidatorMandatory()) {
+			String errMsg = "the operation does not specify a validator";
+			throw new CartagoException(errMsg);
+		}
+
 		Constructor<?> constructor = guardedAnnotation.getOpMethodConstructor();
 		try {
-			Object obj = constructor.newInstance(this, method);
+			Object obj = constructor.newInstance(this, method, validatorMethod);
 			if (obj instanceof IArtifactOp) {
 				IArtifactOp op = (IArtifactOp) obj;
 				defineOp(op, guardBody);
@@ -135,13 +199,13 @@ public abstract class Coordinator extends Artifact {
 		}
 	}
 
-	protected abstract void registerCustomOperations() throws CartagoException;
+	private void registerOperations() throws CartagoException {
+		fillOperations();
 
-	protected abstract void updateRank();
-
-	protected abstract void updateCurrency();
-
-	protected abstract void saveState();
+		GuardedAnnotationProcessor processor = new GuardedAnnotationProcessor(
+				getClass());
+		processor.processAnnotations(annotations);
+	}
 
 	@OPERATION
 	void registerAgent(OpFeedbackParam<String> wsp) throws Exception {

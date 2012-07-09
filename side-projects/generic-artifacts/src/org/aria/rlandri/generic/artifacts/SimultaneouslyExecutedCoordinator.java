@@ -1,13 +1,9 @@
 package org.aria.rlandri.generic.artifacts;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 
 import org.apache.commons.collections.map.MultiValueMap;
 import org.aria.rlandri.generic.artifacts.annotation.GAME_OPERATION;
-import org.aria.rlandri.generic.artifacts.annotation.GuardedAnnotation;
-import org.aria.rlandri.generic.artifacts.annotation.GuardedAnnotationProcessor;
 import org.aria.rlandri.generic.artifacts.annotation.PRIME_AGENT_OPERATION;
 
 import cartago.AgentId;
@@ -61,16 +57,11 @@ public class SimultaneouslyExecutedCoordinator extends Coordinator {
 	}
 
 	@Override
-	protected void registerCustomOperations() throws CartagoException {
-		List<GuardedAnnotation> annotations = new ArrayList<GuardedAnnotation>();
-		annotations.add(new CoordinatorAnnotation(GAME_OPERATION.class,
-				SETBGameArtifactOpMethod.class));
-		annotations.add(new CoordinatorAnnotation(PRIME_AGENT_OPERATION.class,
-				PrimeAgentArtifactOpMethod.class));
-
-		GuardedAnnotationProcessor processor = new GuardedAnnotationProcessor(
-				getClass());
-		processor.processAnnotations(annotations);
+	protected void fillOperations() throws CartagoException {
+		addOperation(new CoordinatorAnnotation(GAME_OPERATION.class,
+				SETBGameArtifactOpMethod.class, true));
+		addOperation(new CoordinatorAnnotation(PRIME_AGENT_OPERATION.class,
+				PrimeAgentArtifactOpMethod.class, false));
 	}
 
 	@Override

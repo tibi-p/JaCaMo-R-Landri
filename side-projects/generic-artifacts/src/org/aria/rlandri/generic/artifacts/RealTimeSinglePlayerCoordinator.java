@@ -55,8 +55,6 @@ abstract public class RealTimeSinglePlayerCoordinator extends Coordinator {
 		}
 	}
 
-	abstract void registerOperations();
-
 	@PRIME_AGENT_OPERATION
 	void checkStatus(OpFeedbackParam<String> status) {
 	}
