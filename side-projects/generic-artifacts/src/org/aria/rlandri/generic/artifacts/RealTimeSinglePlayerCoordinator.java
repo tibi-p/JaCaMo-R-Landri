@@ -3,6 +3,8 @@ package org.aria.rlandri.generic.artifacts;
 import java.util.ArrayList;
 import java.util.Collections;
 
+import org.aria.rlandri.generic.artifacts.annotation.PRIME_AGENT_OPERATION;
+
 import cartago.OPERATION;
 import cartago.OpFeedbackParam;
 
@@ -22,8 +24,7 @@ abstract public class RealTimeSinglePlayerCoordinator extends Coordinator {
 		else privateSubenv.set(getOpUserName() + "_private_workspace");
 	}
 
-	// TODO @PRIME_AGENT_OPERATION
-	@OPERATION
+	@PRIME_AGENT_OPERATION
 	private void getNextAgent(OpFeedbackParam<String> wspName) {
 		ArrayList<String> agents = new ArrayList<String>(super.agents.keySet());
 		Collections.sort(agents);
@@ -56,8 +57,7 @@ abstract public class RealTimeSinglePlayerCoordinator extends Coordinator {
 
 	abstract void registerOperations();
 
-	// TODO @PRIME_AGENT_OPERATION
-	@OPERATION
+	@PRIME_AGENT_OPERATION
 	void checkStatus(OpFeedbackParam<String> status) {
 	}
 
@@ -68,8 +68,7 @@ abstract public class RealTimeSinglePlayerCoordinator extends Coordinator {
 		saveState();
 	}
 
-	// TODO @PRIME_AGENT_OPERATION
-	@OPERATION
+	@PRIME_AGENT_OPERATION
 	void startSubenv() {
 		signal("startSubenv");
 		state = EnvStatus.RUNNING;
