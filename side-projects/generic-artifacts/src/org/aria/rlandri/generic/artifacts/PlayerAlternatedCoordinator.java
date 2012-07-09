@@ -13,6 +13,7 @@ import cartago.AgentId;
 import cartago.CartagoException;
 import cartago.IArtifactOp;
 import cartago.OPERATION;
+import cartago.OpFeedbackParam;
 
 /**
  * @author Andrei Geacar
@@ -33,23 +34,20 @@ public class PlayerAlternatedCoordinator extends Coordinator {
 	public static final int STEPS = 10;
 	public static final int TURN_LENGTH = 1000;
 
-	/*
+	
 
 	// TODO use status here
 		@OPERATION
-		void registerAgent(OpFeedbackParam<String> wsp) throws InterruptedException
+		void registerAgent(OpFeedbackParam<String> wsp) throws Exception
 		{
-			AgentId aid= this.getOpUserId();
+			super.registerAgent(wsp);
 			String name = this.getOpUserName();
-			if(order.contains(name))
-				return;
-			agents.put(name,aid);
 			order.add(name);
 			wsp.set("NA");
 
 		}
 	
-	*/
+	
 	
 	public void addOpMethod(IArtifactOp op, Object[] params) {
 		AgentId agentId = getOpUserId();
