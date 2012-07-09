@@ -1,6 +1,5 @@
 package org.aria.rlandri.generic.artifacts;
 
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -64,24 +63,10 @@ public class SimultaneouslyExecutedCoordinator extends Coordinator {
 	@Override
 	protected void registerCustomOperations() throws CartagoException {
 		List<GuardedAnnotation> annotations = new ArrayList<GuardedAnnotation>();
-		annotations.add(new GuardedAnnotation(GAME_OPERATION.class,
-				SETBGameArtifactOpMethod.class) {
-
-			@Override
-			public void processMethod(Method method) throws CartagoException {
-				addCustomOperation(this, method);
-			}
-
-		});
-		annotations.add(new GuardedAnnotation(PRIME_AGENT_OPERATION.class,
-				PrimeAgentArtifactOpMethod.class) {
-
-			@Override
-			public void processMethod(Method method) throws CartagoException {
-				addCustomOperation(this, method);
-			}
-
-		});
+		annotations.add(new CoordinatorAnnotation(GAME_OPERATION.class,
+				SETBGameArtifactOpMethod.class));
+		annotations.add(new CoordinatorAnnotation(PRIME_AGENT_OPERATION.class,
+				PrimeAgentArtifactOpMethod.class));
 
 		GuardedAnnotationProcessor processor = new GuardedAnnotationProcessor(
 				getClass());
@@ -93,13 +78,6 @@ public class SimultaneouslyExecutedCoordinator extends Coordinator {
 	void registerAgent(OpFeedbackParam<String> wsp) {
 		// TODO Auto-generated method stub
 		wsp.set("NA");
-	}
-
-	@Override
-	@OPERATION
-	void finishSubenv() {
-		// TODO Auto-generated method stub
-
 	}
 
 	@Override

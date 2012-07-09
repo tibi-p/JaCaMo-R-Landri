@@ -61,18 +61,4 @@ abstract public class RealTimeSinglePlayerCoordinator extends Coordinator {
 	void checkStatus(OpFeedbackParam<String> status) {
 	}
 
-	@OPERATION
-	private void finishEnv(){
-		updateRank();
-		updateCurrency();
-		saveState();
-	}
-
-	@Override
-	void finishSubenv() {
-		updateRank();
-		updateCurrency();
-		saveState();
-	}
-
 }

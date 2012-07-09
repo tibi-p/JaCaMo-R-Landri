@@ -39,6 +39,22 @@ public abstract class Coordinator extends Artifact {
 		PRIMORDIAL, INITIATED, RUNNING, EVALUATING, FINISHED
 	};
 
+	protected class CoordinatorAnnotation extends GuardedAnnotation {
+
+		public CoordinatorAnnotation(
+				Class<? extends Annotation> annotationClass,
+				Class<? extends IArtifactOp> opMethodClass)
+				throws CartagoException {
+			super(annotationClass, opMethodClass);
+		}
+
+		@Override
+		public void processMethod(Method method) throws CartagoException {
+			addCustomOperation(this, method);
+		}
+
+	}
+
 	void init() throws CartagoException {
 		try {
 			agents = new HashMap<String, AgentId>();
@@ -132,15 +148,17 @@ public abstract class Coordinator extends Artifact {
 		agents.put(getOpUserName(), getOpUserId());
 	}
 
-
 	@PRIME_AGENT_OPERATION
 	void startSubenv() throws InterruptedException {
 		signal("startSubenv");
 		state = EnvStatus.RUNNING;
 	}
 
-
 	@OPERATION
-	abstract void finishSubenv();
+	void finishSubenv() {
+		updateRank();
+		updateCurrency();
+		saveState();
+	}
 
 }

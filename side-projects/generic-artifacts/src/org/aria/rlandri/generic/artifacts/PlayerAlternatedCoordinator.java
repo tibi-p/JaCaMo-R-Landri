@@ -1,5 +1,5 @@
 package org.aria.rlandri.generic.artifacts;
-import java.lang.reflect.Method;
+
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -37,20 +37,17 @@ public class PlayerAlternatedCoordinator extends Coordinator {
 	
 
 	// TODO use status here
-		@OPERATION
-		void registerAgent(OpFeedbackParam<String> wsp) throws Exception
-		{
-			super.registerAgent(wsp);
-			String name = this.getOpUserName();
-			order.add(name);
-			wsp.set("NA");
+	@OPERATION
+	void registerAgent(OpFeedbackParam<String> wsp) throws Exception
+	{
+		super.registerAgent(wsp);
+		String name = this.getOpUserName();
+		order.add(name);
+		wsp.set("NA");
 
-		}
-	
-	
-	
+	}
+
 	public void addOpMethod(IArtifactOp op, Object[] params) {
-		AgentId agentId = getOpUserId();
 		turnOpClosure = new ParameterizedOperation(op, params);
 	}
 	
@@ -63,24 +60,10 @@ public class PlayerAlternatedCoordinator extends Coordinator {
 	@Override
 	protected void registerCustomOperations() throws CartagoException {
 		List<GuardedAnnotation> annotations = new ArrayList<GuardedAnnotation>();
-		annotations.add(new GuardedAnnotation(GAME_OPERATION.class,
-				SETBGameArtifactOpMethod.class) {
-
-			@Override
-			public void processMethod(Method method) throws CartagoException {
-				addCustomOperation(this, method);
-			}
-
-		});
-		annotations.add(new GuardedAnnotation(PRIME_AGENT_OPERATION.class,
-				PrimeAgentArtifactOpMethod.class) {
-
-			@Override
-			public void processMethod(Method method) throws CartagoException {
-				addCustomOperation(this, method);
-			}
-
-		});
+		annotations.add(new CoordinatorAnnotation(GAME_OPERATION.class,
+				SETBGameArtifactOpMethod.class));
+		annotations.add(new CoordinatorAnnotation(
+				PRIME_AGENT_OPERATION.class, PrimeAgentArtifactOpMethod.class));
 
 		GuardedAnnotationProcessor processor = new GuardedAnnotationProcessor(
 				getClass());
@@ -95,13 +78,6 @@ public class PlayerAlternatedCoordinator extends Coordinator {
 		}
 	}
 
-	@Override
-	void finishSubenv()
-	{
-		
-	}
-
-	
 	private void executeStep() throws InterruptedException
 	{
 		for(currentAgent=0;currentAgent<order.size();currentAgent++)
