@@ -3,8 +3,6 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.aria.rlandri.generic.artifacts.Coordinator.EnvStatus;
-
 import cartago.AgentId;
 import cartago.CartagoException;
 import cartago.OPERATION;
@@ -36,6 +34,8 @@ public class PlayerAlternatedCoordinator extends Coordinator {
 		order  = new LinkedList<String>();
 	}
 	
+	/*
+
 	// TODO use status here
 		@OPERATION
 		void registerAgent(OpFeedbackParam<String> wsp) throws InterruptedException
@@ -49,6 +49,8 @@ public class PlayerAlternatedCoordinator extends Coordinator {
 			wsp.set("NA");
 
 		}
+	
+	*/
 	
 	@OPERATION
 	void startSubenv() throws CartagoException, InterruptedException
@@ -96,11 +98,6 @@ public class PlayerAlternatedCoordinator extends Coordinator {
 			turnOp.execSavedParameters();
 		} catch (Exception e) {
 			e.printStackTrace();
-		}
-
-		if(currentAgent==order.size())
-		{
-			currentAgent = 0;
 		}
 	}
 	// TODO internal action to run subenv
