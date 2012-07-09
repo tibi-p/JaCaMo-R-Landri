@@ -20,7 +20,7 @@ public class PlayerAlternatedCoordinator extends Coordinator {
 	private int currentStep = 0;
 	private int currentAgent = 0;
 
-	HashMap<String,AgentId> agents;
+	
 	List<String> order;
 
 	GameArtifactOpMethod turnOp;
