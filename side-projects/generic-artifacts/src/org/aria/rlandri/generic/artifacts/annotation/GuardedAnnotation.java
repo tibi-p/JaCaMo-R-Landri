@@ -1,6 +1,7 @@
 package org.aria.rlandri.generic.artifacts.annotation;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
@@ -12,15 +13,19 @@ import cartago.IArtifactOp;
 public abstract class GuardedAnnotation {
 
 	private final Class<? extends Annotation> annotationClass;
-	private final Class<? extends IArtifactOp> opMethodClass;
+	private final Constructor<?> opMethodConstructor;
 	private final Method guardMethod;
 
 	public GuardedAnnotation(Class<? extends Annotation> annotationClass,
 			Class<? extends IArtifactOp> opMethodClass) throws CartagoException {
-		this.annotationClass = annotationClass;
-		this.opMethodClass = opMethodClass;
-		this.guardMethod = ReflectionUtils.getMethodInHierarchy(
-				annotationClass, "guard");
+		try {
+			this.annotationClass = annotationClass;
+			this.opMethodConstructor = opMethodClass.getConstructors()[0];
+			this.guardMethod = ReflectionUtils.getMethodInHierarchy(
+					annotationClass, "guard");
+		} catch (SecurityException e) {
+			throw new CartagoException(e.getMessage());
+		}
 		if (this.guardMethod == null)
 			throw new CartagoException("the annotation has no guard method");
 	}
@@ -29,8 +34,8 @@ public abstract class GuardedAnnotation {
 		return annotationClass;
 	}
 
-	public Class<? extends IArtifactOp> getOpMethodClass() {
-		return opMethodClass;
+	public Constructor<?> getOpMethodConstructor() {
+		return opMethodConstructor;
 	}
 
 	public Method getGuardMethod() {

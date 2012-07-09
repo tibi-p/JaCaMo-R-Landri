@@ -9,7 +9,6 @@ import java.io.File;
 import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.util.ArrayList;
 import java.util.HashMap;
 
 import cartago.AgentId;
@@ -19,39 +18,58 @@ import cartago.OPERATION;
 import cartago.OpFeedbackParam;
 
 public abstract class Coordinator extends Artifact {
-	HashMap<String,AgentId> agents;
-	enum EnvStatus { PRIMORDIAL, INITIATED, RUNNING, EVALUATING, FINISHED};
+	HashMap<String, AgentId> agents;
+
+	enum EnvStatus {
+		PRIMORDIAL, INITIATED, RUNNING, EVALUATING, FINISHED
+	};
+
 	EnvStatus state = EnvStatus.PRIMORDIAL;
-	public static final int realTimeSP = 0, realTimeNeg = 1, turnBasedSimultaneous = 2, turnBasedAlternative = 3;
+	public static final int realTimeSP = 0, realTimeNeg = 1,
+			turnBasedSimultaneous = 2, turnBasedAlternative = 3;
 
 	void init() throws CartagoException {
-		try{
+		try {
 			agents = new HashMap<String, AgentId>();
-			
+
 			File mas2jFile = new File(".").listFiles(new FileFilter() {
-				
+
 				public boolean accept(File arg0) {
 					return arg0.getAbsolutePath().endsWith("mas2j");
 				}
 			})[0];
-			
+
 			mas2j parser = new mas2j(new FileInputStream(mas2jFile));
 			MAS2JProject project = parser.mas();
-			for(AgentParameters ap : project.getAgents()){
-				if(!ap.getAgName().startsWith("prime_agent_s_"))
-					if(ap.qty == 1){
+			for (AgentParameters ap : project.getAgents()) {
+				if (!ap.getAgName().startsWith("prime_agent_s_"))
+					if (ap.qty == 1) {
 						agents.put(ap.getAgName(), null);
-					}
-					else for(int i = 1; i <= ap.qty; i++){
-						agents.put(ap.getAgName() + "_" + i, null);
-					}
+					} else
+						for (int i = 1; i <= ap.qty; i++) {
+							agents.put(ap.getAgName() + "_" + i, null);
+						}
 			}
 			state = EnvStatus.INITIATED;
 		} catch (FileNotFoundException e) {
-			System.err.println("Could not find mas2j file");
-		} catch (ParseException e){
-			System.err.println("Parse exception for mas2j file");
+			throw new CartagoException("Could not find mas2j file");
+		} catch (ParseException e) {
+			throw new CartagoException("Parse exception for mas2j file");
 		}
+	}
+
+	public void failIfNotRunning() {
+		if (state != EnvStatus.RUNNING)
+			failed("The coordinator is not in running mode");
+	}
+
+	public boolean isPrimeAgent() {
+		return isPrimeAgent(getOpUserName());
+	}
+
+	public boolean isPrimeAgent(String agentName) {
+		// TODO iffy prime agent check
+		return agentName.startsWith("prime_agent_s_");
 	}
 
 	protected abstract void updateRank();
@@ -61,13 +79,13 @@ public abstract class Coordinator extends Artifact {
 	protected abstract void saveState();
 
 	@OPERATION
-	void registerAgent(OpFeedbackParam<String> wsp) throws Exception{
-	    agents.put(getOpUserName(), getOpUserId());
+	void registerAgent(OpFeedbackParam<String> wsp) throws Exception {
+		agents.put(getOpUserName(), getOpUserId());
 	}
-	
+
 	@OPERATION
 	abstract void startSubenv() throws Exception;
-	
+
 	@OPERATION
 	abstract void finishSubenv();
 

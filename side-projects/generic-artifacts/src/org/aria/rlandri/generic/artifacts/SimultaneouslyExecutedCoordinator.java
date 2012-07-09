@@ -31,7 +31,7 @@ public class SimultaneouslyExecutedCoordinator extends Coordinator {
 		registerGameOperations();
 	}
 
-	public void addOpMethod(GameArtifactOpMethod op) {
+	public void addOpMethod(IArtifactOp op) {
 		AgentId agentId = getOpUserId();
 		operationQueue.put(agentId, op);
 	}
@@ -54,8 +54,8 @@ public class SimultaneouslyExecutedCoordinator extends Coordinator {
 		for (Object key : operationQueue.keySet()) {
 			Collection<?> coll = operationQueue.getCollection(key);
 			for (Object value : coll) {
-				if (value instanceof GameArtifactOpMethod) {
-					GameArtifactOpMethod op = (GameArtifactOpMethod) value;
+				if (value instanceof SETBGameArtifactOpMethod) {
+					SETBGameArtifactOpMethod op = (SETBGameArtifactOpMethod) value;
 					try {
 						op.execSavedParameters();
 					} catch (Exception e) {
@@ -75,7 +75,7 @@ public class SimultaneouslyExecutedCoordinator extends Coordinator {
 	private void registerGameOperations() throws CartagoException {
 		List<GuardedAnnotation> annotations = new ArrayList<GuardedAnnotation>();
 		annotations.add(new GuardedAnnotation(GAME_OPERATION.class,
-				GameArtifactOpMethod.class) {
+				SETBGameArtifactOpMethod.class) {
 
 			@Override
 			public void processMethod(Method method) throws CartagoException {
@@ -84,7 +84,7 @@ public class SimultaneouslyExecutedCoordinator extends Coordinator {
 
 		});
 		annotations.add(new GuardedAnnotation(PRIME_AGENT_OPERATION.class,
-				GameArtifactOpMethod.class) {
+				SETBGameArtifactOpMethod.class) {
 
 			@Override
 			public void processMethod(Method method) throws CartagoException {
@@ -117,28 +117,21 @@ public class SimultaneouslyExecutedCoordinator extends Coordinator {
 				guardBody = new ArtifactGuardMethod(this, guardMethod);
 			}
 		}
-		Class<? extends IArtifactOp> opMethodClass = guardedAnnotation
-				.getOpMethodClass();
-		Constructor<?> constructor = opMethodClass.getConstructors()[0];
+		Constructor<?> constructor = guardedAnnotation.getOpMethodConstructor();
 		try {
 			Object obj = constructor.newInstance(this, method);
 			if (obj instanceof IArtifactOp) {
-				// IArtifactOp op = new GameArtifactOpMethod(this, method);
 				IArtifactOp op = (IArtifactOp) obj;
 				defineOp(op, guardBody);
 			}
 		} catch (IllegalArgumentException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			throw new CartagoException(e.getMessage());
 		} catch (InstantiationException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			throw new CartagoException(e.getMessage());
 		} catch (IllegalAccessException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			throw new CartagoException(e.getMessage());
 		} catch (InvocationTargetException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			throw new CartagoException(e.getMessage());
 		}
 	}
 

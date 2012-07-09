@@ -22,7 +22,6 @@
 		<- 	makeArtifact("coordinator",
 				"org.aria.rlandri.generic.artifacts.SimultaneouslyExecutedCoordinator", [], _
 			);
-			lookupArtifact("coordinator", _);
 			hotelCismigiu.
 
 +!makeLogger: true
