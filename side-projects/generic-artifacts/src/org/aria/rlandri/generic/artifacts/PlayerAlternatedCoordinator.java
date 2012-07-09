@@ -6,7 +6,6 @@ import java.util.List;
 import cartago.AgentId;
 import cartago.CartagoException;
 import cartago.OPERATION;
-import cartago.OpFeedbackParam;
 
 /**
  * @author Andrei Geacar
@@ -21,7 +20,7 @@ public class PlayerAlternatedCoordinator extends Coordinator {
 	
 	List<String> order;
 
-	GameArtifactOpMethod turnOp;
+	//GameArtifactOpMethod turnOp;
 
 	// constants for testing purposes
 	public static final int STEPS = 10;
@@ -94,11 +93,13 @@ public class PlayerAlternatedCoordinator extends Coordinator {
 
 	private void  processTurn()
 	{
+		/*
 		try {
 			turnOp.execSavedParameters();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		*/
 	}
 	// TODO internal action to run subenv
 

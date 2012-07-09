@@ -13,7 +13,6 @@ public class SETBGameArtifactOpMethod extends ArtifactOpMethod {
 			.getLogger(SETBGameArtifactOpMethod.class);
 
 	private SimultaneouslyExecutedCoordinator coordinator;
-	private Object[] actualParams;
 
 	public SETBGameArtifactOpMethod(
 			SimultaneouslyExecutedCoordinator coordinator, Method method) {
@@ -21,7 +20,7 @@ public class SETBGameArtifactOpMethod extends ArtifactOpMethod {
 		this.coordinator = coordinator;
 	}
 
-	public void execSavedParameters() throws Exception {
+	public void execSavedParameters(Object[] actualParams) throws Exception {
 		String msgFmt = "%s: executing op using saved parameters %s";
 		logger.debug(String.format(msgFmt, this, Arrays.toString(actualParams)));
 		if (actualParams != null)
@@ -34,8 +33,7 @@ public class SETBGameArtifactOpMethod extends ArtifactOpMethod {
 		coordinator.failIfNotRunning();
 		String msgFmt = "%s: saving execution with parameters %s";
 		logger.debug(String.format(msgFmt, this, Arrays.toString(actualParams)));
-		this.actualParams = actualParams;
-		coordinator.addOpMethod(this);
+		coordinator.addOpMethod(this, actualParams);
 	}
 
 }

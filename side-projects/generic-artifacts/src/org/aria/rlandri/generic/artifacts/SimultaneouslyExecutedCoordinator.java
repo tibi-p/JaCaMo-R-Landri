@@ -31,13 +31,12 @@ public class SimultaneouslyExecutedCoordinator extends Coordinator {
 		registerGameOperations();
 	}
 
-	public void addOpMethod(IArtifactOp op) {
+	public void addOpMethod(IArtifactOp op, Object[] params) {
 		AgentId agentId = getOpUserId();
-		operationQueue.put(agentId, op);
+		operationQueue.put(agentId, new ParameterizedOperation(op, params));
 	}
 
-	// TODO @PRIME_AGENT_OPERATION
-	@OPERATION
+	@PRIME_AGENT_OPERATION
 	void startSubenv() {
 		signal("startSubenv");
 		state = EnvStatus.RUNNING;
@@ -54,10 +53,12 @@ public class SimultaneouslyExecutedCoordinator extends Coordinator {
 		for (Object key : operationQueue.keySet()) {
 			Collection<?> coll = operationQueue.getCollection(key);
 			for (Object value : coll) {
-				if (value instanceof SETBGameArtifactOpMethod) {
-					SETBGameArtifactOpMethod op = (SETBGameArtifactOpMethod) value;
+				if (value instanceof ParameterizedOperation) {
+					ParameterizedOperation entry = (ParameterizedOperation) value;
 					try {
-						op.execSavedParameters();
+						SETBGameArtifactOpMethod op = (SETBGameArtifactOpMethod) entry
+								.getOp();
+						op.execSavedParameters(entry.getParams());
 					} catch (Exception e) {
 						// TODO log it or something
 						e.printStackTrace();
@@ -84,13 +85,10 @@ public class SimultaneouslyExecutedCoordinator extends Coordinator {
 
 		});
 		annotations.add(new GuardedAnnotation(PRIME_AGENT_OPERATION.class,
-				SETBGameArtifactOpMethod.class) {
+				PrimeAgentArtifactOpMethod.class) {
 
 			@Override
 			public void processMethod(Method method) throws CartagoException {
-				// TODO this is iffy, do it the right way
-				// if (!getOpUserName().startsWith("prime_agent_s_"))
-				// failed("Only the prime agent can execute a PRIME_AGENT_OPERATION");
 				addCustomOperation(this, method);
 			}
 
