@@ -10,22 +10,23 @@ import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.HashMap;
 
+import cartago.AgentId;
 import cartago.Artifact;
 import cartago.CartagoException;
 import cartago.OPERATION;
 import cartago.OpFeedbackParam;
 
 public abstract class Coordinator extends Artifact {
-	// TODO transform to map: String -> (AgentId, status)
-	ArrayList<String> participants;
+	HashMap<String,AgentId> agents;
 	enum EnvStatus { PRIMORDIAL, INITIATED, RUNNING, EVALUATING, FINISHED};
 	EnvStatus state = EnvStatus.PRIMORDIAL;
 	public static final int realTimeSP = 0, realTimeNeg = 1, turnBasedSimultaneous = 2, turnBasedAlternative = 3;
 
 	void init() throws CartagoException {
 		try{
-			participants = new ArrayList<String>();
+			agents = new HashMap<String, AgentId>();
 			
 			File mas2jFile = new File(".").listFiles(new FileFilter() {
 				
@@ -37,9 +38,13 @@ public abstract class Coordinator extends Artifact {
 			mas2j parser = new mas2j(new FileInputStream(mas2jFile));
 			MAS2JProject project = parser.mas();
 			for(AgentParameters ap : project.getAgents()){
-				// TODO again, very iffy
 				if(!ap.getAgName().startsWith("prime_agent_s_"))
-					participants.add(ap.getAgName());
+					if(ap.qty == 1){
+						agents.put(ap.getAgName(), null);
+					}
+					else for(int i = 1; i <= ap.qty; i++){
+						agents.put(ap.getAgName() + "_" + i, null);
+					}
 			}
 			state = EnvStatus.INITIATED;
 		} catch (FileNotFoundException e) {
