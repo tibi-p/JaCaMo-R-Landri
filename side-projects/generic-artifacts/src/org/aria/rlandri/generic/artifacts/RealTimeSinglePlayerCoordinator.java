@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import org.aria.rlandri.generic.artifacts.annotation.PRIME_AGENT_OPERATION;
 
+import cartago.CartagoException;
 import cartago.OPERATION;
 import cartago.OpFeedbackParam;
 
@@ -12,7 +13,8 @@ abstract public class RealTimeSinglePlayerCoordinator extends Coordinator {
 	private int index = 0;
 
 	@OPERATION
-	void registerAgent(OpFeedbackParam<String> privateSubenv){
+	void registerAgent(OpFeedbackParam<String> privateSubenv) throws CartagoException{
+		super.init();
 	    privateSubenv.set(getOpUserName() + "_private_workspace");
 	}
 
