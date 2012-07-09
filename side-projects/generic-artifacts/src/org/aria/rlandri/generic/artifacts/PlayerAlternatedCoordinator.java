@@ -11,6 +11,7 @@ import org.aria.rlandri.generic.artifacts.annotation.PRIME_AGENT_OPERATION;
 
 import cartago.AgentId;
 import cartago.CartagoException;
+import cartago.IArtifactOp;
 import cartago.OPERATION;
 
 /**
@@ -26,7 +27,7 @@ public class PlayerAlternatedCoordinator extends Coordinator {
 	
 	List<String> order = new LinkedList<String>();
 
-	//GameArtifactOpMethod turnOp;
+	ParameterizedOperation turnOpClosure;
 
 	// constants for testing purposes
 	public static final int STEPS = 10;
@@ -49,6 +50,11 @@ public class PlayerAlternatedCoordinator extends Coordinator {
 		}
 	
 	*/
+	
+	public void addOpMethod(IArtifactOp op, Object[] params) {
+		AgentId agentId = getOpUserId();
+		turnOpClosure = new ParameterizedOperation(op, params);
+	}
 	
 	@OPERATION
 	void startSubenv() throws InterruptedException{
@@ -118,15 +124,14 @@ public class PlayerAlternatedCoordinator extends Coordinator {
 
 	private void  processTurn()
 	{
-		/*
 		try {
-			turnOp.execSavedParameters();
+			PATBGameArtifactOpMethod op = (PATBGameArtifactOpMethod)turnOpClosure.getOp();
+			op.execSavedParameters(turnOpClosure.getParams());
 		} catch (Exception e) {
+			// TODO log it or something
 			e.printStackTrace();
 		}
-		*/
 	}
-	// TODO internal action to run subenv
 
 	@Override
 	protected void updateRank() {
