@@ -233,6 +233,4 @@ public abstract class Coordinator extends Artifact {
 		saveState();
 	}
 
-	
-
 }
