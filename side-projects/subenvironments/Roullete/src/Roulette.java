@@ -12,7 +12,7 @@ public class Roulette extends Artifact {
     
 	int [] numbers = new int[]{0,32,15,19,4,21,2,25,17,34,6,27,13,36,11,30,8,23,10,5,24,16,33,1,20,14,31,9,22,18,29,7,28,12,35,3,26};
 
-	private final HashMap<String,Integer> payouts = new HashMap<String,Integer>();
+	private final HashMap<String,Integer> payoffs = new HashMap<String,Integer>();
 
 	{
 		payouts.put("0",35);
@@ -21,6 +21,12 @@ public class Roulette extends Artifact {
 		payouts.put("Street",11);
 		payouts.put("Corner",8);
 		payouts.put("Six",5);
+		payouts.put("Column1",2);
+		payouts.put("Column2",2);
+		payouts.put("Column3",2);
+		payouts.put("Dozen1",2);
+		payouts.put("Dozen2",2);
+		payouts.put("Dozen3",2);
 	}
     
 	HashMap<String,Bet> bets = new HashMap<String,Bet>();
@@ -88,6 +94,11 @@ public class Roulette extends Artifact {
 		System.out.println("Winning number: "+winningNumber + " and color: " +  winningColor);
     }
 	
+	private int payoff(String betType,double betSum)
+	{
+		return betSum*payoffs.get(betType);
+	}
+
 	//TODO: Validation is not done here (eg. users can win with ill formed bets)!!!!!!!!!!!!!!
 	@OPERATION public void payout()
 	{
@@ -107,38 +118,25 @@ public class Roulette extends Artifact {
 			String betType = bet.type;
 			double betSum = bet.sum;
 			Object[] values = bet.betValues;
+
+			boolean won = false;
 			
 			if(betType.equals("0"))
 			{
 				if(winningNumber==0)
-				{
-					updateStandings(player,35*betSum);
-				}
-				else
-				{
-					updateStandings(player,-betSum);
-				}
+					won = true;
 			}
 			
 			if(betType.equals("Single"))
 			{
-
-				
 				int betValue = ((Number)values[0]).intValue();				
-
 				if(winningNumber==betValue)
-				{
-					updateStandings(player,35*betSum);
-				}
-				else
-				{
-					updateStandings(player,-betSum);
-				}
+					won = true;
 			}
 
 			if(betType.equals("Split"))
 			{
-				boolean won = false;
+				
 				for(int i=0;i<values.length;i++)
 				{
 					int value = ((Number)values[i]).intValue();
@@ -147,84 +145,93 @@ public class Roulette extends Artifact {
 						won = true;
 						break;
 					}
-				}
-				if(won)
-					updateStandings(player,17*betSum);
-				else
-					updateStandings(player,-betSum);	
+				}	
 			}
-			
+
+			if(betType.equals("Street"))
+			{
+				
+			}
+
+			if(betType.equals("Corner"))
+			{
+				
+			}
+
+			if(betType.equals("Six"))
+			{
+
+			}
+
+			if(betType.equals("Column1"))
+			{
+				
+			}
+			if(betType.equals("Column2",2)
+			{
+				
+			}
+
+			if(betType.equals("Column3",2)
+			{
+				
+			}
+
+			if(betType.equals("Dozen1",2);
+			{
+				
+			}
+
+			if(betType.equals("Dozen2",2)
+			{
+				
+			}
+
+			if(betType.equals("Dozen3",2)
+			{
+				
+			}
+
 			if(betType.equals("Manque"))
 			{
 				if(winningNumber>=1 && winningNumber<=18)
-				{
-					updateStandings(player,betSum);
-				}
-				else
-				{
-					updateStandings(player,-betSum);
-				}
+					won = true;
 			}
 			
 			if(betType.equals("Passe"))
 			{
 				if(winningNumber>=19 && winningNumber<=36)
-				{
-					updateStandings(player,betSum);
-				}
-				else
-				{
-					updateStandings(player,-betSum);
-				}
+					won = true;
 			}
 			
 			if(betType.equals("Red"))
 			{
 				if(winningColor.equals("red"))
-				{
-					updateStandings(player,betSum);
-				}
-				else
-				{
-					updateStandings(player,-betSum);
-				}
+					won = true;
 			}
 			
 			if(betType.equals("Black"))
 			{
 				if(winningColor.equals("black"))
-				{
-					updateStandings(player,betSum);
-				}
-				else
-				{
-					updateStandings(player,-betSum);
-				}
+					won = true;
 			}
 			
 			if(betType.equals("Odd"))
 			{
 				if(winningNumber%2==1)
-				{
-					updateStandings(player,betSum);
-				}
-				else
-				{
-					updateStandings(player,-betSum);
-				}
+					won = true;
 			}
 			
 			if(betType.equals("Even"))
 			{
 				if(winningNumber%2==0 && winningNumber>0)
-				{
-					updateStandings(player,betSum);
-				}
-				else
-				{
-					updateStandings(player,-betSum);
-				}
+					won = true;
 			}
+
+			if(won)
+				updateStandings(player,payoff(betType,betSum);
+			else
+				updateStandings(player,-betSum);
 		}
 		bets = new HashMap<String,Bet>();
 		System.out.println(standings);
