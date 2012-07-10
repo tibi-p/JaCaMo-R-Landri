@@ -8,7 +8,6 @@ import org.aria.rlandri.generic.artifacts.annotation.PRIME_AGENT_OPERATION;
 
 import cartago.AgentId;
 import cartago.CartagoException;
-import cartago.IArtifactOp;
 import cartago.INTERNAL_OPERATION;
 import cartago.OPERATION;
 import cartago.OpFeedbackParam;
@@ -25,8 +24,6 @@ public class PlayerAlternatedCoordinator extends Coordinator {
 
 	
 	List<String> order = new LinkedList<String>();
-
-	ParameterizedOperation turnOpClosure;
 
 	// constants for testing purposes
 	public static final int STEPS = 10;
@@ -45,8 +42,13 @@ public class PlayerAlternatedCoordinator extends Coordinator {
 
 	}
 
-	public void addOpMethod(IArtifactOp op, Object[] params) {
-		turnOpClosure = new ParameterizedOperation(op, params);
+	public void failIfNotCurrentTurn() {
+		String userName = getOpUserName();
+		if(userName!=order.get(currentAgent))
+		{
+			//TODO: Standard error messages
+			failed("Error message");
+		}
 	}
 
 	@PRIME_AGENT_OPERATION
@@ -78,7 +80,6 @@ public class PlayerAlternatedCoordinator extends Coordinator {
 		{
 			startPlayerTurn();
 			await_time(TURN_LENGTH);
-			processTurn();
 		}
 	}
 
@@ -90,16 +91,7 @@ public class PlayerAlternatedCoordinator extends Coordinator {
 		currentAgent+=1;
 	}
 
-	private void  processTurn()
-	{
-		try {
-			PATBGameArtifactOpMethod op = (PATBGameArtifactOpMethod)turnOpClosure.getOp();
-			op.execSavedParameters(turnOpClosure.getParams());
-		} catch (Exception e) {
-			// TODO log it or something
-			e.printStackTrace();
-		}
-	}
+	
 
 	@Override
 	protected void updateRank() {
