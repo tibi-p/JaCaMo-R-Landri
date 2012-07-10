@@ -40,10 +40,6 @@ public abstract class Coordinator extends Artifact {
 	private List<GuardedAnnotation> annotations = new ArrayList<GuardedAnnotation>();
 	private EnvStatus state = EnvStatus.PRIMORDIAL;
 
-	enum EnvStatus {
-		PRIMORDIAL, INITIATED, RUNNING, EVALUATING, FINISHED
-	};
-
 	protected class CoordinatorAnnotation extends GuardedAnnotation {
 
 		public CoordinatorAnnotation(
@@ -89,7 +85,7 @@ public abstract class Coordinator extends Artifact {
 							agents.put(ap.getAgName() + "_" + i, null);
 						}
 			}
-			state = EnvStatus.INITIATED;
+			setState(EnvStatus.INITIATED);
 
 			registerOperations();
 		} catch (FileNotFoundException e) {
@@ -132,6 +128,16 @@ public abstract class Coordinator extends Artifact {
 	public boolean isPrimeAgent(String agentName) {
 		// TODO iffy prime agent check
 		return agentName.startsWith("prime_agent_s_");
+	}
+
+	/**
+	 * Sets the current state of coordinator to the specified one.
+	 * 
+	 * @param state
+	 *            the new state of the coordinator
+	 */
+	public void setState(EnvStatus state) {
+		this.state = state;
 	}
 
 	/**
@@ -223,7 +229,7 @@ public abstract class Coordinator extends Artifact {
 	@PRIME_AGENT_OPERATION
 	void startSubenv() {
 		signal("startSubenv");
-		state = EnvStatus.RUNNING;
+		setState(EnvStatus.RUNNING);
 	}
 
 	@OPERATION

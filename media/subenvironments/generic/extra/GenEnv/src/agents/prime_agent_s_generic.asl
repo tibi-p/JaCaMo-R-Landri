@@ -20,9 +20,8 @@
 
 +!makeCoordinator: true
 		<- 	makeArtifact("coordinator",
-				"org.aria.rlandri.generic.artifacts.SimultaneouslyExecutedCoordinator", [], _
-			);
-			hotelCismigiu.
+				"org.aria.rlandri.generic.artifacts.PlayerAlternatedCoordinator", [], _
+			).
 
 +!makeLogger: true
 		<- 	makeArtifact("logger",
