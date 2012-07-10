@@ -3,12 +3,14 @@ package org.aria.rlandri.generic.artifacts;
 import java.util.ArrayList;
 import java.util.Collections;
 
+import org.aria.rlandri.generic.artifacts.annotation.GAME_OPERATION;
 import org.aria.rlandri.generic.artifacts.annotation.PRIME_AGENT_OPERATION;
 
+import cartago.CartagoException;
 import cartago.OPERATION;
 import cartago.OpFeedbackParam;
 
-abstract public class RealTimeSinglePlayerCoordinator extends Coordinator {
+public class RealTimeSinglePlayerCoordinator extends Coordinator {
 
 	private int index = 0;
 	private String last;
@@ -60,9 +62,37 @@ abstract public class RealTimeSinglePlayerCoordinator extends Coordinator {
 			index++;
 		}
 	}
-
+	
 	@PRIME_AGENT_OPERATION
 	void checkStatus(OpFeedbackParam<String> status) {
+		
+	}
+
+	@Override
+	protected void fillOperations() throws CartagoException {
+		addOperation(new CoordinatorAnnotation(GAME_OPERATION.class,
+				RTSPGameArtifactOpMethod.class, true));
+		addOperation(new CoordinatorAnnotation(PRIME_AGENT_OPERATION.class,
+				PrimeAgentArtifactOpMethod.class, false));
+	}
+
+	@Override
+	protected void updateRank() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	protected void updateCurrency() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	protected void saveState() {
+		// TODO Auto-generated method stub
+		
 	}
 
 }
+
