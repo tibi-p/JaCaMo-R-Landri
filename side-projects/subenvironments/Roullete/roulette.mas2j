@@ -1,7 +1,11 @@
-/* Jason Project */
-
-MAS roulette {
-
+/* Jason Project */
+
+
+
+MAS roulette {
+
+
+
    infrastructure: Centralised
 
    environment: c4jason.CartagoEnvironment
@@ -17,5 +21,6 @@ MAS roulette {
               "lib/cartago.jar"; // cartago: platform for artifacts
               "lib/c4jason.jar"; // jason-cartago integration
 
-	}
+	}
+
 

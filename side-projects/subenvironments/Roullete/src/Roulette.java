@@ -11,6 +11,17 @@ import java.util.Set;
 public class Roulette extends Artifact {
     
 	int [] numbers = new int[]{0,32,15,19,4,21,2,25,17,34,6,27,13,36,11,30,8,23,10,5,24,16,33,1,20,14,31,9,22,18,29,7,28,12,35,3,26};
+
+	private final HashMap<String,Integer> payouts = new HashMap<String,Integer>();
+
+	{
+		payouts.put("0",35);
+		payouts.put("Single",35);
+		payouts.put("Split",17);
+		payouts.put("Street",11);
+		payouts.put("Corner",8);
+		payouts.put("Six",5);
+	}
     
 	HashMap<String,Bet> bets = new HashMap<String,Bet>();
 	HashMap<String,Double> standings = new HashMap<String,Double>();
@@ -31,35 +42,28 @@ public class Roulette extends Artifact {
 		}
 	}
 	
-    @OPERATION public void init() 
+    	@OPERATION public void init() 
 	{
 
-    }
+    	}
 
-	@OPERATION public void bet(String betName,int betValue,double sum)
-	{
-		String user = getOpUserName();
-		
-		System.out.println(user + " bets " + sum + " gold coins on " + betName);
-		
-		Bet bet = new Bet();
-		bet.sum = sum;
-		bet.type = betName;
-		bet.value = betValue;	
-		
-		bets.put(user,bet);
-	}
-	
 	@OPERATION public void bet(String betName,double sum)
 	{
+		this.bet(betName,null,sum);
+	}	
+
+	@OPERATION public void bet(String betName, Object betValues[], double sum)
+	{
+
 		String user = getOpUserName();
 		
 		System.out.println(user + " bets " + sum + " gold coins on " + betName);
 		
 		Bet bet = new Bet();
+		System.out.println("MONEY: "+sum+"AGENT: "+getOpUserName());
 		bet.sum = sum;
 		bet.type = betName;
-		
+		bet.betValues = betValues;
 		bets.put(user,bet);
 		
 	}
@@ -84,12 +88,10 @@ public class Roulette extends Artifact {
 		System.out.println("Winning number: "+winningNumber + " and color: " +  winningColor);
     }
 	
+	//TODO: Validation is not done here (eg. users can win with ill formed bets)!!!!!!!!!!!!!!
 	@OPERATION public void payout()
 	{
-	
-		
-		
-	
+
 		String user = getOpUserName();
 		if(!user.equals("master"))
 			return;
@@ -99,10 +101,12 @@ public class Roulette extends Artifact {
 		{
 			String player = (String)it.next();
 			Bet bet = bets.get(player);
+
+			
 			
 			String betType = bet.type;
-			int betValue = bet.value;
 			double betSum = bet.sum;
+			Object[] values = bet.betValues;
 			
 			if(betType.equals("0"))
 			{
@@ -116,8 +120,12 @@ public class Roulette extends Artifact {
 				}
 			}
 			
-			if(betType.equals("Number"))
+			if(betType.equals("Single"))
 			{
+
+				
+				int betValue = ((Number)values[0]).intValue();				
+
 				if(winningNumber==betValue)
 				{
 					updateStandings(player,35*betSum);
@@ -126,6 +134,24 @@ public class Roulette extends Artifact {
 				{
 					updateStandings(player,-betSum);
 				}
+			}
+
+			if(betType.equals("Split"))
+			{
+				boolean won = false;
+				for(int i=0;i<values.length;i++)
+				{
+					int value = ((Number)values[i]).intValue();
+					if(winningNumber==value)
+					{
+						won = true;
+						break;
+					}
+				}
+				if(won)
+					updateStandings(player,17*betSum);
+				else
+					updateStandings(player,-betSum);	
 			}
 			
 			if(betType.equals("Manque"))

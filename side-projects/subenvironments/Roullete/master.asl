@@ -1,20 +1,30 @@
-// Agent master in project roulette.mas2j
-
-/* Initial beliefs and rules */
-
+// Agent master in project roulette.mas2j
+
+
+
+/* Initial beliefs and rules */
+
+
+
 iter(1).
 limit(3).
 
-/* Initial goals */
-
-!start.
-
-/* Plans */
+/* Initial goals */
+
+
+
+!start.
+
+
+
+/* Plans */
+
 
 
 +!start : true <- 
 	makeArtifact("rou","Roulette",[],_);
 	!roulette;
+	wait(100000);
 	.stopMAS.
 
 +!roulette: true <-
