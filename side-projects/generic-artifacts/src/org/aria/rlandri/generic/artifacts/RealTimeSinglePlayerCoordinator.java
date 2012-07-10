@@ -5,6 +5,7 @@ import java.util.Collections;
 
 import org.aria.rlandri.generic.artifacts.annotation.GAME_OPERATION;
 import org.aria.rlandri.generic.artifacts.annotation.PRIME_AGENT_OPERATION;
+import org.aria.rlandri.generic.artifacts.opmethod.RTSPGameArtifactOpMethod;
 
 import cartago.CartagoException;
 import cartago.OPERATION;

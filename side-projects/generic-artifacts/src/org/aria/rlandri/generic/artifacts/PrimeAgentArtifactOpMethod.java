@@ -4,6 +4,7 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 
 import org.apache.log4j.Logger;
+import org.aria.rlandri.generic.artifacts.opmethod.ValidatorArtifactOpMethod;
 
 import cartago.CartagoException;
 

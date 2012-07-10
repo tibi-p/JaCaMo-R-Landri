@@ -5,6 +5,7 @@ import java.util.Collection;
 import org.apache.commons.collections.map.MultiValueMap;
 import org.aria.rlandri.generic.artifacts.annotation.GAME_OPERATION;
 import org.aria.rlandri.generic.artifacts.annotation.PRIME_AGENT_OPERATION;
+import org.aria.rlandri.generic.artifacts.opmethod.SETBGameArtifactOpMethod;
 
 import cartago.AgentId;
 import cartago.CartagoException;
@@ -47,11 +48,13 @@ public class SimultaneouslyExecutedCoordinator extends Coordinator {
 		}
 	}
 
+	// TODO remove me
 	@GAME_OPERATION(validator = "catzelushCuParuCretz")
 	void hotelCismigiu() {
 		System.out.println("SA MA MUT IN HOTEL CISMIGIU");
 	}
 
+	// TODO remove me
 	void catzelushCuParuCretz() {
 		System.out.println("Toni da cu Grebla");
 	}

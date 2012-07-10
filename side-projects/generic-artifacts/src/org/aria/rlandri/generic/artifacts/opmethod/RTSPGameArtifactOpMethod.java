@@ -1,6 +1,8 @@
-package org.aria.rlandri.generic.artifacts;
+package org.aria.rlandri.generic.artifacts.opmethod;
 
 import java.lang.reflect.Method;
+
+import org.aria.rlandri.generic.artifacts.Coordinator;
 
 public class RTSPGameArtifactOpMethod extends ValidatorArtifactOpMethod {
 
@@ -11,8 +13,7 @@ public class RTSPGameArtifactOpMethod extends ValidatorArtifactOpMethod {
 	public void exec(Object[] actualParams) throws Exception {
 		coordinator.failIfNotRunning();
 		validate(coordinator, actualParams);
-
 		super.exec(actualParams);
-
 	}
+
 }

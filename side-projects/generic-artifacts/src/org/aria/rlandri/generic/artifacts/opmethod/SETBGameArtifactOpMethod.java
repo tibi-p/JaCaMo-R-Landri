@@ -1,9 +1,10 @@
-package org.aria.rlandri.generic.artifacts;
+package org.aria.rlandri.generic.artifacts.opmethod;
 
 import java.lang.reflect.Method;
 import java.util.Arrays;
 
 import org.apache.log4j.Logger;
+import org.aria.rlandri.generic.artifacts.SimultaneouslyExecutedCoordinator;
 
 public class SETBGameArtifactOpMethod extends ValidatorArtifactOpMethod {
 
@@ -27,18 +28,12 @@ public class SETBGameArtifactOpMethod extends ValidatorArtifactOpMethod {
 	// TODO (mihai) check if running
 	public void exec(Object[] actualParams) throws Exception {
 		coordinator.failIfNotRunning();
-		try {
-			validate(coordinator, actualParams);
-			String msgFmt = "%s: saving execution with parameters %s";
-			logger.debug(String.format(msgFmt, this,
-					Arrays.toString(actualParams)));
-			if (coordinator instanceof SimultaneouslyExecutedCoordinator) {
-				SimultaneouslyExecutedCoordinator seCoordinator = (SimultaneouslyExecutedCoordinator) coordinator;
-				seCoordinator.addOpMethod(this, actualParams);
-			}
-		} catch (Exception e) {
-			System.err.println("XOXOXO " + e.getMessage());
-			e.printStackTrace(System.err);
+		validate(coordinator, actualParams);
+		String msgFmt = "%s: saving execution with parameters %s";
+		logger.debug(String.format(msgFmt, this, Arrays.toString(actualParams)));
+		if (coordinator instanceof SimultaneouslyExecutedCoordinator) {
+			SimultaneouslyExecutedCoordinator seCoordinator = (SimultaneouslyExecutedCoordinator) coordinator;
+			seCoordinator.addOpMethod(this, actualParams);
 		}
 	}
 

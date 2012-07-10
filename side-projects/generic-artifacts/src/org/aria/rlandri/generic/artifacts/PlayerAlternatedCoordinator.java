@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.aria.rlandri.generic.artifacts.annotation.GAME_OPERATION;
 import org.aria.rlandri.generic.artifacts.annotation.PRIME_AGENT_OPERATION;
+import org.aria.rlandri.generic.artifacts.opmethod.PATBGameArtifactOpMethod;
 
 import cartago.AgentId;
 import cartago.CartagoException;
@@ -55,7 +56,7 @@ public class PlayerAlternatedCoordinator extends Coordinator {
 	@Override
 	protected void fillOperations() throws CartagoException {
 		addOperation(new CoordinatorAnnotation(GAME_OPERATION.class,
-				SETBGameArtifactOpMethod.class, true));
+				PATBGameArtifactOpMethod.class, true));
 		addOperation(new CoordinatorAnnotation(PRIME_AGENT_OPERATION.class,
 				PrimeAgentArtifactOpMethod.class, false));
 	}
@@ -94,6 +95,17 @@ public class PlayerAlternatedCoordinator extends Coordinator {
 	@Override
 	protected void saveState() {
 		// TODO Auto-generated method stub
+	}
+
+	// TODO remove me
+	@GAME_OPERATION(validator = "catzelushCuParuCretz")
+	void hotelCismigiu() {
+		System.out.println("SA MA MUT IN HOTEL CISMIGIU");
+	}
+
+	// TODO remove me
+	void catzelushCuParuCretz() {
+		System.out.println("Toni da cu Grebla");
 	}
 
 }

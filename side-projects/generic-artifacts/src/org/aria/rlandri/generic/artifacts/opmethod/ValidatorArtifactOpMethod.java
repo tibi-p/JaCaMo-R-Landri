@@ -1,7 +1,9 @@
-package org.aria.rlandri.generic.artifacts;
+package org.aria.rlandri.generic.artifacts.opmethod;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+
+import org.aria.rlandri.generic.artifacts.Coordinator;
 
 import cartago.Artifact;
 import cartago.ArtifactOpMethod;
