@@ -31,10 +31,14 @@ public abstract class GuardedAnnotation {
 		} catch (SecurityException e) {
 			throw new CartagoException(e.getMessage());
 		}
-		if (this.guardMethod == null)
-			throw new CartagoException("the annotation has no guard method");
-		if (this.validatorMethod == null)
-			throw new CartagoException("the annotation has no validator method");
+		if (this.guardMethod == null) {
+			String errFmt = "the annotation %s has no guard method";
+			throw new CartagoException(String.format(errFmt, annotationClass));
+		}
+		if (this.validatorMethod == null) {
+			String errFmt = "the annotation %s has no validator method";
+			throw new CartagoException(String.format(errFmt, annotationClass));
+		}
 	}
 
 	public Class<? extends Annotation> getAnnotationClass() {

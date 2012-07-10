@@ -10,13 +10,10 @@ public class SETBGameArtifactOpMethod extends ValidatorArtifactOpMethod {
 	private static final Logger logger = Logger
 			.getLogger(SETBGameArtifactOpMethod.class);
 
-	private SimultaneouslyExecutedCoordinator coordinator;
-
 	public SETBGameArtifactOpMethod(
 			SimultaneouslyExecutedCoordinator coordinator, Method method,
 			Method validatorMethod) {
 		super(coordinator, method, validatorMethod);
-		this.coordinator = coordinator;
 	}
 
 	public void execSavedParameters(Object[] actualParams) throws Exception {
@@ -30,10 +27,19 @@ public class SETBGameArtifactOpMethod extends ValidatorArtifactOpMethod {
 	// TODO (mihai) check if running
 	public void exec(Object[] actualParams) throws Exception {
 		coordinator.failIfNotRunning();
-		validate(coordinator, actualParams);
-		String msgFmt = "%s: saving execution with parameters %s";
-		logger.debug(String.format(msgFmt, this, Arrays.toString(actualParams)));
-		coordinator.addOpMethod(this, actualParams);
+		try {
+			validate(coordinator, actualParams);
+			String msgFmt = "%s: saving execution with parameters %s";
+			logger.debug(String.format(msgFmt, this,
+					Arrays.toString(actualParams)));
+			if (coordinator instanceof SimultaneouslyExecutedCoordinator) {
+				SimultaneouslyExecutedCoordinator seCoordinator = (SimultaneouslyExecutedCoordinator) coordinator;
+				seCoordinator.addOpMethod(this, actualParams);
+			}
+		} catch (Exception e) {
+			System.err.println("XOXOXO " + e.getMessage());
+			e.printStackTrace(System.err);
+		}
 	}
 
 }

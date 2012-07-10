@@ -10,12 +10,9 @@ public class PATBGameArtifactOpMethod extends ValidatorArtifactOpMethod {
 	private static final Logger logger = Logger
 			.getLogger(PATBGameArtifactOpMethod.class);
 
-	private PlayerAlternatedCoordinator coordinator;
-
 	public PATBGameArtifactOpMethod(PlayerAlternatedCoordinator coordinator,
 			Method method, Method validatorMethod) {
 		super(coordinator, method, validatorMethod);
-		this.coordinator = coordinator;
 	}
 
 	public void execSavedParameters(Object[] actualParams) throws Exception {
@@ -32,7 +29,10 @@ public class PATBGameArtifactOpMethod extends ValidatorArtifactOpMethod {
 		validate(coordinator, actualParams);
 		String msgFmt = "%s: saving execution with parameters %s";
 		logger.debug(String.format(msgFmt, this, Arrays.toString(actualParams)));
-		coordinator.addOpMethod(this, actualParams);
+		if (coordinator instanceof PlayerAlternatedCoordinator) {
+			PlayerAlternatedCoordinator paCoordinator = (PlayerAlternatedCoordinator) coordinator;
+			paCoordinator.addOpMethod(this, actualParams);
+		}
 	}
 
 }

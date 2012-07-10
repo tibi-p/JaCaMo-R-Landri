@@ -16,10 +16,6 @@ public class SimultaneouslyExecutedCoordinator extends Coordinator {
 
 	private MultiValueMap operationQueue = new MultiValueMap();
 
-	void init() throws CartagoException {
-		super.init();
-	}
-
 	public void addOpMethod(IArtifactOp op, Object[] params) {
 		AgentId agentId = getOpUserId();
 		operationQueue.put(agentId, new ParameterizedOperation(op, params));
@@ -51,9 +47,13 @@ public class SimultaneouslyExecutedCoordinator extends Coordinator {
 		}
 	}
 
-	@GAME_OPERATION
+	@GAME_OPERATION(validator = "catzelushCuParuCretz")
 	void hotelCismigiu() {
 		System.out.println("SA MA MUT IN HOTEL CISMIGIU");
+	}
+
+	void catzelushCuParuCretz() {
+		System.out.println("Toni da cu Grebla");
 	}
 
 	@Override

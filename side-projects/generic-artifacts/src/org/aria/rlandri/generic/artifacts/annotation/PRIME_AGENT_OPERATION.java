@@ -14,4 +14,6 @@ import java.lang.annotation.RetentionPolicy;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface PRIME_AGENT_OPERATION {
 	String guard() default "";
+
+	String validator() default "";
 }

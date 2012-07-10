@@ -8,19 +8,30 @@ import cartago.ArtifactOpMethod;
 
 public class ValidatorArtifactOpMethod extends ArtifactOpMethod {
 
-	private Method validatorMethod;
+	protected final Coordinator coordinator;
+	private final Method validatorMethod;
 
-	public ValidatorArtifactOpMethod(Artifact artifact, Method method,
+	public ValidatorArtifactOpMethod(Coordinator coordinator, Method method,
 			Method validatorMethod) {
-		super(artifact, method);
+		super(coordinator, method);
+		this.coordinator = coordinator;
 		this.validatorMethod = validatorMethod;
+		// completely ignore any qualifier like private or protected
+		if (validatorMethod != null)
+			validatorMethod.setAccessible(true);
 	}
 
-	protected void validate(Artifact artifact, Object[] actualParams)
-			throws IllegalArgumentException, IllegalAccessException,
-			InvocationTargetException {
-		if (validatorMethod != null)
-			validatorMethod.invoke(artifact, actualParams);
+	protected void validate(Artifact artifact, Object[] actualParams) {
+		try {
+			if (validatorMethod != null)
+				validatorMethod.invoke(artifact, actualParams);
+		} catch (IllegalArgumentException e) {
+			coordinator.failWithMessage("validatorMethod", e.getMessage());
+		} catch (IllegalAccessException e) {
+			coordinator.failWithMessage("validatorMethod", e.getMessage());
+		} catch (InvocationTargetException e) {
+			coordinator.failWithMessage("validatorMethod", e.getMessage());
+		}
 	}
 
 }

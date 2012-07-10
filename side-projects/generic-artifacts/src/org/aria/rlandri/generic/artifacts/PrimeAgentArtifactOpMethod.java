@@ -12,12 +12,9 @@ public class PrimeAgentArtifactOpMethod extends ValidatorArtifactOpMethod {
 	private static final Logger logger = Logger
 			.getLogger(PrimeAgentArtifactOpMethod.class);
 
-	private Coordinator coordinator;
-
 	public PrimeAgentArtifactOpMethod(Coordinator coordinator, Method method,
 			Method validatorMethod) {
 		super(coordinator, method, validatorMethod);
-		this.coordinator = coordinator;
 	}
 
 	public void exec(Object[] actualParams) throws Exception {

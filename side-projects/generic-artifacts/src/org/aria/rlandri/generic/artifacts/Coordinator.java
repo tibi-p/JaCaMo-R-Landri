@@ -100,6 +100,14 @@ public abstract class Coordinator extends Artifact {
 	}
 
 	/**
+	 * Fails and prints a formatted message.
+	 */
+	public void failWithMessage(String section, String message) {
+		String failMsg = String.format("%s: %s", section, message);
+		failed(failMsg);
+	}
+
+	/**
 	 * Fails if the coordinator is not currently in the running state.
 	 */
 	public void failIfNotRunning() {
