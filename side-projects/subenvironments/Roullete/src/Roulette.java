@@ -8,7 +8,7 @@ import java.util.Set;
 /**
  *      Artifact that implements the auction. 
  */
-public class Roulette extends Artifact {
+public class Roulette extends SimultaneouslyExecutedCoordinator {
     
 	int [] numbers = new int[]{0,32,15,19,4,21,2,25,17,34,6,27,13,36,11,30,8,23,10,5,24,16,33,1,20,14,31,9,22,18,29,7,28,12,35,3,26};
 
@@ -48,17 +48,19 @@ public class Roulette extends Artifact {
 		}
 	}
 	
-    	@OPERATION public void init() 
-	{
+	/*
+    public void init() 
+    {
 
-    	}
+    }
+    */
 
-	@OPERATION public void bet(String betName,double sum)
+	@GAME_OPERATION public void bet(String betName,double sum)
 	{
 		this.bet(betName,null,sum);
 	}	
 
-	@OPERATION public void bet(String betName, Object betValues[], double sum)
+	@GAME_OPERATION public void bet(String betName, Object betValues[], double sum)
 	{
 
 		String user = getOpUserName();
@@ -74,7 +76,7 @@ public class Roulette extends Artifact {
 		
 	}
 	
-    @OPERATION public void spinWheel() {
+    @PRIME_AGENT_OPERATION public void spinWheel() {
 	
 		String user = getOpUserName();
 		if(!user.equals("master"))
@@ -100,7 +102,7 @@ public class Roulette extends Artifact {
 	}
 
 	//TODO: Validation is not done here (eg. users can win with ill formed bets)!!!!!!!!!!!!!!
-	@OPERATION public void payout()
+	@PRIME_AGENT_OPERATION public void payout()
 	{
 
 		String user = getOpUserName();
