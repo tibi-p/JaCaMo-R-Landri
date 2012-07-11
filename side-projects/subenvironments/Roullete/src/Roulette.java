@@ -5,6 +5,10 @@ import cartago.ObsProperty;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Set;
+
+import org.aria.rlandri.generic.artifacts.*;
+import org.aria.rlandri.generic.artifacts.annotation.*;
+
 /**
  *      Artifact that implements the auction. 
  */
@@ -15,18 +19,18 @@ public class Roulette extends SimultaneouslyExecutedCoordinator {
 	private final HashMap<String,Integer> payoffs = new HashMap<String,Integer>();
 
 	{
-		payouts.put("0",35);
-		payouts.put("Single",35);
-		payouts.put("Split",17);
-		payouts.put("Street",11);
-		payouts.put("Corner",8);
-		payouts.put("Six",5);
-		payouts.put("Column1",2);
-		payouts.put("Column2",2);
-		payouts.put("Column3",2);
-		payouts.put("Dozen1",2);
-		payouts.put("Dozen2",2);
-		payouts.put("Dozen3",2);
+		payoffs.put("0",35);
+		payoffs.put("Single",35);
+		payoffs.put("Split",17);
+		payoffs.put("Street",11);
+		payoffs.put("Corner",8);
+		payoffs.put("Six",5);
+		payoffs.put("Column1",2);
+		payoffs.put("Column2",2);
+		payoffs.put("Column3",2);
+		payoffs.put("Dozen1",2);
+		payoffs.put("Dozen2",2);
+		payoffs.put("Dozen3",2);
 	}
     
 	HashMap<String,Bet> bets = new HashMap<String,Bet>();
@@ -34,6 +38,12 @@ public class Roulette extends SimultaneouslyExecutedCoordinator {
 	
 	String winningColor;
 	int winningNumber;
+	
+
+	private double payoff(String betType,double betSum)
+	{
+		return betSum*payoffs.get(betType).intValue();
+	}
 	
 	private void updateStandings(String player, double value)
 	{
@@ -47,20 +57,21 @@ public class Roulette extends SimultaneouslyExecutedCoordinator {
 			standings.put(player,value);
 		}
 	}
-	
-	/*
-    public void init() 
-    {
 
-    }
-    */
-
-	@GAME_OPERATION public void bet(String betName,double sum)
+	@GAME_OPERATION(validator = "validateBet")
+	void bet(String betName,double sum)
 	{
+		System.out.println("AJUNG AICI BITCH");
 		this.bet(betName,null,sum);
+	}
+
+	void validateBet(String betName,double sum)
+	{
+		System.out.println("Validating BIATCH");
 	}	
 
-	@GAME_OPERATION public void bet(String betName, Object betValues[], double sum)
+	@GAME_OPERATION(validator = "validateBet")
+	void bet(String betName, Object betValues[], double sum)
 	{
 
 		String user = getOpUserName();
@@ -75,8 +86,14 @@ public class Roulette extends SimultaneouslyExecutedCoordinator {
 		bets.put(user,bet);
 		
 	}
+
+	void validateBet(String betName, Object betValues[], double sum)
+	{
+		System.out.println("Validating BIATCH!");
+	}
 	
-    @PRIME_AGENT_OPERATION public void spinWheel() {
+    	@GAME_OPERATION(validator = "validateSpinWheel")
+	public void spinWheel() {
 	
 		String user = getOpUserName();
 		if(!user.equals("master"))
@@ -96,13 +113,15 @@ public class Roulette extends SimultaneouslyExecutedCoordinator {
 		System.out.println("Winning number: "+winningNumber + " and color: " +  winningColor);
     }
 	
-	private int payoff(String betType,double betSum)
+	void validateSpinWheel()
 	{
-		return betSum*payoffs.get(betType);
+		
 	}
-
+	
+	
 	//TODO: Validation is not done here (eg. users can win with ill formed bets)!!!!!!!!!!!!!!
-	@PRIME_AGENT_OPERATION public void payout()
+	@GAME_OPERATION(validator = "validatePayout")	
+	public void payout()
 	{
 
 		String user = getOpUserName();
@@ -169,27 +188,27 @@ public class Roulette extends SimultaneouslyExecutedCoordinator {
 			{
 				
 			}
-			if(betType.equals("Column2",2)
+			if(betType.equals("Column2"))
 			{
 				
 			}
 
-			if(betType.equals("Column3",2)
+			if(betType.equals("Column3"))
 			{
 				
 			}
 
-			if(betType.equals("Dozen1",2);
+			if(betType.equals("Dozen1"))
 			{
 				
 			}
 
-			if(betType.equals("Dozen2",2)
+			if(betType.equals("Dozen2"))
 			{
 				
 			}
 
-			if(betType.equals("Dozen3",2)
+			if(betType.equals("Dozen3"))
 			{
 				
 			}
@@ -231,12 +250,18 @@ public class Roulette extends SimultaneouslyExecutedCoordinator {
 			}
 
 			if(won)
-				updateStandings(player,payoff(betType,betSum);
+				updateStandings(player,payoff(betType,betSum));
 			else
 				updateStandings(player,-betSum);
 		}
 		bets = new HashMap<String,Bet>();
 		System.out.println(standings);
 	}
+
+	void validatePayout()
+	{
+	
+	}
+
 }
 
