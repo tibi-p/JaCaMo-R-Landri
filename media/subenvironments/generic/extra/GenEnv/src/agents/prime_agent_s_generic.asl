@@ -1,7 +1,7 @@
 // Agent prime_agent in project sandbox
 
 /* Initial beliefs and rules */
-endSign("no_more").
+
 /* Initial goals */
 
 !prepare_environment.
@@ -11,29 +11,16 @@ endSign("no_more").
 +!prepare_environment : true 
 		<- 	!makeAndJoinDefaultWorkspace;
 			!makeStandardArtifacts;
-			getNextAgent(ParticipantWsp);
-			+nextParticipant(ParticipantWsp);
-			!makePrivateWsp;
 			!startSubenv
 		.
 			
 +!makeStandardArtifacts: true
 		<- 	!makeLogger;
 			!makeCoordinator.
-			
-+!makePrivateWsp: nextParticipant("no_more")
-		<-	true.
 
-+!makePrivateWsp: not nextParticipant("no_more")
-		<- 	?nextParticipant(AgentWsp);
-			createWorkspace(AgentWsp);
-			getNextAgent(ParticipantWsp);
-			-+nextParticipant(ParticipantWsp);
-			!makePrivateWsp.
-			
 +!makeCoordinator: true
 		<- 	makeArtifact("coordinator",
-				"org.aria.rlandri.generic.artifacts.RealTimeSinglePlayerCoordinator", [], _
+				"org.aria.rlandri.generic.artifacts.PlayerAlternatedCoordinator", [], _
 			).
 
 +!makeLogger: true
