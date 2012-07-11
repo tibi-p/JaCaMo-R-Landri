@@ -72,26 +72,42 @@ public class SubenvLogger extends Artifact {
 	}
 
 	@OPERATION
-	public void logInfo(String line) {
+	public void logInfo(Object... strings) {
 		Logger l = fetchLogger(getOpUserName());
+		String line = "";
+		for(Object o : strings){
+			line += o.toString();
+		}
 		l.info(line);
 	}
 
 	@OPERATION
-	public void logWarning(String line) {
+	public void logWarning(Object... strings) {
 		Logger l = fetchLogger(getOpUserName());
+		String line = "";
+		for(Object o : strings){
+			line += o.toString();
+		}
 		l.warn(line);
 	}
 
 	@OPERATION
-	public void logError(String line) {
+	public void logError(Object... strings) {
 		Logger l = fetchLogger(getOpUserName());
+		String line = "";
+		for(Object o : strings){
+			line += o.toString();
+		}
 		l.error(line);
 	}
 
 	@OPERATION
-	public void logFatal(String line) {
+	public void logFatal(Object... strings) {
 		Logger l = fetchLogger(getOpUserName());
+		String line = "";
+		for(Object o : strings){
+			line += o.toString();
+		}
 		l.fatal(line);
 	}
 

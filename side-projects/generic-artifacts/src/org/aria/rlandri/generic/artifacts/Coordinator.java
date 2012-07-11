@@ -63,7 +63,7 @@ public abstract class Coordinator extends Artifact {
 	 * @throws CartagoException
 	 *             if the artifact could not be properly initialised
 	 */
-	void init() throws CartagoException {
+	protected void init() throws CartagoException {
 		try {
 			agents = new HashMap<String, AgentId>();
 
