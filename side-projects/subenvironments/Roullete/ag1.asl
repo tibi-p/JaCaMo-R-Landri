@@ -21,7 +21,9 @@
 	?discover_roulette(_).
 	
 + bet(_) : true
-	<- bet("Split",[8,9],3).
+	<- 
+		.print("can bet");
+		bet("Split",[8,9],3).
 	
 +?discover_roulette(R) : true  
   <- lookupArtifact("rou",R). 
