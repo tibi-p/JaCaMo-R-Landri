@@ -155,7 +155,7 @@ public class Roulette extends SimultaneouslyExecutedCoordinator {
 					won = true;
 			}
 
-			if(betType.equals("Split"))
+			if(betType.equals("Split") || betType.equals("Street") || betType.equals("Corner") || betType.equals("Six"))
 			{
 				
 				for(int i=0;i<values.length;i++)
@@ -169,48 +169,75 @@ public class Roulette extends SimultaneouslyExecutedCoordinator {
 				}	
 			}
 
-			if(betType.equals("Street"))
-			{
-				
-			}
-
-			if(betType.equals("Corner"))
-			{
-				
-			}
-
-			if(betType.equals("Six"))
-			{
-
-			}
-
 			if(betType.equals("Column1"))
 			{
-				
+				for(int i=1;i<=36;i+=3)
+				{
+					if(winningNumber==value)
+					{
+						won = true;
+						break;
+					}
+				}
 			}
 			if(betType.equals("Column2"))
 			{
-				
+				for(int i=2;i<=36;i+=3)
+				{
+					if(winningNumber==value)
+					{
+						won = true;
+						break;
+					}
+				}
 			}
 
 			if(betType.equals("Column3"))
 			{
-				
+				for(int i=3;i<=36;i+=3)
+				{
+					if(winningNumber==value)
+					{
+						won = true;
+						break;
+					}
+				}
 			}
 
 			if(betType.equals("Dozen1"))
 			{
-				
+				for(int i=1;i<=12;i+=1)
+				{
+					if(winningNumber==value)
+					{
+						won = true;
+						break;
+					}
+				}	
 			}
 
 			if(betType.equals("Dozen2"))
 			{
-				
+				for(int i=13;i<=24;i+=1)
+				{
+					if(winningNumber==value)
+					{
+						won = true;
+						break;
+					}
+				}
 			}
 
 			if(betType.equals("Dozen3"))
 			{
-				
+				for(int i=25;i<=36;i+=1)
+				{
+					if(winningNumber==value)
+					{
+						won = true;
+						break;
+					}
+				}
 			}
 
 			if(betType.equals("Manque"))
