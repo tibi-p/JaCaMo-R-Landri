@@ -2,6 +2,7 @@ package org.aria.rlandri.generic.artifacts.opmethod;
 
 import java.lang.reflect.Method;
 
+import org.aria.rlandri.generic.artifacts.EnvStatus;
 import org.aria.rlandri.generic.artifacts.PlayerAlternatedCoordinator;
 
 public class PATBGameArtifactOpMethod extends ValidatorArtifactOpMethod {
@@ -17,8 +18,13 @@ public class PATBGameArtifactOpMethod extends ValidatorArtifactOpMethod {
 			PlayerAlternatedCoordinator paCoordinator = (PlayerAlternatedCoordinator) coordinator;
 			paCoordinator.failIfNotCurrentTurn();
 		}
-		validate(coordinator, actualParams);
-		super.exec(actualParams);
+		coordinator.setState(EnvStatus.EVALUATING);
+		try {
+			validate(coordinator, actualParams);
+			super.exec(actualParams);
+		} finally {
+			coordinator.setState(EnvStatus.RUNNING);
+		}
 	}
 
 }

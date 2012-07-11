@@ -27,6 +27,7 @@ import cartago.AgentId;
 import cartago.Artifact;
 import cartago.ArtifactGuardMethod;
 import cartago.CartagoException;
+import cartago.GUARD;
 import cartago.IArtifactOp;
 import cartago.OPERATION;
 import cartago.OpFeedbackParam;
@@ -107,7 +108,7 @@ public abstract class Coordinator extends Artifact {
 	 * Fails if the coordinator is not currently in the running state.
 	 */
 	public void failIfNotRunning() {
-		if (state != EnvStatus.RUNNING)
+		if (isNotRunning())
 			failed("The coordinator is not in running mode");
 	}
 
@@ -141,6 +142,7 @@ public abstract class Coordinator extends Artifact {
 	 *            the new state of the coordinator
 	 */
 	public void setState(EnvStatus state) {
+		System.err.println(String.format("changed state from %s to %s", this.state, state));
 		this.state = state;
 	}
 
@@ -241,6 +243,11 @@ public abstract class Coordinator extends Artifact {
 		updateRank();
 		updateCurrency();
 		saveState();
+	}
+
+	@GUARD
+	boolean isNotRunning() {
+		return state != EnvStatus.RUNNING;
 	}
 
 }

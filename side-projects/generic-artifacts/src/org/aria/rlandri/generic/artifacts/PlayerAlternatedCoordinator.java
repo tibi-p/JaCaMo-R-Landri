@@ -22,6 +22,7 @@ import cartago.OpFeedbackParam;
 
 public class PlayerAlternatedCoordinator extends Coordinator {
 
+	private final Timer timer = new Timer();
 	private int currentStep = 0;
 	private int currentAgent = 0;
 
@@ -95,12 +96,12 @@ public class PlayerAlternatedCoordinator extends Coordinator {
 	}
 
 	private void executePlayerTurn() {
-		final Timer timer = new Timer();
 		timer.schedule(new TimerTask() {
 			public void run() {
 				execInternalOp("changeToEvaluating");
 			}
 		}, TURN_LENGTH);
+		await("isNotRunning");
 	}
 
 	@Override
