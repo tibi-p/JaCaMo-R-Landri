@@ -2,6 +2,8 @@ package org.aria.rlandri.generic.artifacts;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import org.aria.rlandri.generic.artifacts.annotation.GAME_OPERATION;
 import org.aria.rlandri.generic.artifacts.annotation.PRIME_AGENT_OPERATION;
@@ -68,10 +70,20 @@ public class PlayerAlternatedCoordinator extends Coordinator {
 		}
 	}
 
+	@INTERNAL_OPERATION
+	void changeToEvaluating() {
+		EnvStatus state = getState();
+		if (state == EnvStatus.RUNNING) {
+			setState(EnvStatus.EVALUATING);
+		} else {
+			// TODO handle me
+		}
+	}
+
 	private void executeStep() {
 		for (currentAgent = 0; currentAgent < order.size(); currentAgent++) {
 			startPlayerTurn();
-			await_time(TURN_LENGTH);
+			executePlayerTurn();
 		}
 	}
 
@@ -80,6 +92,15 @@ public class PlayerAlternatedCoordinator extends Coordinator {
 		AgentId aid = agents.get(name);
 		signal(aid, "startTurn", currentStep);
 		currentAgent += 1;
+	}
+
+	private void executePlayerTurn() {
+		final Timer timer = new Timer();
+		timer.schedule(new TimerTask() {
+			public void run() {
+				execInternalOp("changeToEvaluating");
+			}
+		}, TURN_LENGTH);
 	}
 
 	@Override

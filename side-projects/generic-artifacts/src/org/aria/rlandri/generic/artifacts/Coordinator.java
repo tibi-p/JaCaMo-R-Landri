@@ -130,6 +130,10 @@ public abstract class Coordinator extends Artifact {
 		return agentName.startsWith("prime_agent_s_");
 	}
 
+	public EnvStatus getState() {
+		return state;
+	}
+
 	/**
 	 * Sets the current state of coordinator to the specified one.
 	 * 

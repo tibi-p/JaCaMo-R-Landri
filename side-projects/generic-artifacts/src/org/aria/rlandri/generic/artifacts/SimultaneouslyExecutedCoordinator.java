@@ -14,14 +14,13 @@ import cartago.INTERNAL_OPERATION;
 import cartago.OPERATION;
 import cartago.OpFeedbackParam;
 
-
 public class SimultaneouslyExecutedCoordinator extends Coordinator {
 
 	private int currentStep = 0;
-	
+
 	public static final int STEPS = 10;
 	public static final int STEP_LENGTH = 1000;
-	
+
 	private MultiValueMap operationQueue = new MultiValueMap();
 
 	public void addOpMethod(IArtifactOp op, Object[] params) {
@@ -65,18 +64,18 @@ public class SimultaneouslyExecutedCoordinator extends Coordinator {
 	void catzelushCuParuCretz() {
 		System.out.println("Toni da cu Grebla");
 	}
-	
+
 	@PRIME_AGENT_OPERATION
 	void startSubenv() {
 		super.startSubenv();
 		execInternalOp("runSubEnv");
 	}
-	
+
 	@INTERNAL_OPERATION
 	void runSubEnv() {
 		for (currentStep = 1; currentStep <= STEPS; currentStep++) {
-		// TODO: implement step execution
-		//executeStep();
+			// TODO: implement step execution
+			// executeStep();
 		}
 	}
 
