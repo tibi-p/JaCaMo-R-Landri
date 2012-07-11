@@ -23,17 +23,11 @@ public class ValidatorArtifactOpMethod extends ArtifactOpMethod {
 			validatorMethod.setAccessible(true);
 	}
 
-	protected void validate(Artifact artifact, Object[] actualParams) {
-		try {
-			if (validatorMethod != null)
-				validatorMethod.invoke(artifact, actualParams);
-		} catch (IllegalArgumentException e) {
-			coordinator.failWithMessage("validatorMethod", e.getMessage());
-		} catch (IllegalAccessException e) {
-			coordinator.failWithMessage("validatorMethod", e.getMessage());
-		} catch (InvocationTargetException e) {
-			coordinator.failWithMessage("validatorMethod", e.getMessage());
-		}
+	protected void validate(Artifact artifact, Object[] actualParams)
+			throws IllegalArgumentException, IllegalAccessException,
+			InvocationTargetException {
+		if (validatorMethod != null)
+			validatorMethod.invoke(artifact, actualParams);
 	}
 
 }
