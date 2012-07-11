@@ -1,7 +1,7 @@
 /**
  * 
  */
-package org.aria.rlandri.generic.artifacts;
+package org.aria.rlandri.generic.artifacts.annotation;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -14,4 +14,6 @@ import java.lang.annotation.RetentionPolicy;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface GAME_OPERATION {
 	String guard() default "";
+
+	String validator() default "";
 }

@@ -1,37 +1,31 @@
 package org.aria.rlandri.generic.artifacts;
 
-import java.lang.reflect.Method;
 import java.util.Collection;
 
 import org.apache.commons.collections.map.MultiValueMap;
+import org.aria.rlandri.generic.artifacts.annotation.GAME_OPERATION;
+import org.aria.rlandri.generic.artifacts.annotation.PRIME_AGENT_OPERATION;
+import org.aria.rlandri.generic.artifacts.opmethod.SETBGameArtifactOpMethod;
 
 import cartago.AgentId;
-import cartago.ArtifactGuardMethod;
 import cartago.CartagoException;
 import cartago.IArtifactOp;
+import cartago.INTERNAL_OPERATION;
 import cartago.OPERATION;
 import cartago.OpFeedbackParam;
 
 public class SimultaneouslyExecutedCoordinator extends Coordinator {
 
+	private int currentStep = 0;
+
+	public static final int STEPS = 10;
+	public static final int STEP_LENGTH = 1000;
+
 	private MultiValueMap operationQueue = new MultiValueMap();
 
-	void init() throws CartagoException {
-		super.init();
-		registerGameOperations();
-	}
-
-	public void addOpMethod(GameArtifactOpMethod op) {
+	public void addOpMethod(IArtifactOp op, Object[] params) {
 		AgentId agentId = getOpUserId();
-		operationQueue.put(agentId, op);
-	}
-
-	@OPERATION
-	void startSubenv() {
-		if (getOpUserName().equals("prime_agent_s_generic")) {
-			signal("startSubenv");
-			state = EnvStatus.RUNNING;
-		}
+		operationQueue.put(agentId, new ParameterizedOperation(op, params));
 	}
 
 	@OPERATION
@@ -45,11 +39,14 @@ public class SimultaneouslyExecutedCoordinator extends Coordinator {
 		for (Object key : operationQueue.keySet()) {
 			Collection<?> coll = operationQueue.getCollection(key);
 			for (Object value : coll) {
-				if (value instanceof GameArtifactOpMethod) {
-					GameArtifactOpMethod op = (GameArtifactOpMethod) value;
+				if (value instanceof ParameterizedOperation) {
+					ParameterizedOperation entry = (ParameterizedOperation) value;
 					try {
-						op.execSavedParameters();
+						SETBGameArtifactOpMethod op = (SETBGameArtifactOpMethod) entry
+								.getOp();
+						op.execSavedParameters(entry.getParams());
 					} catch (Exception e) {
+						// TODO log it or something
 						e.printStackTrace();
 					}
 				}
@@ -57,64 +54,58 @@ public class SimultaneouslyExecutedCoordinator extends Coordinator {
 		}
 	}
 
-	@GAME_OPERATION
+	// TODO remove me
+	@GAME_OPERATION(validator = "catzelushCuParuCretz")
 	void hotelCismigiu() {
-		System.out.println("SA TE *UT IN HOTEL CISMIGIU");
+		System.out.println("SA MA MUT IN HOTEL CISMIGIU");
 	}
 
-	private void registerGameOperations() throws CartagoException {
-		for (Class<?> c = getClass(); c != null; c = c.getSuperclass()) {
-			Method[] methods = c.getDeclaredMethods();
-			for (Method method : methods) {
-				if (method.isAnnotationPresent(GAME_OPERATION.class))
-					addGameOperation(method);
-			}
+	// TODO remove me
+	void catzelushCuParuCretz() {
+		System.out.println("Toni da cu Grebla");
+	}
+
+	@PRIME_AGENT_OPERATION
+	void startSubenv() {
+		super.startSubenv();
+		execInternalOp("runSubEnv");
+	}
+
+	@INTERNAL_OPERATION
+	void runSubEnv() {
+		for (currentStep = 1; currentStep <= STEPS; currentStep++) {
+			// TODO: implement step execution
+			// executeStep();
 		}
 	}
 
-	private void addGameOperation(Method method) throws CartagoException {
-		GAME_OPERATION annotation = method.getAnnotation(GAME_OPERATION.class);
-		System.out.println("-- " + method);
-		System.out.println("-- " + annotation);
-		String guard = annotation.guard();
-		ArtifactGuardMethod guardBody = null;
-		if (!"".equals(guard)) {
-			Method guardMethod = getMethodInHierarchy(guard,
-					method.getParameterTypes());
-			if (guardMethod == null) {
-				throw new CartagoException("invalid guard: " + guard);
-			} else {
-				guardBody = new ArtifactGuardMethod(this, guardMethod);
-			}
-		}
-		IArtifactOp op = new GameArtifactOpMethod(this, method);
-		defineOp(op, guardBody);
+	@Override
+	protected void fillOperations() throws CartagoException {
+		addOperation(new CoordinatorAnnotation(GAME_OPERATION.class,
+				SETBGameArtifactOpMethod.class, true));
+		addOperation(new CoordinatorAnnotation(PRIME_AGENT_OPERATION.class,
+				PrimeAgentArtifactOpMethod.class, false));
 	}
 
-	private Method getMethodInHierarchy(String name, Class<?>[] types) {
-		Class<?> cl = getClass();
-		do {
-			try {
-				return cl.getDeclaredMethod(name, types);
-			} catch (Exception ex) {
-				cl = cl.getSuperclass();
-			}
-		} while (cl != null);
-		return null;
+	@OPERATION
+	void registerAgent(OpFeedbackParam<String> wsp) throws Exception {
+		super.registerAgent(wsp);
+		wsp.set("NA");
 	}
 
 	@Override
-	@OPERATION
-	void registerAgent(OpFeedbackParam<String> wsp) {
+	protected void updateRank() {
 		// TODO Auto-generated method stub
-		
 	}
 
 	@Override
-	@OPERATION
-	void finishSubenv() {
+	protected void updateCurrency() {
 		// TODO Auto-generated method stub
-		
+	}
+
+	@Override
+	protected void saveState() {
+		// TODO Auto-generated method stub
 	}
 
 }
