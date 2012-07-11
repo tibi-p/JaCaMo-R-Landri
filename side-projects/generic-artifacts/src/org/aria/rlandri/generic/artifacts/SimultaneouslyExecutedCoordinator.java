@@ -10,11 +10,18 @@ import org.aria.rlandri.generic.artifacts.opmethod.SETBGameArtifactOpMethod;
 import cartago.AgentId;
 import cartago.CartagoException;
 import cartago.IArtifactOp;
+import cartago.INTERNAL_OPERATION;
 import cartago.OPERATION;
 import cartago.OpFeedbackParam;
 
+
 public class SimultaneouslyExecutedCoordinator extends Coordinator {
 
+	private int currentStep = 0;
+	
+	public static final int STEPS = 10;
+	public static final int STEP_LENGTH = 1000;
+	
 	private MultiValueMap operationQueue = new MultiValueMap();
 
 	public void addOpMethod(IArtifactOp op, Object[] params) {
@@ -58,6 +65,20 @@ public class SimultaneouslyExecutedCoordinator extends Coordinator {
 	void catzelushCuParuCretz() {
 		System.out.println("Toni da cu Grebla");
 	}
+	
+	@PRIME_AGENT_OPERATION
+	void startSubenv() {
+		super.startSubenv();
+		execInternalOp("runSubEnv");
+	}
+	
+	@INTERNAL_OPERATION
+	void runSubEnv() {
+		for (currentStep = 1; currentStep <= STEPS; currentStep++) {
+		// TODO: implement step execution
+		//executeStep();
+		}
+	}
 
 	@Override
 	protected void fillOperations() throws CartagoException {
@@ -67,10 +88,9 @@ public class SimultaneouslyExecutedCoordinator extends Coordinator {
 				PrimeAgentArtifactOpMethod.class, false));
 	}
 
-	@Override
 	@OPERATION
-	void registerAgent(OpFeedbackParam<String> wsp) {
-		// TODO Auto-generated method stub
+	void registerAgent(OpFeedbackParam<String> wsp) throws Exception {
+		super.registerAgent(wsp);
 		wsp.set("NA");
 	}
 

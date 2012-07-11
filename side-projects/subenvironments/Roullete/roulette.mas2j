@@ -13,8 +13,6 @@ MAS roulette {
    agents:
    
     ag1  agentArchClass c4jason.CAgentArch;
-	ag2 agentArchClass c4jason.CAgentArch;
-	ag3 agentArchClass c4jason.CAgentArch;
 	master agentArchClass c4jason.CAgentArch;
 
    classpath: "lib/moise.jar";   // moise: where the artifacts are included 

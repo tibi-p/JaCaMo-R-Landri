@@ -22,7 +22,7 @@ limit(3).
 
 
 +!start : true <- 
-	makeArtifact("rou","Roulette",[],_);
+	makeArtifact("rou","Roulette",[],R);
 	!roulette;
 	wait(100000);
 	.stopMAS.
