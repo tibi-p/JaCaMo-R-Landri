@@ -34,9 +34,9 @@ public class Roulette extends SimultaneouslyExecutedCoordinator {
 		payoffs.put("Manque",1);
 		payoffs.put("Passe",1);
 		payoffs.put("Red",1);
-		payoffs.pub("Black",1);
+		payoffs.put("Black",1);
 		payoffs.put("Odd",1);
-		payoffs.pub("Even",1);
+		payoffs.put("Even",1);
 	}
     
 	HashMap<String,Bet> bets = new HashMap<String,Bet>();
