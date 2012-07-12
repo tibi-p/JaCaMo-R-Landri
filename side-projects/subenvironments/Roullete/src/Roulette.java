@@ -31,6 +31,12 @@ public class Roulette extends SimultaneouslyExecutedCoordinator {
 		payoffs.put("Dozen1",2);
 		payoffs.put("Dozen2",2);
 		payoffs.put("Dozen3",2);
+		payoffs.put("Manque",1);
+		payoffs.put("Passe",1);
+		payoffs.put("Red",1);
+		payoffs.pub("Black",1);
+		payoffs.put("Odd",1);
+		payoffs.pub("Even",1);
 	}
     
 	HashMap<String,Bet> bets = new HashMap<String,Bet>();
@@ -173,7 +179,7 @@ public class Roulette extends SimultaneouslyExecutedCoordinator {
 			{
 				for(int i=1;i<=36;i+=3)
 				{
-					if(winningNumber==value)
+					if(winningNumber==i)
 					{
 						won = true;
 						break;
@@ -184,7 +190,7 @@ public class Roulette extends SimultaneouslyExecutedCoordinator {
 			{
 				for(int i=2;i<=36;i+=3)
 				{
-					if(winningNumber==value)
+					if(winningNumber==i)
 					{
 						won = true;
 						break;
@@ -196,7 +202,7 @@ public class Roulette extends SimultaneouslyExecutedCoordinator {
 			{
 				for(int i=3;i<=36;i+=3)
 				{
-					if(winningNumber==value)
+					if(winningNumber==i)
 					{
 						won = true;
 						break;
@@ -208,7 +214,7 @@ public class Roulette extends SimultaneouslyExecutedCoordinator {
 			{
 				for(int i=1;i<=12;i+=1)
 				{
-					if(winningNumber==value)
+					if(winningNumber==i)
 					{
 						won = true;
 						break;
@@ -220,7 +226,7 @@ public class Roulette extends SimultaneouslyExecutedCoordinator {
 			{
 				for(int i=13;i<=24;i+=1)
 				{
-					if(winningNumber==value)
+					if(winningNumber==i)
 					{
 						won = true;
 						break;
@@ -232,7 +238,7 @@ public class Roulette extends SimultaneouslyExecutedCoordinator {
 			{
 				for(int i=25;i<=36;i+=1)
 				{
-					if(winningNumber==value)
+					if(winningNumber==i)
 					{
 						won = true;
 						break;
