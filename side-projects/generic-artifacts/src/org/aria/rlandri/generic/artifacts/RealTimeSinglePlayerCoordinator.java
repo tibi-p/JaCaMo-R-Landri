@@ -5,7 +5,7 @@ import java.util.Collections;
 
 import org.aria.rlandri.generic.artifacts.annotation.GAME_OPERATION;
 import org.aria.rlandri.generic.artifacts.annotation.PRIME_AGENT_OPERATION;
-import org.aria.rlandri.generic.artifacts.opmethod.RTSPGameArtifactOpMethod;
+import org.aria.rlandri.generic.artifacts.opmethod.RTGameArtifactOpMethod;
 
 import cartago.CartagoException;
 import cartago.OPERATION;
@@ -72,7 +72,7 @@ public class RealTimeSinglePlayerCoordinator extends Coordinator {
 	@Override
 	protected void fillOperations() throws CartagoException {
 		addOperation(new CoordinatorAnnotation(GAME_OPERATION.class,
-				RTSPGameArtifactOpMethod.class, true));
+				RTGameArtifactOpMethod.class, true));
 		addOperation(new CoordinatorAnnotation(PRIME_AGENT_OPERATION.class,
 				PrimeAgentArtifactOpMethod.class, false));
 	}
