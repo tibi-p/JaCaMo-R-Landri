@@ -32,9 +32,10 @@ endSign("no_more").
 			!makePrivateWsp.
 			
 +!makeCoordinator: true
-		<- 	makeArtifact("coordinator",
-				"org.aria.rlandri.generic.artifacts.RealTimeSinglePlayerCoordinator", [], _
-			).
+		<- 	makeArtifact("initiator",
+				"org.aria.rlandri.generic.artifacts.Initiator", [], _
+			);
+			makeCoordinatorArtifact("coordinator").
 
 +!makeLogger: true
 		<- 	makeArtifact("logger",

@@ -19,9 +19,10 @@
 		
 			
 +!makeCoordinator: true
-		<- 	makeArtifact("coordinator",
-				"org.aria.rlandri.generic.artifacts.RealTimeMultiPlayerCoordinator", [], _
-			).
+		<- 	makeArtifact("initiator",
+				"org.aria.rlandri.generic.artifacts.Initiator", [], _
+			);
+			makeCoordinatorArtifact("coordinator").
 
 +!makeLogger: true
 		<- 	makeArtifact("logger",
