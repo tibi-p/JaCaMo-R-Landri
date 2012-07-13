@@ -6,20 +6,13 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render_to_response
 from django.template import RequestContext
 from envuser.models import EnvAgent, EnvUser
-from home.base import fill_object, make_base_custom_formset
+from home.base import fill_object, get_agent_name_list, \
+    make_base_custom_formset
 from solution.models import Solution
 from subenvironment.models import SubEnvironment
 from specification import SolutionSpecification
 from validate import Validator
 import json
-from zipfile import BadZipfile, ZipFile
-
-def get_agent_code_from_zip(filename):
-    try:
-        with ZipFile(filename, 'r') as zipFile:
-            return zipFile.namelist()
-    except BadZipfile:
-        return [ ]
 
 def tweak_keywords(keywords, attr, defaults):
     queryset = keywords.get(attr, None)
@@ -52,7 +45,7 @@ def validate_artifacts(artifacts, userID):
             raise forms.ValidationError(error_msg)
     return artifacts
 
-def validate_agents(agents,userID):
+def validate_agents(agents, userID):
     if not Validator.validateAgentZip(agents, userID):
         error_msg = "Should upload a valid .zip with agents"
         raise forms.ValidationError(error_msg)
@@ -73,7 +66,7 @@ def make_solution_form(envUser, subEnvKwArgs={ }):
             
             def clean_agents(self):
                 agents = self.cleaned_data['agents']
-                return validate_agents(agents,envUser.id)
+                return validate_agents(agents, envUser.id)
 
             class Meta:
                 model = Solution
@@ -92,7 +85,7 @@ def make_solution_form(envUser, subEnvKwArgs={ }):
             
             def clean_agents(self):
                 agents = self.cleaned_data['agents']
-                return validate_agents(agents,envUser.id)
+                return validate_agents(agents, envUser.id)
 
             class Meta:
                 model = Solution
@@ -180,13 +173,8 @@ def index_common(request, postSolution=None, postSubEnv=None, others=False):
                     })
             else:
                 formset = SolutionFormSet()
-                
-            ##FIXME: Make sure this error is treated correctly
-            try:
-                agentFiles = get_agent_code_from_zip(solution.agents.path)
-            except IOError:
-                agentFiles = []
 
+            agentFiles = get_agent_name_list(solution.agents.path)
             choices = [ (filename, filename) for filename in agentFiles ]
             AgentForm = make_custom_agent_form({
                 'queryset': agentQueryset,

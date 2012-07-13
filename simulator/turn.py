@@ -1,10 +1,12 @@
 from django.db.models import F
 from envuser.models import EnvAgent
+from home.base import get_agent_name_list
 from simulator.sandbox import JaCaMoSandbox
 from schedule.models import Schedule
 from solution.specification import SolutionSpecification
 from subenvironment.models import SubEnvironment, DefaultExtra
 from multiprocessing import Pipe, Process
+import os
 import tempfile
 
 def runTurn(numSteps):
@@ -43,6 +45,16 @@ def getSandboxProcess(subenvironment, solutions, usePipe=False):
         if orgs:
             solutionFiles['orgs'].append(orgs)
     agents = [ elem for row in specs for elem in row ]
+    # TODO I'm in need of dire refactoring
+    pathSuffix = '_s%s.asl' % (subenvironment.id,)
+    for agentZip in subenvironment.agent_set.all():
+        for masterAgent in get_agent_name_list(agentZip.file.path):
+            if masterAgent.endswith(pathSuffix):
+                agentName = os.path.splitext(masterAgent)[0]
+                agents.append({
+                    'arch': 'c4jason.CAgentArch',
+                    'name': agentName,
+                })
     agents.append({
         'arch': 'c4jason.CAgentArch',
         'name': 'prime_agent_s_%s' % (subenvironment.envType,),

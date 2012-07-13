@@ -1,1 +1,1 @@
-<solution><asl-list><asl agentId="2" cardinality="1" file="master_u2.asl" /><asl agentId="1" cardinality="3" file="gambler_u2.asl" /></asl-list></solution>
+<solution><asl-list><asl agentId="1" cardinality="3" file="gambler_u2.asl" /><asl agentId="2" cardinality="4" file="gambler_u2.asl" /></asl-list></solution>
