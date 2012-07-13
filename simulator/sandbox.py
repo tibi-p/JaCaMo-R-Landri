@@ -88,12 +88,18 @@ class JaCaMoSandbox(object):
 
     def writeMAS(self, name, infra, env, agents):
         # create agents string
+        paramTemplates = {
+            'code': '%(code)s',
+            'arch': 'agentArchClass %(arch)s',
+        }
         ags = [ ]
         for agent in agents:
-            if 'arch' in agent:
-                agTpl = '\t\t%(name)s %(code)s agentArchClass %(arch)s #%(no)s;'
-            else:
-                agTpl = '\t\t%(name)s %(code)s #%(no)s;'
+            agTpl = [ '%(name)s' ]
+            for k, v in paramTemplates.iteritems():
+                if k in agent:
+                    agTpl.append(v)
+            agTpl.append('#%(no)s')
+            agTpl = '\t\t%s;' % (' '.join(agTpl),)
             ags.append(agTpl % agent)
         ags = '\n'.join(ags)
 

@@ -81,10 +81,11 @@ public abstract class Coordinator extends Artifact {
 				if (!ap.getAgName().startsWith("prime_agent_s_"))
 					if (ap.qty == 1) {
 						agents.put(ap.getAgName(), null);
-					} else
+					} else {
 						for (int i = 1; i <= ap.qty; i++) {
-							agents.put(ap.getAgName() + "_" + i, null);
+							agents.put(ap.getAgName() + i, null);
 						}
+					}
 			}
 			setState(EnvStatus.INITIATED);
 
@@ -142,7 +143,8 @@ public abstract class Coordinator extends Artifact {
 	 *            the new state of the coordinator
 	 */
 	public void setState(EnvStatus state) {
-		System.err.println(String.format("changed state from %s to %s", this.state, state));
+		System.err.println(String.format("changed state from %s to %s",
+				this.state, state));
 		this.state = state;
 	}
 
@@ -229,7 +231,13 @@ public abstract class Coordinator extends Artifact {
 
 	@OPERATION
 	void registerAgent(OpFeedbackParam<String> wsp) throws Exception {
-		agents.put(getOpUserName(), getOpUserId());
+		String agentName = getOpUserName();
+		if (agents.containsKey(agentName)) {
+			agents.put(agentName, getOpUserId());
+		} else {
+			failed(String.format("%s cannot register in this sub-environment",
+					agentName));
+		}
 	}
 
 	@PRIME_AGENT_OPERATION

@@ -8,6 +8,7 @@ import java.util.Random;
 
 import org.aria.rlandri.generic.artifacts.annotation.GAME_OPERATION;
 import org.aria.rlandri.generic.artifacts.annotation.PRIME_AGENT_OPERATION;
+import org.aria.rlandri.generic.artifacts.opmethod.PrimeAgentArtifactOpMethod;
 import org.aria.rlandri.generic.artifacts.opmethod.RTGameArtifactOpMethod;
 
 import cartago.CartagoException;
