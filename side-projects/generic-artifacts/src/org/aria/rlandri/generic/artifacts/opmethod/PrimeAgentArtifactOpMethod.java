@@ -1,10 +1,10 @@
-package org.aria.rlandri.generic.artifacts;
+package org.aria.rlandri.generic.artifacts.opmethod;
 
 import java.lang.reflect.Method;
 import java.util.Arrays;
 
 import org.apache.log4j.Logger;
-import org.aria.rlandri.generic.artifacts.opmethod.ValidatorArtifactOpMethod;
+import org.aria.rlandri.generic.artifacts.Coordinator;
 
 import cartago.CartagoException;
 

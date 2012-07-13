@@ -42,7 +42,13 @@ def getSandboxProcess(subenvironment, solutions, usePipe=False):
             solutionFiles['artifacts'].append(artifacts)
         if orgs:
             solutionFiles['orgs'].append(orgs)
-    masArgs['agents'] = [ elem for row in specs for elem in row ]
+    agents = [ elem for row in specs for elem in row ]
+    agents.append({
+        'arch': 'c4jason.CAgentArch',
+        'name': 'prime_agent_s_%s' % (subenvironment.envType,),
+        'no': 1,
+    })
+    masArgs['agents'] = agents
 
     conn = None
     args = (subenvironment, solutionFiles, masArgs)

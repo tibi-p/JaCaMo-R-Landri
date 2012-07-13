@@ -9,6 +9,7 @@ import java.util.TimerTask;
 import org.apache.commons.collections.map.MultiValueMap;
 import org.aria.rlandri.generic.artifacts.annotation.GAME_OPERATION;
 import org.aria.rlandri.generic.artifacts.annotation.PRIME_AGENT_OPERATION;
+import org.aria.rlandri.generic.artifacts.opmethod.PrimeAgentArtifactOpMethod;
 import org.aria.rlandri.generic.artifacts.opmethod.SETBGameArtifactOpMethod;
 
 import cartago.AgentId;
