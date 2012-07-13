@@ -38,12 +38,29 @@ public class SimultaneouslyExecutedCoordinator extends Coordinator {
 		operationQueue.put(agentId, new ParameterizedOperation(op, params));
 	}
 
-	public void waitForEndTurn() {
+	public boolean waitForEndTurn() {
 		numReadyAgents++;
+		System.err.println(String.format("%d agents are ready from %d",
+				numReadyAgents, agents.size()));
 		agentOrder.add(getOpUserName());
-		if (!isEverybodyReady())
+		if (!isEverybodyReady()) {
 			await("isEverybodyReady");
+		} else {
+			setState(EnvStatus.EVALUATING);
+		}
 		await("isItMyTurn");
+		if (executingAgentIndex == numReadyAgents) {
+			resetTurnInfo();
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	private void resetTurnInfo() {
+		agentOrder.clear();
+		numReadyAgents = 0;
+		executingAgentIndex = 0;
 	}
 
 	@OPERATION

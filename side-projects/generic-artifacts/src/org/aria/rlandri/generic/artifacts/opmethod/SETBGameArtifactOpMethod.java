@@ -4,6 +4,7 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 
 import org.apache.log4j.Logger;
+import org.aria.rlandri.generic.artifacts.EnvStatus;
 import org.aria.rlandri.generic.artifacts.SimultaneouslyExecutedCoordinator;
 
 public class SETBGameArtifactOpMethod extends ValidatorArtifactOpMethod {
@@ -24,22 +25,27 @@ public class SETBGameArtifactOpMethod extends ValidatorArtifactOpMethod {
 			super.exec(actualParams);
 	}
 
-	// TODO (andrei) check whose turn it is
 	// TODO (mihai) check if running
 	public void exec(Object[] actualParams) throws Exception {
-		try{
-		System.err.println("HERE I AM THIS IS ME");
+		try {
 		coordinator.failIfNotRunning();
-		validate(coordinator, actualParams);
 		String msgFmt = "%s: saving execution with parameters %s";
-		logger.debug(String.format(msgFmt, this, Arrays.toString(actualParams)));
+		logger.debug(String.format(msgFmt, this,
+				Arrays.toString(actualParams)));
 		if (coordinator instanceof SimultaneouslyExecutedCoordinator) {
 			SimultaneouslyExecutedCoordinator seCoordinator = (SimultaneouslyExecutedCoordinator) coordinator;
-			//seCoordinator.addOpMethod(this, actualParams);
-			seCoordinator.waitForEndTurn();
+			// seCoordinator.addOpMethod(this, actualParams);
+			boolean isLast = seCoordinator.waitForEndTurn();
+			try {
+				validate(coordinator, actualParams);
+				super.exec(actualParams);
+			} finally {
+				if (isLast)
+					coordinator.setState(EnvStatus.RUNNING);
+			}
 		}
 		} catch (Exception e) {
-			System.err.println("Faster and faster ><>< xoxoxo");
+			System.err.println("**** UNCANNY exception ****");
 			e.printStackTrace(System.err);
 		}
 	}
