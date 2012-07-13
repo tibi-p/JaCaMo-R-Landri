@@ -91,6 +91,7 @@ class JaCaMoSandbox(object):
         paramTemplates = {
             'code': '%(code)s',
             'arch': 'agentArchClass %(arch)s',
+            'no': '#%(no)s',
         }
         ags = [ ]
         for agent in agents:
@@ -98,7 +99,6 @@ class JaCaMoSandbox(object):
             for k, v in paramTemplates.iteritems():
                 if k in agent:
                     agTpl.append(v)
-            agTpl.append('#%(no)s')
             agTpl = '\t\t%s;' % (' '.join(agTpl),)
             ags.append(agTpl % agent)
         ags = '\n'.join(ags)

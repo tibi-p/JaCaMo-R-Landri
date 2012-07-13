@@ -46,7 +46,6 @@ def getSandboxProcess(subenvironment, solutions, usePipe=False):
     agents.append({
         'arch': 'c4jason.CAgentArch',
         'name': 'prime_agent_s_%s' % (subenvironment.envType,),
-        'no': 1,
     })
     masArgs['agents'] = agents
 
