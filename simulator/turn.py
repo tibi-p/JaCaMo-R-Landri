@@ -70,7 +70,7 @@ def runStep(step):
 
 def runInSandbox(subenvironment, solutionFiles, masArgs, pipe=None):
     rootDir = tempfile.mkdtemp()
-    sandbox = JaCaMoSandbox(rootDir)
+    sandbox = JaCaMoSandbox(rootDir, subenvironment)
     sandbox.populate(solutionFiles, {
         'agents': getPathList(subenvironment, 'agent_set'),
         'artifacts': getPathList(subenvironment, 'artifact_set'),

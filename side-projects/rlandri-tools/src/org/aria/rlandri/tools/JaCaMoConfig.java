@@ -6,6 +6,8 @@ package org.aria.rlandri.tools;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 
 /**
@@ -14,11 +16,14 @@ import java.util.Properties;
  */
 public class JaCaMoConfig {
 
-	public static void writeProperties(String sandboxPath) throws IOException {
+	private static final String CONFIG_FILENAME = "config.properties";
+
+	public static void writeProperties(String sandboxPath,
+			Map<String, String> propMap) throws IOException {
 		Properties properties = new Properties();
-		String currentDirectory = System.getProperty("user.dir");
-		properties.setProperty("django_directory", currentDirectory);
-		File configFile = new File(sandboxPath, "config.properties");
+		for (Map.Entry<String, String> entry : propMap.entrySet())
+			properties.setProperty(entry.getKey(), entry.getValue());
+		File configFile = new File(sandboxPath, CONFIG_FILENAME);
 		properties.store(new FileOutputStream(configFile),
 				"Properties for sub-environment configuration");
 	}
@@ -28,10 +33,15 @@ public class JaCaMoConfig {
 	 *            tool arguments: the path to the JaCaMo sandbox
 	 */
 	public static void main(String[] args) {
-		if (args.length >= 1) {
+		if (args.length >= 3) {
 			String sandboxPath = args[0];
+			Map<String, String> propMap = new HashMap<String, String>();
+			String currentDirectory = System.getProperty("user.dir");
+			propMap.put("django_directory", currentDirectory);
+			propMap.put("environment_type", args[1]);
+			propMap.put("coordinator_class", args[2]);
 			try {
-				writeProperties(sandboxPath);
+				writeProperties(sandboxPath, propMap);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}

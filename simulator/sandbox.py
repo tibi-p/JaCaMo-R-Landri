@@ -57,8 +57,9 @@ def transferFiles(files, directory):
     return libraries
 
 class JaCaMoSandbox(object):
-    def __init__(self, root):
+    def __init__(self, root, subenvironment):
         self.root = root
+        self.subenvironment = subenvironment
         self.libs = filter_listdir(os.path.join('lib', 'jacamo'), 'jar')
 
     def handle_filelist(self, dirname, filelist):
@@ -75,6 +76,8 @@ class JaCaMoSandbox(object):
             os.pathsep.join(libraries),
             "org.aria.rlandri.tools.JaCaMoConfig",
             self.root,
+            self.subenvironment.envType,
+            self.subenvironment.coordinatorClass,
         ])
 
         for dirname, filelist in solutionFiles.iteritems():
