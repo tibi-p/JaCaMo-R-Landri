@@ -24,7 +24,7 @@ public class DBWrapper {
 	private Connection conn;
 	private String databasePath = DB_REL_PATH;
 
-	public void init() throws ClassNotFoundException {
+	public DBWrapper() throws ClassNotFoundException {
 		try {
 			Properties prop = new Properties();
 			prop.load(new FileInputStream("config.properties"));
