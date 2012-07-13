@@ -2,6 +2,9 @@ package org.aria.rlandri.generic.artifacts;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Random;
 
 import org.aria.rlandri.generic.artifacts.annotation.GAME_OPERATION;
 import org.aria.rlandri.generic.artifacts.annotation.PRIME_AGENT_OPERATION;
@@ -15,17 +18,23 @@ public class RealTimeSinglePlayerCoordinator extends Coordinator {
 
 	private int index = 0;
 	private String last;
+	Map<String, String> workspaces;
 
+	protected void init() throws CartagoException{
+		super.init();
+		last = "";
+		workspaces = new HashMap<String, String>();
+	}
 	@OPERATION
 	void registerAgent(OpFeedbackParam<String> privateSubenv) throws Exception {
 		super.registerAgent(null);
-		last = "";
 		String agentName = getOpUserName();
 		if (agentName.matches(".+_[0-9]")) {
-			privateSubenv.set(agentName.substring(0,
-					agentName.lastIndexOf('_') + 1) + "private_workspace");
+			agentName = agentName.substring(0, agentName.lastIndexOf('_'));
+			privateSubenv.set(workspaces.get(agentName));
+			//System.out.println("for " + agentName + " is " + workspaces.get(agentName));
 		} else
-			privateSubenv.set(getOpUserName() + "_private_workspace");
+			privateSubenv.set(workspaces.get(agentName.substring(0, agentName.lastIndexOf('_'))));
 	}
 
 	@PRIME_AGENT_OPERATION
@@ -38,15 +47,17 @@ public class RealTimeSinglePlayerCoordinator extends Coordinator {
 			String root;
 			if (agents.get(index).matches(".+_[0-9]"))
 				root = agents.get(index).substring(0,
-						agents.get(index).lastIndexOf('_'));
+						agents.get(index).lastIndexOf('_') - 1);
 			else {
-				wspName.set(agents.get(index) + "_private_workspace");
+				root = agents.get(index);
+				root = root.substring(0, root.lastIndexOf('_'));
+				String name = root + "_private_workspace" + new Random().nextFloat();
+				workspaces.put(root, name);
+				wspName.set(name);
 				index++;
 				return;
 			}
-			// System.out.println(root);
 			while (root.equals(last)) {
-				// System.out.println(root);
 				index++;
 				if (index == agents.size()) {
 					wspName.set("no_more");
@@ -54,12 +65,21 @@ public class RealTimeSinglePlayerCoordinator extends Coordinator {
 				}
 				if (agents.get(index).matches(".+_[0-9]"))
 					root = agents.get(index).substring(0,
-							agents.get(index).lastIndexOf('_'));
-				else
+							agents.get(index).lastIndexOf('_') - 1);
+				else{
 					root = agents.get(index);
+					root = root.substring(0, root.lastIndexOf('_'));
+					break;
+				}
 			}
 			last = root;
-			wspName.set(root + "private_workspace");
+			if(workspaces.containsKey(root))
+				wspName.set(workspaces.get(root));
+			else{
+				String name = root + "_private_workspace" + new Random().nextFloat();
+				workspaces.put(root, name);
+				wspName.set(name);
+			}
 			index++;
 		}
 	}
