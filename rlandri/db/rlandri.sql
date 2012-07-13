@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: 127.0.0.1
--- Generation Time: Jul 12, 2012 at 01:35 PM
+-- Generation Time: Jul 13, 2012 at 09:40 AM
 -- Server version: 5.5.25a-log
 -- PHP Version: 5.4.4
 
@@ -158,9 +158,9 @@ CREATE TABLE IF NOT EXISTS `auth_user` (
 --
 
 INSERT INTO `auth_user` (`id`, `username`, `first_name`, `last_name`, `email`, `password`, `is_staff`, `is_active`, `is_superuser`, `last_login`, `date_joined`) VALUES
-(1, 'admin', '', '', 'popa.tiberiu@gmail.com', 'pbkdf2_sha256$10000$Pel4TDYzKAof$zawDS1r9uzj0ZkO/N17caDtFPsDFwcLo9unbfJVXTlU=', 1, 1, 1, '2012-07-12 11:29:01', '2012-07-12 11:13:16'),
-(2, 'tibi', '', '', '', 'pbkdf2_sha256$10000$j4VqrRFjDGoy$mMDRAp9YUBpIDZXDoQDBJLe4ZhNQilyHnU7f4LUqIt4=', 0, 1, 0, '2012-07-12 11:32:02', '2012-07-12 11:14:25'),
-(3, 'andrei', '', '', '', 'pbkdf2_sha256$10000$WDjG5qD6agbH$GtnTKn45ca2zlUa1uSEgtGolmWIzJ/9+iqhTaUZ86z8=', 0, 1, 0, '2012-07-12 11:14:40', '2012-07-12 11:14:40'),
+(1, 'admin', '', '', 'popa.tiberiu@gmail.com', 'pbkdf2_sha256$10000$Pel4TDYzKAof$zawDS1r9uzj0ZkO/N17caDtFPsDFwcLo9unbfJVXTlU=', 1, 1, 1, '2012-07-12 21:54:05', '2012-07-12 11:13:16'),
+(2, 'tibi', '', '', '', 'pbkdf2_sha256$10000$j4VqrRFjDGoy$mMDRAp9YUBpIDZXDoQDBJLe4ZhNQilyHnU7f4LUqIt4=', 0, 1, 0, '2012-07-12 20:42:57', '2012-07-12 11:14:25'),
+(3, 'andrei', '', '', '', 'pbkdf2_sha256$10000$WDjG5qD6agbH$GtnTKn45ca2zlUa1uSEgtGolmWIzJ/9+iqhTaUZ86z8=', 0, 1, 0, '2012-07-12 12:15:29', '2012-07-12 11:14:40'),
 (4, 'mihai', '', '', '', 'pbkdf2_sha256$10000$Ac6AXMUmTKvR$EyJJuVXpvAAq/6hPqgufSiTLweRfKQPSvoJHuvVDVbA=', 0, 1, 0, '2012-07-12 11:14:46', '2012-07-12 11:14:46');
 
 -- --------------------------------------------------------
@@ -257,7 +257,7 @@ CREATE TABLE IF NOT EXISTS `django_admin_log` (
   PRIMARY KEY (`id`),
   KEY `django_admin_log_403f60f` (`user_id`),
   KEY `django_admin_log_1bb8f392` (`content_type_id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=20 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=22 ;
 
 --
 -- Dumping data for table `django_admin_log`
@@ -282,7 +282,9 @@ INSERT INTO `django_admin_log` (`id`, `action_time`, `user_id`, `content_type_id
 (16, '2012-07-12 11:30:49', 1, 12, '2', 'Generic Artifacts', 1, ''),
 (17, '2012-07-12 11:30:57', 1, 12, '2', 'Generic Artifacts', 3, ''),
 (18, '2012-07-12 11:31:10', 1, 12, '3', 'Logging Properties', 1, ''),
-(19, '2012-07-12 11:31:31', 1, 12, '4', 'Generic Environment', 1, '');
+(19, '2012-07-12 11:31:31', 1, 12, '4', 'Generic Environment', 1, ''),
+(20, '2012-07-12 22:01:39', 1, 10, '1', 'Roulette', 2, 'Changed envType.'),
+(21, '2012-07-12 22:09:57', 1, 10, '1', 'Roulette', 2, 'Changed coordinatorClass.');
 
 -- --------------------------------------------------------
 
@@ -344,7 +346,8 @@ CREATE TABLE IF NOT EXISTS `django_session` (
 --
 
 INSERT INTO `django_session` (`session_key`, `session_data`, `expire_date`) VALUES
-('aa0acfc5f000712da1dd74a6cdd2fece', 'NmJmZWUyZWExMGEyNzU1NGUwZjg2MzhiNzA4ZjA3MDI5YTg0MzNiYjqAAn1xAShVEl9hdXRoX3Vz\nZXJfYmFja2VuZHECVSlkamFuZ28uY29udHJpYi5hdXRoLmJhY2tlbmRzLk1vZGVsQmFja2VuZHED\nVQ1fYXV0aF91c2VyX2lkcQSKAQJ1Lg==\n', '2012-07-26 11:32:02');
+('35a8865d6e58152c435adf0fd15cabfe', 'NmJmZWUyZWExMGEyNzU1NGUwZjg2MzhiNzA4ZjA3MDI5YTg0MzNiYjqAAn1xAShVEl9hdXRoX3Vz\nZXJfYmFja2VuZHECVSlkamFuZ28uY29udHJpYi5hdXRoLmJhY2tlbmRzLk1vZGVsQmFja2VuZHED\nVQ1fYXV0aF91c2VyX2lkcQSKAQJ1Lg==\n', '2012-07-26 20:42:57'),
+('a4a809a08989518883f1bfb0da72baf1', 'N2RjY2UwOTYxNTQ3OThlMWY1YjAyZWJlMGQyZWI2YjYyYzYzMmM3OTqAAn1xAShVEl9hdXRoX3Vz\nZXJfYmFja2VuZHECVSlkamFuZ28uY29udHJpYi5hdXRoLmJhY2tlbmRzLk1vZGVsQmFja2VuZHED\nVQ1fYXV0aF91c2VyX2lkcQSKAQF1Lg==\n', '2012-07-26 21:54:05');
 
 -- --------------------------------------------------------
 
@@ -449,14 +452,14 @@ CREATE TABLE IF NOT EXISTS `simulator_abstractprocess` (
   `created` datetime NOT NULL,
   PRIMARY KEY (`id`),
   KEY `simulator_abstractprocess_6c4d8baf` (`solution_id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=3 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=4 ;
 
 --
 -- Dumping data for table `simulator_abstractprocess`
 --
 
 INSERT INTO `simulator_abstractprocess` (`id`, `solution_id`, `created`) VALUES
-(2, 1, '2012-07-12 11:32:05');
+(3, 1, '2012-07-12 11:49:40');
 
 -- --------------------------------------------------------
 
@@ -596,6 +599,8 @@ CREATE TABLE IF NOT EXISTS `subenvironment_subenvironment` (
   `description` longtext NOT NULL,
   `ring_id` int(11) NOT NULL,
   `index` int(10) unsigned NOT NULL,
+  `envType` varchar(10) NOT NULL,
+  `coordinatorClass` varchar(200) NOT NULL,
   PRIMARY KEY (`id`),
   KEY `subenvironment_subenvironment_77550576` (`ring_id`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=2 ;
@@ -604,8 +609,8 @@ CREATE TABLE IF NOT EXISTS `subenvironment_subenvironment` (
 -- Dumping data for table `subenvironment_subenvironment`
 --
 
-INSERT INTO `subenvironment_subenvironment` (`id`, `name`, `description`, `ring_id`, `index`) VALUES
-(1, 'Roulette', 'European Roulette', 2, 1);
+INSERT INTO `subenvironment_subenvironment` (`id`, `name`, `description`, `ring_id`, `index`, `envType`, `coordinatorClass`) VALUES
+(1, 'Roulette', 'European Roulette', 2, 1, 'setb', 'Roulette');
 
 --
 -- Constraints for dumped tables
@@ -628,15 +633,15 @@ ALTER TABLE `auth_permission`
 -- Constraints for table `auth_user_groups`
 --
 ALTER TABLE `auth_user_groups`
-  ADD CONSTRAINT `user_id_refs_id_7ceef80f` FOREIGN KEY (`user_id`) REFERENCES `auth_user` (`id`),
-  ADD CONSTRAINT `group_id_refs_id_f116770` FOREIGN KEY (`group_id`) REFERENCES `auth_group` (`id`);
+  ADD CONSTRAINT `group_id_refs_id_f116770` FOREIGN KEY (`group_id`) REFERENCES `auth_group` (`id`),
+  ADD CONSTRAINT `user_id_refs_id_7ceef80f` FOREIGN KEY (`user_id`) REFERENCES `auth_user` (`id`);
 
 --
 -- Constraints for table `auth_user_user_permissions`
 --
 ALTER TABLE `auth_user_user_permissions`
-  ADD CONSTRAINT `user_id_refs_id_dfbab7d` FOREIGN KEY (`user_id`) REFERENCES `auth_user` (`id`),
-  ADD CONSTRAINT `permission_id_refs_id_67e79cb` FOREIGN KEY (`permission_id`) REFERENCES `auth_permission` (`id`);
+  ADD CONSTRAINT `permission_id_refs_id_67e79cb` FOREIGN KEY (`permission_id`) REFERENCES `auth_permission` (`id`),
+  ADD CONSTRAINT `user_id_refs_id_dfbab7d` FOREIGN KEY (`user_id`) REFERENCES `auth_user` (`id`);
 
 --
 -- Constraints for table `city_ring`
@@ -648,8 +653,8 @@ ALTER TABLE `city_ring`
 -- Constraints for table `django_admin_log`
 --
 ALTER TABLE `django_admin_log`
-  ADD CONSTRAINT `user_id_refs_id_c8665aa` FOREIGN KEY (`user_id`) REFERENCES `auth_user` (`id`),
-  ADD CONSTRAINT `content_type_id_refs_id_288599e6` FOREIGN KEY (`content_type_id`) REFERENCES `django_content_type` (`id`);
+  ADD CONSTRAINT `content_type_id_refs_id_288599e6` FOREIGN KEY (`content_type_id`) REFERENCES `django_content_type` (`id`),
+  ADD CONSTRAINT `user_id_refs_id_c8665aa` FOREIGN KEY (`user_id`) REFERENCES `auth_user` (`id`);
 
 --
 -- Constraints for table `envuser_envagent`

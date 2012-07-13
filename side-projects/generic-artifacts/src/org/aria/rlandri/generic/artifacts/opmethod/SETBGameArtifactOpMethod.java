@@ -27,13 +27,20 @@ public class SETBGameArtifactOpMethod extends ValidatorArtifactOpMethod {
 	// TODO (andrei) check whose turn it is
 	// TODO (mihai) check if running
 	public void exec(Object[] actualParams) throws Exception {
+		try{
+		System.err.println("HERE I AM THIS IS ME");
 		coordinator.failIfNotRunning();
 		validate(coordinator, actualParams);
 		String msgFmt = "%s: saving execution with parameters %s";
 		logger.debug(String.format(msgFmt, this, Arrays.toString(actualParams)));
 		if (coordinator instanceof SimultaneouslyExecutedCoordinator) {
 			SimultaneouslyExecutedCoordinator seCoordinator = (SimultaneouslyExecutedCoordinator) coordinator;
-			seCoordinator.addOpMethod(this, actualParams);
+			//seCoordinator.addOpMethod(this, actualParams);
+			seCoordinator.waitForEndTurn();
+		}
+		} catch (Exception e) {
+			System.err.println("Faster and faster ><>< xoxoxo");
+			e.printStackTrace(System.err);
 		}
 	}
 
