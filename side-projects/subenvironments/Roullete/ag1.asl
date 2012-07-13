@@ -19,7 +19,7 @@
 		bet("Split",[8,9],3).
 
 +?discover_roulette(R) : true
-  <- lookupArtifact("rou",R).
+  <- lookupArtifact("coordinator", R).
 
 -?discover_roulette(R)
   <- .wait(10);
