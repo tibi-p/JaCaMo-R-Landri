@@ -7,7 +7,7 @@
 /* Plans */
 
 +startSubenv[artifact_name(_, "coordinator")]
-	<-	registerAgent(Wsp);
+	<-	registerMasterAgent(Wsp);
 		+wsp_to_join(Wsp);
 		!joinPrivateWorkspace;
 		!start.

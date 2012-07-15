@@ -37,7 +37,8 @@ public abstract class Coordinator extends Artifact {
 	public static final int realTimeSP = 0, realTimeNeg = 1,
 			turnBasedSimultaneous = 2, turnBasedAlternative = 3;
 
-	protected Map<String, AgentId> agents;
+	protected Map<String, AgentId> agents = new HashMap<String, AgentId>();
+	protected Map<String, AgentId> masterAgents = new HashMap<String, AgentId>();
 	private List<GuardedAnnotation> annotations = new ArrayList<GuardedAnnotation>();
 	private EnvStatus state = EnvStatus.PRIMORDIAL;
 
@@ -66,10 +67,7 @@ public abstract class Coordinator extends Artifact {
 	 */
 	protected void init() throws CartagoException {
 		try {
-			agents = new HashMap<String, AgentId>();
-
 			File mas2jFile = new File(".").listFiles(new FileFilter() {
-
 				public boolean accept(File arg0) {
 					return arg0.getAbsolutePath().endsWith("mas2j");
 				}
@@ -78,14 +76,24 @@ public abstract class Coordinator extends Artifact {
 			mas2j parser = new mas2j(new FileInputStream(mas2jFile));
 			MAS2JProject project = parser.mas();
 			for (AgentParameters ap : project.getAgents()) {
-				if (!ap.getAgName().startsWith("prime_agent_s_"))
+				String agentName = ap.getAgName();
+				if (isParticipatingAgent(agentName)) {
 					if (ap.qty == 1) {
-						agents.put(ap.getAgName(), null);
+						agents.put(agentName, null);
 					} else {
 						for (int i = 1; i <= ap.qty; i++) {
-							agents.put(ap.getAgName() + i, null);
+							agents.put(agentName + i, null);
 						}
 					}
+				} else if (!isPrimeAgent(agentName)) {
+					if (ap.qty == 1) {
+						masterAgents.put(agentName, null);
+					} else {
+						for (int i = 1; i <= ap.qty; i++) {
+							masterAgents.put(agentName + i, null);
+						}
+					}
+				}
 			}
 			setState(EnvStatus.INITIATED);
 
@@ -156,6 +164,29 @@ public abstract class Coordinator extends Artifact {
 	 */
 	protected void addOperation(GuardedAnnotation annotation) {
 		annotations.add(annotation);
+	}
+
+	/**
+	 * Returns <tt>true</tt> if <tt>agentName</tt> is a participating agent.
+	 * 
+	 * @return <tt>true</tt> if <tt>agentName</tt> is a participating agent
+	 */
+	private boolean isParticipatingAgent(String agentName) {
+		try {
+			String[] tokens = agentName.split("_");
+			if (tokens.length >= 2 && tokens.length <= 3) {
+				if ("agent".equals(tokens[0])) {
+					for (int i = 1; i < tokens.length; i++) {
+						int id = Integer.parseInt(tokens[i]);
+						if (id <= 0)
+							return false;
+					}
+					return true;
+				}
+			}
+		} catch (NumberFormatException e) {
+		}
+		return false;
 	}
 
 	/**
@@ -230,13 +261,24 @@ public abstract class Coordinator extends Artifact {
 	}
 
 	@OPERATION
-	void registerAgent(OpFeedbackParam<String> wsp) throws Exception {
+	void registerAgent(OpFeedbackParam<String> wsp) {
 		String agentName = getOpUserName();
 		if (agents.containsKey(agentName)) {
 			agents.put(agentName, getOpUserId());
 		} else {
-			failed(String.format("%s cannot register in this sub-environment",
-					agentName));
+			String errFmt = "%s cannot register in this sub-environment";
+			failed(String.format(errFmt, agentName));
+		}
+	}
+
+	@OPERATION
+	void registerMasterAgent(OpFeedbackParam<String> wsp) {
+		String agentName = getOpUserName();
+		if (masterAgents.containsKey(agentName)) {
+			masterAgents.put(agentName, getOpUserId());
+		} else {
+			String errFmt = "%s cannot register as a master in this sub-environment";
+			failed(String.format(errFmt, agentName));
 		}
 	}
 
