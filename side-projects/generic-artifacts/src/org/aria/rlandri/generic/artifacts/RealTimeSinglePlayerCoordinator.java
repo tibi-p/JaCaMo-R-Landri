@@ -26,9 +26,10 @@ public class RealTimeSinglePlayerCoordinator extends Coordinator {
 		last = "";
 		workspaces = new HashMap<String, String>();
 	}
+
 	@OPERATION
-	void registerAgent(OpFeedbackParam<String> privateSubenv) throws Exception {
-		super.registerAgent(null);
+	void registerAgent(OpFeedbackParam<String> privateSubenv) {
+		super.registerAgent(privateSubenv);
 		String agentName = getOpUserName();
 		if (agentName.matches(".+_[0-9]")) {
 			agentName = agentName.substring(0, agentName.lastIndexOf('_'));

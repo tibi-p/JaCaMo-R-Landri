@@ -35,12 +35,11 @@ public class PlayerAlternatedCoordinator extends Coordinator {
 
 	// TODO use status here
 	@OPERATION
-	void registerAgent(OpFeedbackParam<String> wsp) throws Exception {
+	void registerAgent(OpFeedbackParam<String> wsp) {
 		super.registerAgent(wsp);
 		String name = this.getOpUserName();
 		order.add(name);
 		wsp.set("NA");
-
 	}
 
 	public void failIfNotCurrentTurn() {

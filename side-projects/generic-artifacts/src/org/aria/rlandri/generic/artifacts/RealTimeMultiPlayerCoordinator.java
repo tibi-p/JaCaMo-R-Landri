@@ -13,8 +13,8 @@ abstract public class RealTimeMultiPlayerCoordinator extends Coordinator {
 
 	@Override
 	@OPERATION
-	void registerAgent(OpFeedbackParam<String> wsp) throws Exception {
-		super.registerAgent(null);
+	void registerAgent(OpFeedbackParam<String> wsp) {
+		super.registerAgent(wsp);
 		wsp.set("NA");
 	}
 
