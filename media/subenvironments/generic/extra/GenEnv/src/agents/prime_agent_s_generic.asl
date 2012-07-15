@@ -8,16 +8,6 @@
 
 /* Plans */
 
-+!prepare_environment : true
-	<-	!makeAndJoinDefaultWorkspace;
-		!makeStandardArtifacts;
-		!startSubenv
-	.
-
-+!makeStandardArtifacts: true
-	<-	!makeLogger;
-		!makeCoordinator.
-
 +!makeCoordinator: true
 	<-	makeArtifact("initiator",
 			"org.aria.rlandri.generic.artifacts.Initiator", [], _
@@ -28,12 +18,3 @@
 	<-	makeArtifact("logger",
 			"org.aria.rlandri.generic.artifacts.SubenvLogger", [], _
 		).
-
-+!makeAndJoinDefaultWorkspace: true
-	<-	createWorkspace("SubenvDefaultWorkspace");
-		joinWorkspace("SubenvDefaultWorkspace", Id);
-		cartago.set_current_wsp(Id).
-
-+!startSubenv: true
-	<-	.wait(2000);
-		startSubenv.
