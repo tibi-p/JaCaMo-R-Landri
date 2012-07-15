@@ -40,8 +40,8 @@ public class SimultaneouslyExecutedCoordinator extends Coordinator {
 
 	public boolean waitForEndTurn() {
 		numReadyAgents++;
-		System.err.println(String.format("%d agents are ready from %d",
-				numReadyAgents, agents.size()));
+		System.err.println(String.format("%s: %d agents are ready from %d",
+				getOpUserName(), numReadyAgents, agents.size()));
 		agentOrder.add(getOpUserName());
 		if (!isEverybodyReady()) {
 			await("isEverybodyReady");
@@ -49,6 +49,8 @@ public class SimultaneouslyExecutedCoordinator extends Coordinator {
 			setState(EnvStatus.EVALUATING);
 		}
 		await("isItMyTurn");
+		System.err.println(String.format("%s: Now it's my turn!",
+				getOpUserName()));
 		if (executingAgentIndex == numReadyAgents) {
 			resetTurnInfo();
 			return true;
@@ -61,11 +63,6 @@ public class SimultaneouslyExecutedCoordinator extends Coordinator {
 		agentOrder.clear();
 		numReadyAgents = 0;
 		executingAgentIndex = 0;
-	}
-
-	@OPERATION
-	void registerAgent() {
-
 	}
 
 	@OPERATION
@@ -141,7 +138,7 @@ public class SimultaneouslyExecutedCoordinator extends Coordinator {
 	}
 
 	@OPERATION
-	void registerAgent(OpFeedbackParam<String> wsp) throws Exception {
+	void registerAgent(OpFeedbackParam<String> wsp) {
 		super.registerAgent(wsp);
 		wsp.set("NA");
 	}

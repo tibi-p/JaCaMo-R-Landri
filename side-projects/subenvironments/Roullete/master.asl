@@ -1,7 +1,7 @@
 // Agent master in project roulette.mas2j
 
 {
-	include("common_s_generic.asl")
+	include("master_s_generic.asl")
 }
 
 /* Initial beliefs and rules */

@@ -97,16 +97,11 @@ public class Roulette extends SimultaneouslyExecutedCoordinator {
 	{
 		System.out.println("Validating BIATCH!");
 	}
-	
-    	@GAME_OPERATION(validator = "validateSpinWheel")
+
+	@MASTER_OPERATION(validator = "validateSpinWheel")
 	public void spinWheel() {
-	
-		String user = getOpUserName();
-		if(!user.equals("master"))
-			return;
-	
 		int value = (int)(Math.random()*37);
-		
+
 		winningNumber = numbers[value];
 		winningColor = "red";
 		if(value%2==0)
@@ -118,22 +113,16 @@ public class Roulette extends SimultaneouslyExecutedCoordinator {
 	
 		System.out.println("Winning number: "+winningNumber + " and color: " +  winningColor);
     }
-	
+
 	void validateSpinWheel()
 	{
 		
 	}
-	
-	
+
 	//TODO: Validation is not done here (eg. users can win with ill formed bets)!!!!!!!!!!!!!!
-	@GAME_OPERATION(validator = "validatePayout")	
+	@MASTER_OPERATION(validator = "validatePayout")	
 	public void payout()
 	{
-
-		String user = getOpUserName();
-		if(!user.equals("master"))
-			return;
-			
 		Set<String> players = bets.keySet();
 		for(Iterator it = players.iterator();it.hasNext();)
 		{

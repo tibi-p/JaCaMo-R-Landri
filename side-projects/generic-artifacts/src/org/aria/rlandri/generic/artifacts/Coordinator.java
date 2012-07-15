@@ -20,7 +20,9 @@ import java.util.Map;
 
 import org.aria.rlandri.generic.artifacts.annotation.GuardedAnnotation;
 import org.aria.rlandri.generic.artifacts.annotation.GuardedAnnotationProcessor;
+import org.aria.rlandri.generic.artifacts.annotation.MASTER_OPERATION;
 import org.aria.rlandri.generic.artifacts.annotation.PRIME_AGENT_OPERATION;
+import org.aria.rlandri.generic.artifacts.opmethod.MasterArtifactOpMethod;
 import org.aria.rlandri.generic.artifacts.util.ReflectionUtils;
 
 import cartago.AgentId;
@@ -140,6 +142,24 @@ public abstract class Coordinator extends Artifact {
 		return agentName.startsWith("prime_agent_s_");
 	}
 
+	/**
+	 * Returns <tt>true</tt> if the calling agent is a registered master agent.
+	 * 
+	 * @return <tt>true</tt> if the calling agent is a registered master agent
+	 */
+	public boolean isRegisteredMasterAgent() {
+		return masterAgents.containsKey(getOpUserName());
+	}
+
+	/**
+	 * Returns <tt>true</tt> if <tt>agentName</tt> is a registered master agent.
+	 * 
+	 * @return <tt>true</tt> if <tt>agentName</tt> is a registered master agent
+	 */
+	public boolean isRegisteredMasterAgent(String agentName) {
+		return masterAgents.containsKey(agentName);
+	}
+
 	public EnvStatus getState() {
 		return state;
 	}
@@ -253,11 +273,17 @@ public abstract class Coordinator extends Artifact {
 	}
 
 	private void registerOperations() throws CartagoException {
+		fillDefaultOperations();
 		fillOperations();
 
 		GuardedAnnotationProcessor processor = new GuardedAnnotationProcessor(
 				getClass());
 		processor.processAnnotations(annotations);
+	}
+
+	private void fillDefaultOperations() throws CartagoException {
+		addOperation(new CoordinatorAnnotation(MASTER_OPERATION.class,
+				MasterArtifactOpMethod.class, true));
 	}
 
 	@OPERATION
