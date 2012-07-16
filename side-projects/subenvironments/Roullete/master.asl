@@ -6,11 +6,12 @@
 
 /* Initial beliefs and rules */
 
-
 /* Initial goals */
 
 /* Plans */
 
++!start : true
+	<-	true.
 
 +stopTurn(iteration): true <-
 	spinWheel;
