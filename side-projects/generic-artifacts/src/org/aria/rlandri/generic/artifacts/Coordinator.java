@@ -24,6 +24,9 @@ import org.aria.rlandri.generic.artifacts.annotation.MASTER_OPERATION;
 import org.aria.rlandri.generic.artifacts.annotation.PRIME_AGENT_OPERATION;
 import org.aria.rlandri.generic.artifacts.opmethod.MasterArtifactOpMethod;
 import org.aria.rlandri.generic.artifacts.util.ReflectionUtils;
+import org.aria.rlandri.generic.tools.ValidationResult;
+
+import com.sun.xml.internal.bind.v2.runtime.unmarshaller.XsiNilLoader.Array;
 
 import cartago.AgentId;
 import cartago.Artifact;
@@ -43,6 +46,8 @@ public abstract class Coordinator extends Artifact {
 	protected Map<String, AgentId> masterAgents = new HashMap<String, AgentId>();
 	private List<GuardedAnnotation> annotations = new ArrayList<GuardedAnnotation>();
 	private EnvStatus state = EnvStatus.PRIMORDIAL;
+	private HashMap<String, ValidationResult> failures;
+	private boolean typedFailSearch;
 
 	protected class CoordinatorAnnotation extends GuardedAnnotation {
 
@@ -69,6 +74,8 @@ public abstract class Coordinator extends Artifact {
 	 */
 	protected void init() throws CartagoException {
 		try {
+			failures = new HashMap<String, ValidationResult>();
+			typedFailSearch = false;
 			File mas2jFile = new File(".").listFiles(new FileFilter() {
 				public boolean accept(File arg0) {
 					return arg0.getAbsolutePath().endsWith("mas2j");
@@ -98,7 +105,6 @@ public abstract class Coordinator extends Artifact {
 				}
 			}
 			setState(EnvStatus.INITIATED);
-
 			registerOperations();
 		} catch (FileNotFoundException e) {
 			throw new CartagoException("Could not find mas2j file");
@@ -124,8 +130,6 @@ public abstract class Coordinator extends Artifact {
 	}
 
 	/**
-	 * Returns <tt>true</tt> if the calling agent is the prime agent.
-	 * 
 	 * @return <tt>true</tt> if the calling agent is the prime agent
 	 */
 	public boolean isPrimeAgent() {
@@ -133,8 +137,6 @@ public abstract class Coordinator extends Artifact {
 	}
 
 	/**
-	 * Returns <tt>true</tt> if <tt>agentName</tt> is the prime agent.
-	 * 
 	 * @return <tt>true</tt> if <tt>agentName</tt> is the prime agent
 	 */
 	public boolean isPrimeAgent(String agentName) {
@@ -143,8 +145,6 @@ public abstract class Coordinator extends Artifact {
 	}
 
 	/**
-	 * Returns <tt>true</tt> if the calling agent is a registered master agent.
-	 * 
 	 * @return <tt>true</tt> if the calling agent is a registered master agent
 	 */
 	public boolean isRegisteredMasterAgent() {
@@ -152,8 +152,6 @@ public abstract class Coordinator extends Artifact {
 	}
 
 	/**
-	 * Returns <tt>true</tt> if <tt>agentName</tt> is a registered master agent.
-	 * 
 	 * @return <tt>true</tt> if <tt>agentName</tt> is a registered master agent
 	 */
 	public boolean isRegisteredMasterAgent(String agentName) {
@@ -187,8 +185,6 @@ public abstract class Coordinator extends Artifact {
 	}
 
 	/**
-	 * Returns <tt>true</tt> if <tt>agentName</tt> is a participating agent.
-	 * 
 	 * @return <tt>true</tt> if <tt>agentName</tt> is a participating agent
 	 */
 	private boolean isParticipatingAgent(String agentName) {
@@ -326,4 +322,35 @@ public abstract class Coordinator extends Artifact {
 		return state != EnvStatus.RUNNING;
 	}
 
+	public void addValidationResult(ValidationResult vres) {
+		failures.put(vres.getAgent(), vres);
+	}
+	
+	@OPERATION
+	void getNextFailureReason(OpFeedbackParam<String> reason, OpFeedbackParam<String> type){
+		ValidationResult vres = failures.get(getOpUserName());
+		if(vres == null) failed("No recorded failures");
+		if(typedFailSearch){
+			vres.index = 0;
+			typedFailSearch = false;
+		}
+		reason.set(vres.getReasons().get(vres.index++));
+		type.set(vres.getType(reason.get()));
+	}
+	
+	void getNextFailureReason(OpFeedbackParam<String> reason, OpFeedbackParam<String> type, Integer... types){
+		ValidationResult vres = failures.get(getOpUserName());
+		if(vres == null) failed("No recorded failures");
+		if(!typedFailSearch){
+			vres.index = 0;
+			typedFailSearch = true;
+		}
+		ArrayList<Integer> typeFilter = new ArrayList<Integer>();
+		for(Integer t : types){
+			typeFilter.add(t);
+		}
+		
+		reason.set(vres.getReasons(typeFilter).get(vres.index++));
+		type.set(vres.getType(reason.get()));
+	}
 }

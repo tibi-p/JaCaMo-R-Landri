@@ -68,10 +68,23 @@ public class ValidationResult {
 	/**
 	 * get the associated type for the reason specified
 	 * @param reason the reason that you want to find out the type of
-	 * @return the type of the reason
+	 * @return the type of the reason as a string
 	 */
-	public int getType(String reason){
-		return reasons.get(reason);
+	public String getType(String reason){
+		String type = "Durrr, this shouldn't be here";
+		switch(reasons.get(reason)){
+			case WARNING:
+				type = "WARNING";
+				break;
+			case ERROR:
+				type = "ERROR";
+				break;
+			case FATAL:
+				type = "FATAL";
+				break;
+		}
+		
+		return type;
 	}
 	
 	/**
@@ -87,7 +100,7 @@ public class ValidationResult {
 	 * @param types a <tt>list</tt> of types of failures that will filter out the reasons being returned
 	 * @return a <tt>list</tt> of reasons matching the types specified
 	 */
-	public List<String> getReasons(List<String> types){
+	public List<String> getReasons(List<Integer> types){
 		ArrayList<String> result = new ArrayList<String>();
 		
 		for(String reason : reasons.keySet()){
