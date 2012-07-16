@@ -12,8 +12,8 @@ MAS roulette {
 
    agents:
    
-    ag1  agentArchClass c4jason.CAgentArch;
-	master agentArchClass c4jason.CAgentArch;
+    gambler_u2 agentArchClass c4jason.CAgentArch;
+	master_s1  agentArchClass c4jason.CAgentArch;
 
    classpath: "lib/moise.jar";   // moise: where the artifacts are included 
               "lib/cartago.jar"; // cartago: platform for artifacts
@@ -22,5 +22,3 @@ MAS roulette {
 			  "lib/log4j-1.2.17.jar";
 
 	}
-
-
