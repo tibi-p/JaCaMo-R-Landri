@@ -11,16 +11,9 @@
 /* Plans */
 
 +!start : true <-
-	?discover_roulette(R);
-	focus(R).
+	?coord_id(R);
+	.print("Moartea neagra", R).
 
-+startTurn(currentTurn): true <-
-	.print("O inceput! tura: ",currentTurn);
++startTurn(currentTurn) : true <-
+	.print("O inceput! tura: ", currentTurn);
 	bet("Split",[8,9],3).
-
-+?discover_roulette(R) : true
-  <- lookupArtifact("coordinator", R).
-
--?discover_roulette(R)
-  <- .wait(10);
-     ?discover_roulette(R).

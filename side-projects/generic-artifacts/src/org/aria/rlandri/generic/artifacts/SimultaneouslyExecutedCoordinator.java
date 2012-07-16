@@ -32,6 +32,12 @@ public class SimultaneouslyExecutedCoordinator extends Coordinator {
 	private List<String> agentOrder = new ArrayList<String>();
 	private int numReadyAgents = 0;
 	private int executingAgentIndex = 0;
+	private boolean stepFinished = true;
+	private boolean executing = false;
+
+	public void setExecuting(boolean isExecuting) {
+		this.executing = isExecuting;
+	}
 
 	public void addOpMethod(IArtifactOp op, Object[] params) {
 		AgentId agentId = getOpUserId();
@@ -48,7 +54,9 @@ public class SimultaneouslyExecutedCoordinator extends Coordinator {
 		} else {
 			setState(EnvStatus.EVALUATING);
 		}
-		await("isItMyTurn");
+		while (!isItMyTurn())
+			await("isNotExecuting");
+		executing = true;
 		System.err.println(String.format("%s: Now it's my turn!",
 				getOpUserName()));
 		if (executingAgentIndex == numReadyAgents) {
@@ -63,6 +71,17 @@ public class SimultaneouslyExecutedCoordinator extends Coordinator {
 		agentOrder.clear();
 		numReadyAgents = 0;
 		executingAgentIndex = 0;
+		stepFinished = true;
+	}
+
+	private boolean isItMyTurn() {
+		String currentAgent = agentOrder.get(executingAgentIndex);
+		if (currentAgent.equals(getOpUserName())) {
+			executingAgentIndex++;
+			return true;
+		} else {
+			return false;
+		}
 	}
 
 	@OPERATION
@@ -111,13 +130,15 @@ public class SimultaneouslyExecutedCoordinator extends Coordinator {
 	}
 
 	private void executeStep() {
+		System.err.println("TO BE OR NOT TO BE");
+		stepFinished = false;
 		signal("startTurn", currentStep);
 		timer.schedule(new TimerTask() {
 			public void run() {
 				execInternalOp("changeToEvaluating");
 			}
 		}, STEP_LENGTH);
-		await("isNotRunning");
+		await("isStepFinished");
 	}
 
 	@INTERNAL_OPERATION
@@ -141,6 +162,7 @@ public class SimultaneouslyExecutedCoordinator extends Coordinator {
 	@OPERATION
 	void registerAgent(OpFeedbackParam<String> wsp) {
 		super.registerAgent(wsp);
+		System.err.println("CEVA E PUTRED IN R'LANDRI");
 		wsp.set("NA");
 	}
 
@@ -150,14 +172,13 @@ public class SimultaneouslyExecutedCoordinator extends Coordinator {
 	}
 
 	@GUARD
-	boolean isItMyTurn() {
-		String currentAgent = agentOrder.get(executingAgentIndex);
-		if (currentAgent.equals(getOpUserName())) {
-			executingAgentIndex++;
-			return true;
-		} else {
-			return false;
-		}
+	private boolean isNotExecuting() {
+		return !executing;
+	}
+
+	@GUARD
+	private boolean isStepFinished() {
+		return stepFinished;
 	}
 
 	@Override
