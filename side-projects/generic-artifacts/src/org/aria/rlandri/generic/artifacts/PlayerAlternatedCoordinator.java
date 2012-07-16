@@ -25,7 +25,7 @@ public class PlayerAlternatedCoordinator extends Coordinator {
 
 	private final Timer timer = new Timer();
 	private int currentStep = 0;
-	private int currentAgent = 0;
+	protected int currentAgent = 0;
 
 	List<String> order = new LinkedList<String>();
 
