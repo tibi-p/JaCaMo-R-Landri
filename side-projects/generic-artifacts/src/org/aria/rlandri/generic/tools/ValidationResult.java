@@ -3,21 +3,32 @@ package org.aria.rlandri.generic.tools;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
 
 public class ValidationResult {
 	public final static int WARNING = 0, ERROR = 1, FATAL = 2, limit = 2;
 	private HashMap<String, Integer> reasons;
 	private int defaultType;
+	private String agent;
 
 	/**
 	 * creates a new validation result with the default type of the failure reasons set to "WARNING"
+	 * @param agent the agent that failed the validation
 	 */
-	public ValidationResult() {
+	public ValidationResult(String agent) {
 		reasons = new HashMap<String, Integer>();
 		defaultType = WARNING;
+		this.agent = agent;
 	}
 	
+	/**
+	 * @return the agent that generate this failure
+	 */
+	public String getAgent() {
+		return agent;
+	}
+
+
+
 	/**
 	 * adds a failure reason to this validation result with the type specified
 	 * @param reason one of the reasons for which the validation failed
