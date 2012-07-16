@@ -132,11 +132,43 @@ public abstract class Coordinator extends Artifact {
 	}
 
 	/**
+	 * Fails if the coordinator is not currently in the initiated state.
+	 */
+	public void failIfNotInitiated() {
+		if (state != EnvStatus.INITIATED)
+			failed("The coordinator is not in running mode");
+	}
+
+	/**
 	 * Fails if the coordinator is not currently in the running state.
 	 */
 	public void failIfNotRunning() {
 		if (isNotRunning())
 			failed("The coordinator is not in running mode");
+	}
+
+	/**
+	 * Fails if the current agent is not a registered participating agent.
+	 */
+	public void failIfNotRegisteredParticipatingAgent() {
+		if (!isRegisteredParticipatingAgent())
+			failed("The current agent is not a registered participating agent");
+	}
+
+	/**
+	 * Fails if the current agent is not a registered master agent.
+	 */
+	public void failIfNotRegisteredMasterAgent() {
+		if (!isRegisteredMasterAgent())
+			failed("The current agent is not a registered master agent");
+	}
+
+	/**
+	 * Fails if the current agent is not a registered prime agent.
+	 */
+	public void failIfNotRegisteredPrimeAgent() {
+		if (!isRegisteredPrimeAgent())
+			failed("The current agent is not a registered prime agent");
 	}
 
 	/**
@@ -154,8 +186,30 @@ public abstract class Coordinator extends Artifact {
 	 * @return <tt>true</tt> if <tt>agentName</tt> is the prime agent
 	 */
 	public boolean isPrimeAgent(String agentName) {
-		// TODO iffy prime agent check
-		return agentName.startsWith("prime_agent_s_");
+		String primeName = String.format("prime_agent_s_%s", environmentType);
+		return primeName.equals(agentName);
+	}
+
+	/**
+	 * Returns <tt>true</tt> if the calling agent is a registered participating
+	 * agent.
+	 * 
+	 * @return <tt>true</tt> if the calling agent is a registered participating
+	 *         agent
+	 */
+	public boolean isRegisteredParticipatingAgent() {
+		return isRegisteredParticipatingAgent(getOpUserId());
+	}
+
+	/**
+	 * Returns <tt>true</tt> if <tt>agentId</tt> is a registered participating
+	 * agent.
+	 * 
+	 * @return <tt>true</tt> if <tt>agentId</tt> is a registered participating
+	 *         agent
+	 */
+	public boolean isRegisteredParticipatingAgent(AgentId agentId) {
+		return regularAgents.isRegistered(agentId);
 	}
 
 	/**
@@ -174,6 +228,24 @@ public abstract class Coordinator extends Artifact {
 	 */
 	public boolean isRegisteredMasterAgent(AgentId agentId) {
 		return masterAgents.isRegistered(agentId);
+	}
+
+	/**
+	 * Returns <tt>true</tt> if the calling agent is a registered prime agent.
+	 * 
+	 * @return <tt>true</tt> if the calling agent is a registered prime agent
+	 */
+	public boolean isRegisteredPrimeAgent() {
+		return isRegisteredPrimeAgent(getOpUserId());
+	}
+
+	/**
+	 * Returns <tt>true</tt> if <tt>agentId</tt> is a registered prime agent.
+	 * 
+	 * @return <tt>true</tt> if <tt>agentId</tt> is a registered prime agent
+	 */
+	public boolean isRegisteredPrimeAgent(AgentId agentId) {
+		return primeAgents.isRegistered(agentId);
 	}
 
 	public EnvStatus getState() {
@@ -254,9 +326,6 @@ public abstract class Coordinator extends Artifact {
 	private void addCustomAnnotation(GuardedAnnotation guardedAnnotation,
 			Method method) throws CartagoException {
 		Annotation annotation = guardedAnnotation.getMethodAnnotation(method);
-		System.out.println("-- " + method);
-		System.out.println("-- " + annotation);
-
 		String guard = guardedAnnotation.invokeGuardMethod(annotation);
 		ArtifactGuardMethod guardBody = null;
 		if (!"".equals(guard)) {
@@ -316,6 +385,7 @@ public abstract class Coordinator extends Artifact {
 
 	@OPERATION
 	void registerAgent(OpFeedbackParam<String> wsp) {
+		failIfNotInitiated();
 		AgentId agentId = getOpUserId();
 		if (!regularAgents.registerAgent(agentId)) {
 			String errFmt = "%s cannot register as a regular in this sub-environment";
@@ -325,6 +395,7 @@ public abstract class Coordinator extends Artifact {
 
 	@OPERATION
 	void registerMasterAgent(OpFeedbackParam<String> wsp) {
+		failIfNotInitiated();
 		AgentId agentId = getOpUserId();
 		if (!masterAgents.registerAgent(agentId)) {
 			String errFmt = "%s cannot register as a master in this sub-environment";
@@ -334,6 +405,7 @@ public abstract class Coordinator extends Artifact {
 
 	@OPERATION
 	void registerPrimeAgent() {
+		failIfNotInitiated();
 		AgentId agentId = getOpUserId();
 		if (!primeAgents.registerAgent(agentId)) {
 			String errFmt = "%s cannot register as a prime in this sub-environment";

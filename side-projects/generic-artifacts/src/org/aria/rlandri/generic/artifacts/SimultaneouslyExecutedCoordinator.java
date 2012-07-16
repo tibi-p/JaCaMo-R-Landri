@@ -1,12 +1,10 @@
 package org.aria.rlandri.generic.artifacts;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import org.apache.commons.collections.map.MultiValueMap;
 import org.aria.rlandri.generic.artifacts.annotation.GAME_OPERATION;
 import org.aria.rlandri.generic.artifacts.annotation.PRIME_AGENT_OPERATION;
 import org.aria.rlandri.generic.artifacts.opmethod.PrimeAgentArtifactOpMethod;
@@ -15,7 +13,6 @@ import org.aria.rlandri.generic.artifacts.opmethod.SETBGameArtifactOpMethod;
 import cartago.AgentId;
 import cartago.CartagoException;
 import cartago.GUARD;
-import cartago.IArtifactOp;
 import cartago.INTERNAL_OPERATION;
 import cartago.OPERATION;
 import cartago.OpFeedbackParam;
@@ -28,7 +25,6 @@ public class SimultaneouslyExecutedCoordinator extends Coordinator {
 	public static final int STEPS = 3;
 	public static final int STEP_LENGTH = 1000;
 
-	private MultiValueMap operationQueue = new MultiValueMap();
 	private List<String> agentOrder = new ArrayList<String>();
 	private int numReadyAgents = 0;
 	private int executingAgentIndex = 0;
@@ -38,11 +34,6 @@ public class SimultaneouslyExecutedCoordinator extends Coordinator {
 
 	public void setExecuting(boolean isExecuting) {
 		this.executing = isExecuting;
-	}
-
-	public void addOpMethod(IArtifactOp op, Object[] params) {
-		AgentId agentId = getOpUserId();
-		operationQueue.put(agentId, new ParameterizedOperation(op, params));
 	}
 
 	public boolean waitForEndTurn() {
@@ -91,27 +82,6 @@ public class SimultaneouslyExecutedCoordinator extends Coordinator {
 		}
 	}
 
-	@OPERATION
-	void runQueuedOperations() {
-		System.out.println("SPARTAAAAAA!");
-		for (Object key : operationQueue.keySet()) {
-			Collection<?> coll = operationQueue.getCollection(key);
-			for (Object value : coll) {
-				if (value instanceof ParameterizedOperation) {
-					ParameterizedOperation entry = (ParameterizedOperation) value;
-					try {
-						SETBGameArtifactOpMethod op = (SETBGameArtifactOpMethod) entry
-								.getOp();
-						op.execSavedParameters(entry.getParams());
-					} catch (Exception e) {
-						// TODO log it or something
-						e.printStackTrace();
-					}
-				}
-			}
-		}
-	}
-
 	// TODO remove me
 	@GAME_OPERATION(validator = "catzelushCuParuCretz")
 	void hotelCismigiu() {
@@ -140,7 +110,6 @@ public class SimultaneouslyExecutedCoordinator extends Coordinator {
 
 	private void executeStep() {
 		stepFinished = false;
-		System.out.println("INCEPE TURA FA");
 		signal("startTurn", currentStep);
 		timer.schedule(new TimerTask() {
 			public void run() {

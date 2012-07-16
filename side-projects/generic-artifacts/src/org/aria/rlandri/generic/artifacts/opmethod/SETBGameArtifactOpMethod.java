@@ -18,18 +18,11 @@ public class SETBGameArtifactOpMethod extends ValidatorArtifactOpMethod {
 		super(coordinator, method, validatorMethod);
 	}
 
-	public void execSavedParameters(Object[] actualParams) throws Exception {
-		String msgFmt = "%s: executing op using saved parameters %s";
-		logger.debug(String.format(msgFmt, this, Arrays.toString(actualParams)));
-		if (actualParams != null)
-			super.exec(actualParams);
-	}
-
 	// TODO (mihai) check if running
 	public void exec(Object[] actualParams) throws Exception {
-		invokeParameterless("preliminaryCheck");
-		String msgFmt = "%s: saving execution with parameters %s";
+		String msgFmt = "%s: trying to execute with parameters %s";
 		logger.debug(String.format(msgFmt, this, Arrays.toString(actualParams)));
+		invokeParameterless("preliminaryCheck");
 		if (coordinator instanceof SimultaneouslyExecutedCoordinator) {
 			SimultaneouslyExecutedCoordinator seCoordinator = (SimultaneouslyExecutedCoordinator) coordinator;
 			boolean isLast = seCoordinator.waitForEndTurn();
@@ -46,6 +39,7 @@ public class SETBGameArtifactOpMethod extends ValidatorArtifactOpMethod {
 
 	protected void preliminaryCheck() {
 		coordinator.failIfNotRunning();
+		coordinator.failIfNotRegisteredParticipatingAgent();
 	}
 
 }

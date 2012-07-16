@@ -6,8 +6,6 @@ import java.util.Arrays;
 import org.apache.log4j.Logger;
 import org.aria.rlandri.generic.artifacts.Coordinator;
 
-import cartago.CartagoException;
-
 public class MasterArtifactOpMethod extends ValidatorArtifactOpMethod {
 
 	private static final Logger logger = Logger
@@ -19,14 +17,15 @@ public class MasterArtifactOpMethod extends ValidatorArtifactOpMethod {
 	}
 
 	public void exec(Object[] actualParams) throws Exception {
-		String msgFmt = "%s: checking if master agent is executing with parameters %s";
+		String msgFmt = "%s: trying to execute as master with parameters %s";
 		logger.debug(String.format(msgFmt, this, Arrays.toString(actualParams)));
-		if (!coordinator.isRegisteredMasterAgent()) {
-			String errFmt = "Only the prime agent can execute %s";
-			throw new CartagoException(String.format(errFmt, this));
-		}
+		invokeParameterless("preliminaryCheck");
 		validate(coordinator, actualParams);
 		super.exec(actualParams);
+	}
+
+	protected void preliminaryCheck() {
+		coordinator.failIfNotRegisteredMasterAgent();
 	}
 
 }
