@@ -11,15 +11,12 @@
 /* Plans */
 
 +!start : true <-
-	?discover_roulette(_).
+	?discover_roulette(R);
+	focus(R).
 
 +startTurn(currentTurn): true <-
-	.print("O inceput! tura: ",currentTurn).
-
-+bet(_) : true
-	<- 
-		.print("can bet");
-		bet("Split",[8,9],3).
+	.print("O inceput! tura: ",currentTurn);
+	bet("Split",[8,9],3).
 
 +?discover_roulette(R) : true
   <- lookupArtifact("coordinator", R).
