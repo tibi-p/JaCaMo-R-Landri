@@ -37,8 +37,7 @@ public class PlayerAlternatedCoordinator extends Coordinator {
 	@OPERATION
 	void registerAgent(OpFeedbackParam<String> wsp) {
 		super.registerAgent(wsp);
-		String name = this.getOpUserName();
-		order.add(name);
+		order.add(getOpUserName());
 		wsp.set("NA");
 	}
 
@@ -46,7 +45,7 @@ public class PlayerAlternatedCoordinator extends Coordinator {
 		String userName = getOpUserName();
 		if (userName != order.get(currentAgent)) {
 			// TODO: Standard error messages
-			failed("Error message");
+			failed("not_your_turn");
 		}
 	}
 
@@ -118,16 +117,4 @@ public class PlayerAlternatedCoordinator extends Coordinator {
 	protected void saveState() {
 		// TODO Auto-generated method stub
 	}
-
-	// TODO remove me
-	@GAME_OPERATION(validator = "catzelushCuParuCretz")
-	void hotelCismigiu() {
-		System.out.println("SA MA MUT IN HOTEL CISMIGIU");
-	}
-
-	// TODO remove me
-	void catzelushCuParuCretz() {
-		System.out.println("Toni da cu Grebla");
-	}
-
 }
