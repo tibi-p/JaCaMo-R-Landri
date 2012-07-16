@@ -14,6 +14,10 @@ public class AgentRegistry {
 		return agentNames;
 	}
 
+	public Set<AgentId> getAgentIds() {
+		return agentIds;
+	}
+
 	public int getNumRegistered() {
 		return agentIds.size();
 	}

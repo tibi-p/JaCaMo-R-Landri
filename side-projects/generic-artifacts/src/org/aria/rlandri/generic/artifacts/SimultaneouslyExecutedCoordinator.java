@@ -63,10 +63,10 @@ public class SimultaneouslyExecutedCoordinator extends Coordinator {
 	private void leaveNoAgentBehind() {
 		numReadyAgents++;
 		agentOrder.add(getOpUserName());
-		if (!isEverybodyReady()) {
-			await("isEverybodyReady");
-		} else {
+		if (isEverybodyReady()) {
 			setState(EnvStatus.EVALUATING);
+		} else {
+			await("isEverybodyReady");
 		}
 	}
 
@@ -83,11 +83,8 @@ public class SimultaneouslyExecutedCoordinator extends Coordinator {
 
 	private boolean isItMyTurn(AgentId agentId) {
 		String currentAgent = agentOrder.get(executingAgentIndex);
-		System.err.println("&ECHOES& " + currentAgent + " vs "
-				+ agentId.getAgentName() + " @" + executingAgentIndex);
 		if (currentAgent.equals(agentId.getAgentName())) {
 			executingAgentIndex++;
-			System.err.println("\\\\\\\\ Increased to " + executingAgentIndex);
 			return true;
 		} else {
 			return false;
@@ -137,13 +134,13 @@ public class SimultaneouslyExecutedCoordinator extends Coordinator {
 		for (currentStep = 1; currentStep <= STEPS; currentStep++) {
 			executeStep();
 		}
-		// TODO send only to prime agent
-		System.err.println("}}{{ Dau semnale la prosti");
-		signal("stopGame");
+		for (AgentId agentId : primeAgents.getAgentIds())
+			signal(agentId, "stopGame");
 	}
 
 	private void executeStep() {
 		stepFinished = false;
+		System.out.println("INCEPE TURA FA");
 		signal("startTurn", currentStep);
 		timer.schedule(new TimerTask() {
 			public void run() {
@@ -157,6 +154,7 @@ public class SimultaneouslyExecutedCoordinator extends Coordinator {
 	void changeToEvaluating() {
 		EnvStatus state = getState();
 		if (state == EnvStatus.RUNNING) {
+			System.err.println("OOOOOOOOOO NU CE MORTZII MA-SII");
 			setState(EnvStatus.EVALUATING);
 		} else {
 			// TODO handle me

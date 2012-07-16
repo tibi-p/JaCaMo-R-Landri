@@ -1,6 +1,5 @@
 package org.aria.rlandri.generic.artifacts.opmethod;
 
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 
@@ -28,7 +27,6 @@ public class SETBGameArtifactOpMethod extends ValidatorArtifactOpMethod {
 
 	// TODO (mihai) check if running
 	public void exec(Object[] actualParams) throws Exception {
-		try{
 		invokeParameterless("preliminaryCheck");
 		String msgFmt = "%s: saving execution with parameters %s";
 		logger.debug(String.format(msgFmt, this, Arrays.toString(actualParams)));
@@ -43,14 +41,6 @@ public class SETBGameArtifactOpMethod extends ValidatorArtifactOpMethod {
 				if (isLast)
 					coordinator.setState(EnvStatus.RUNNING);
 			}
-		}
-		} catch (InvocationTargetException e) {
-			System.err.println("**** AM NEVOIE... DE O FEMEIE... CARE SA STIE... MESERIE ****");
-			e.printStackTrace(System.err);
-			throw e;
-		} catch (Exception e) {
-			System.err.println("**** UNCANNY EXCEPTION ****");
-			e.printStackTrace(System.err);
 		}
 	}
 
