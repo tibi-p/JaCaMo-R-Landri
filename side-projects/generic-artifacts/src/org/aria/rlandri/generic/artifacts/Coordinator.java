@@ -148,7 +148,7 @@ public abstract class Coordinator extends Artifact {
 	 * @return <tt>true</tt> if the calling agent is a registered master agent
 	 */
 	public boolean isRegisteredMasterAgent() {
-		return masterAgents.containsKey(getOpUserName());
+		return isRegisteredMasterAgent(getOpUserName());
 	}
 
 	/**
@@ -157,7 +157,7 @@ public abstract class Coordinator extends Artifact {
 	 * @return <tt>true</tt> if <tt>agentName</tt> is a registered master agent
 	 */
 	public boolean isRegisteredMasterAgent(String agentName) {
-		return masterAgents.containsKey(agentName);
+		return masterAgents.get(agentName) != null;
 	}
 
 	public EnvStatus getState() {

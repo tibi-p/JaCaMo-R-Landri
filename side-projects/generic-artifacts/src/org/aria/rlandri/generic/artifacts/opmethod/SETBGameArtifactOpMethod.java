@@ -1,5 +1,6 @@
 package org.aria.rlandri.generic.artifacts.opmethod;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 
@@ -27,14 +28,12 @@ public class SETBGameArtifactOpMethod extends ValidatorArtifactOpMethod {
 
 	// TODO (mihai) check if running
 	public void exec(Object[] actualParams) throws Exception {
-		try {
-		coordinator.failIfNotRunning();
+		try{
+		invokeParameterless("preliminaryCheck");
 		String msgFmt = "%s: saving execution with parameters %s";
-		logger.debug(String.format(msgFmt, this,
-				Arrays.toString(actualParams)));
+		logger.debug(String.format(msgFmt, this, Arrays.toString(actualParams)));
 		if (coordinator instanceof SimultaneouslyExecutedCoordinator) {
 			SimultaneouslyExecutedCoordinator seCoordinator = (SimultaneouslyExecutedCoordinator) coordinator;
-			// seCoordinator.addOpMethod(this, actualParams);
 			boolean isLast = seCoordinator.waitForEndTurn();
 			try {
 				validate(coordinator, actualParams);
@@ -44,10 +43,16 @@ public class SETBGameArtifactOpMethod extends ValidatorArtifactOpMethod {
 					coordinator.setState(EnvStatus.RUNNING);
 			}
 		}
+		} catch (InvocationTargetException e) {
+			throw e;
 		} catch (Exception e) {
-			System.err.println("**** UNCANNY exception ****");
+			System.err.println("**** UNCANNY EXCEPTION ****");
 			e.printStackTrace(System.err);
 		}
+	}
+
+	protected void preliminaryCheck() {
+		coordinator.failIfNotRunning();
 	}
 
 }

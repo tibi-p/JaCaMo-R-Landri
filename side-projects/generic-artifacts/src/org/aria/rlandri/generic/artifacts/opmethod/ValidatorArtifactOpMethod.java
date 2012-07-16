@@ -30,4 +30,13 @@ public class ValidatorArtifactOpMethod extends ArtifactOpMethod {
 			validatorMethod.invoke(artifact, actualParams);
 	}
 
+	protected Object invokeParameterless(String methodName)
+			throws SecurityException, NoSuchMethodException,
+			IllegalArgumentException, IllegalAccessException,
+			InvocationTargetException {
+		Class<?> clazz = getClass();
+		Method method = clazz.getDeclaredMethod(methodName);
+		return method.invoke(this);
+	}
+
 }
