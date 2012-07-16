@@ -91,4 +91,32 @@ public class ValidationResult {
 		
 		return result;
 	}
+	@Override
+	/**
+	 * a string representation of the reasons and their respective types
+	 * @return a string representation of this object
+	 */
+	public String toString(){
+		String result = reasons.keySet().isEmpty() ? "The operation failed for the following reasons: \n" 
+													: "The operation was successful"; 
+		
+		for(String reason : reasons.keySet()){
+			String type = "Durrr, this shouldn't be here";
+			switch(reasons.get(reason)){
+				case WARNING:
+					type = "WARNING";
+					break;
+				case ERROR:
+					type = "ERROR";
+					break;
+				case FATAL:
+					type = "FATAL";
+					break;
+			}
+			
+			result += "\t[" + type + "] " + reason + "\n";
+		}
+		
+		return result;
+	}
 }
