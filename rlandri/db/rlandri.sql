@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: 127.0.0.1
--- Generation Time: Jul 13, 2012 at 12:59 PM
+-- Generation Time: Jul 16, 2012 at 09:18 AM
 -- Server version: 5.5.25a-log
 -- PHP Version: 5.4.4
 
@@ -159,9 +159,9 @@ CREATE TABLE IF NOT EXISTS `auth_user` (
 
 INSERT INTO `auth_user` (`id`, `username`, `first_name`, `last_name`, `email`, `password`, `is_staff`, `is_active`, `is_superuser`, `last_login`, `date_joined`) VALUES
 (1, 'admin', '', '', 'popa.tiberiu@gmail.com', 'pbkdf2_sha256$10000$Pel4TDYzKAof$zawDS1r9uzj0ZkO/N17caDtFPsDFwcLo9unbfJVXTlU=', 1, 1, 1, '2012-07-13 10:26:39', '2012-07-12 11:13:16'),
-(2, 'tibi', '', '', '', 'pbkdf2_sha256$10000$j4VqrRFjDGoy$mMDRAp9YUBpIDZXDoQDBJLe4ZhNQilyHnU7f4LUqIt4=', 0, 1, 0, '2012-07-12 20:42:57', '2012-07-12 11:14:25'),
+(2, 'tibi', '', '', '', 'pbkdf2_sha256$10000$j4VqrRFjDGoy$mMDRAp9YUBpIDZXDoQDBJLe4ZhNQilyHnU7f4LUqIt4=', 0, 1, 0, '2012-07-13 11:57:38', '2012-07-12 11:14:25'),
 (3, 'andrei', '', '', '', 'pbkdf2_sha256$10000$WDjG5qD6agbH$GtnTKn45ca2zlUa1uSEgtGolmWIzJ/9+iqhTaUZ86z8=', 0, 1, 0, '2012-07-12 12:15:29', '2012-07-12 11:14:40'),
-(4, 'mihai', '', '', '', 'pbkdf2_sha256$10000$Ac6AXMUmTKvR$EyJJuVXpvAAq/6hPqgufSiTLweRfKQPSvoJHuvVDVbA=', 0, 1, 0, '2012-07-13 10:33:25', '2012-07-12 11:14:46');
+(4, 'mihai', '', '', '', 'pbkdf2_sha256$10000$Ac6AXMUmTKvR$EyJJuVXpvAAq/6hPqgufSiTLweRfKQPSvoJHuvVDVbA=', 0, 1, 0, '2012-07-13 12:56:40', '2012-07-12 11:14:46');
 
 -- --------------------------------------------------------
 
@@ -257,7 +257,7 @@ CREATE TABLE IF NOT EXISTS `django_admin_log` (
   PRIMARY KEY (`id`),
   KEY `django_admin_log_403f60f` (`user_id`),
   KEY `django_admin_log_1bb8f392` (`content_type_id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=24 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=25 ;
 
 --
 -- Dumping data for table `django_admin_log`
@@ -286,7 +286,8 @@ INSERT INTO `django_admin_log` (`id`, `action_time`, `user_id`, `content_type_id
 (20, '2012-07-12 22:01:39', 1, 10, '1', 'Roulette', 2, 'Changed envType.'),
 (21, '2012-07-12 22:09:57', 1, 10, '1', 'Roulette', 2, 'Changed coordinatorClass.'),
 (22, '2012-07-13 10:31:18', 1, 10, '2', 'Factorial', 1, ''),
-(23, '2012-07-13 10:33:01', 1, 10, '3', 'Auction', 1, '');
+(23, '2012-07-13 10:33:01', 1, 10, '3', 'Auction', 1, ''),
+(24, '2012-07-13 11:49:44', 1, 10, '1', 'Roulette', 2, 'Added agent "Rolling Master".');
 
 -- --------------------------------------------------------
 
@@ -349,8 +350,8 @@ CREATE TABLE IF NOT EXISTS `django_session` (
 
 INSERT INTO `django_session` (`session_key`, `session_data`, `expire_date`) VALUES
 ('35a8865d6e58152c435adf0fd15cabfe', 'NmJmZWUyZWExMGEyNzU1NGUwZjg2MzhiNzA4ZjA3MDI5YTg0MzNiYjqAAn1xAShVEl9hdXRoX3Vz\nZXJfYmFja2VuZHECVSlkamFuZ28uY29udHJpYi5hdXRoLmJhY2tlbmRzLk1vZGVsQmFja2VuZHED\nVQ1fYXV0aF91c2VyX2lkcQSKAQJ1Lg==\n', '2012-07-26 20:42:57'),
-('547d91c72d15e6c0feda776647b25a21', 'Njg4Njc3OWZjMzRjMjAwYjVhZGUxMjE2Nzg4NThlN2E2YzEyNjMyNjqAAn1xAShVEl9hdXRoX3Vz\nZXJfYmFja2VuZHECVSlkamFuZ28uY29udHJpYi5hdXRoLmJhY2tlbmRzLk1vZGVsQmFja2VuZHED\nVQ1fYXV0aF91c2VyX2lkcQSKAQR1Lg==\n', '2012-07-27 10:33:25'),
-('a4a809a08989518883f1bfb0da72baf1', 'N2RjY2UwOTYxNTQ3OThlMWY1YjAyZWJlMGQyZWI2YjYyYzYzMmM3OTqAAn1xAShVEl9hdXRoX3Vz\nZXJfYmFja2VuZHECVSlkamFuZ28uY29udHJpYi5hdXRoLmJhY2tlbmRzLk1vZGVsQmFja2VuZHED\nVQ1fYXV0aF91c2VyX2lkcQSKAQF1Lg==\n', '2012-07-26 21:54:05');
+('5296f51a696da9b19d726334a35c1684', 'Njg4Njc3OWZjMzRjMjAwYjVhZGUxMjE2Nzg4NThlN2E2YzEyNjMyNjqAAn1xAShVEl9hdXRoX3Vz\nZXJfYmFja2VuZHECVSlkamFuZ28uY29udHJpYi5hdXRoLmJhY2tlbmRzLk1vZGVsQmFja2VuZHED\nVQ1fYXV0aF91c2VyX2lkcQSKAQR1Lg==\n', '2012-07-27 12:56:40'),
+('547d91c72d15e6c0feda776647b25a21', 'Njg4Njc3OWZjMzRjMjAwYjVhZGUxMjE2Nzg4NThlN2E2YzEyNjMyNjqAAn1xAShVEl9hdXRoX3Vz\nZXJfYmFja2VuZHECVSlkamFuZ28uY29udHJpYi5hdXRoLmJhY2tlbmRzLk1vZGVsQmFja2VuZHED\nVQ1fYXV0aF91c2VyX2lkcQSKAQR1Lg==\n', '2012-07-27 10:33:25');
 
 -- --------------------------------------------------------
 
@@ -455,14 +456,14 @@ CREATE TABLE IF NOT EXISTS `simulator_abstractprocess` (
   `created` datetime NOT NULL,
   PRIMARY KEY (`id`),
   KEY `simulator_abstractprocess_6c4d8baf` (`solution_id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=8 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=13 ;
 
 --
 -- Dumping data for table `simulator_abstractprocess`
 --
 
 INSERT INTO `simulator_abstractprocess` (`id`, `solution_id`, `created`) VALUES
-(7, 4, '2012-07-13 10:57:14');
+(12, 1, '2012-07-15 19:47:01');
 
 -- --------------------------------------------------------
 
@@ -508,7 +509,14 @@ CREATE TABLE IF NOT EXISTS `subenvironment_agent` (
   `file` varchar(100) NOT NULL,
   PRIMARY KEY (`id`),
   KEY `subenvironment_agent_4d5c45ed` (`subenvironment_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=2 ;
+
+--
+-- Dumping data for table `subenvironment_agent`
+--
+
+INSERT INTO `subenvironment_agent` (`id`, `name`, `subenvironment_id`, `file`) VALUES
+(1, 'Rolling Master', 1, 'subenvironments/1/agents/rolling_master.zip');
 
 -- --------------------------------------------------------
 
