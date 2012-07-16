@@ -9,6 +9,7 @@ public class ValidationResult {
 	private HashMap<String, Integer> reasons;
 	private int defaultType;
 	private String agent;
+	public int index;
 
 	/**
 	 * creates a new validation result with the default type of the failure reasons set to "WARNING"
@@ -18,6 +19,7 @@ public class ValidationResult {
 		reasons = new HashMap<String, Integer>();
 		defaultType = WARNING;
 		this.agent = agent;
+		index = 0;
 	}
 	
 	/**
@@ -26,9 +28,7 @@ public class ValidationResult {
 	public String getAgent() {
 		return agent;
 	}
-
-
-
+	
 	/**
 	 * adds a failure reason to this validation result with the type specified
 	 * @param reason one of the reasons for which the validation failed
@@ -65,6 +65,15 @@ public class ValidationResult {
 		this.defaultType = defaultType;
 		return true;
 	}
+	/**
+	 * get the associated type for the reason specified
+	 * @param reason the reason that you want to find out the type of
+	 * @return the type of the reason
+	 */
+	public int getType(String reason){
+		return reasons.get(reason);
+	}
+	
 	/**
 	 * get all the reasons why the validation failed
 	 * @return an <tt>ArrayList</tt> of strings containing the reasons for failure
