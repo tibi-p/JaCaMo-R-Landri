@@ -1,14 +1,18 @@
-// Agent prime_agent in project sandbox
+/**
+ * The prime agent for a real-time single-player sub-environment.
+ */
+
+{
+	include("prime_agent_s_generic.asl")
+}
 
 /* Initial beliefs and rules */
 endSign("no_more").
 /* Initial goals */
 
-!prepare_environment.
-
 /* Plans */
 
-+!prepare_environment : true 
++!prepare_environment : true
 		<- 	!makeAndJoinDefaultWorkspace;
 			!makeStandardArtifacts;
 			getNextAgent(ParticipantWsp);
@@ -16,11 +20,11 @@ endSign("no_more").
 			!makePrivateWsp;
 			!startSubenv
 		.
-			
+
 +!makeStandardArtifacts: true
 		<- 	!makeLogger;
 			!makeCoordinator.
-			
+
 +!makePrivateWsp: nextParticipant("no_more")
 		<-	true.
 
@@ -30,17 +34,6 @@ endSign("no_more").
 			getNextAgent(ParticipantWsp);
 			-+nextParticipant(ParticipantWsp);
 			!makePrivateWsp.
-			
-+!makeCoordinator: true
-		<- 	makeArtifact("initiator",
-				"org.aria.rlandri.generic.artifacts.Initiator", [], _
-			);
-			makeCoordinatorArtifact("coordinator").
-
-+!makeLogger: true
-		<- 	makeArtifact("logger",
-				"org.aria.rlandri.generic.artifacts.SubenvLogger", [], _
-			).
 
 +!makeAndJoinDefaultWorkspace: true
 		<- 	createWorkspace("SubenvDefaultWorkspace");
