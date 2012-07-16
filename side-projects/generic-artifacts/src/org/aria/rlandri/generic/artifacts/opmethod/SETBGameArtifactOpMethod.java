@@ -45,6 +45,8 @@ public class SETBGameArtifactOpMethod extends ValidatorArtifactOpMethod {
 			}
 		}
 		} catch (InvocationTargetException e) {
+			System.err.println("**** AM NEVOIE... DE O FEMEIE... CARE SA STIE... MESERIE ****");
+			e.printStackTrace(System.err);
 			throw e;
 		} catch (Exception e) {
 			System.err.println("**** UNCANNY EXCEPTION ****");
