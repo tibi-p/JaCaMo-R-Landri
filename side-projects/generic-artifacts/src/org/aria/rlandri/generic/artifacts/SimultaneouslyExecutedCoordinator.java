@@ -25,7 +25,7 @@ public class SimultaneouslyExecutedCoordinator extends Coordinator {
 	private final Timer timer = new Timer();
 	private int currentStep = 0;
 
-	public static final int STEPS = 10;
+	public static final int STEPS = 3;
 	public static final int STEP_LENGTH = 1000;
 
 	private MultiValueMap operationQueue = new MultiValueMap();
@@ -34,6 +34,7 @@ public class SimultaneouslyExecutedCoordinator extends Coordinator {
 	private int executingAgentIndex = 0;
 	private boolean stepFinished = true;
 	private boolean executing = false;
+	private boolean firstTimeOnBarrier = false;
 
 	public void setExecuting(boolean isExecuting) {
 		this.executing = isExecuting;
@@ -45,25 +46,27 @@ public class SimultaneouslyExecutedCoordinator extends Coordinator {
 	}
 
 	public boolean waitForEndTurn() {
-		numReadyAgents++;
-		System.err.println(String.format("%s: %d agents are ready from %d",
-				getOpUserName(), numReadyAgents, agents.size()));
-		agentOrder.add(getOpUserName());
-		if (!isEverybodyReady()) {
-			await("isEverybodyReady");
-		} else {
-			setState(EnvStatus.EVALUATING);
-		}
-		while (!isItMyTurn())
+		leaveNoAgentBehind();
+		while (!isItMyTurn()) {
+			firstTimeOnBarrier = true;
 			await("isNotExecuting");
-		executing = true;
-		System.err.println(String.format("%s: Now it's my turn!",
-				getOpUserName()));
+		}
+		setExecuting(true);
 		if (executingAgentIndex == numReadyAgents) {
 			resetTurnInfo();
 			return true;
 		} else {
 			return false;
+		}
+	}
+
+	private void leaveNoAgentBehind() {
+		numReadyAgents++;
+		agentOrder.add(getOpUserName());
+		if (!isEverybodyReady()) {
+			await("isEverybodyReady");
+		} else {
+			setState(EnvStatus.EVALUATING);
 		}
 	}
 
@@ -75,9 +78,16 @@ public class SimultaneouslyExecutedCoordinator extends Coordinator {
 	}
 
 	private boolean isItMyTurn() {
+		return isItMyTurn(getOpUserId());
+	}
+
+	private boolean isItMyTurn(AgentId agentId) {
 		String currentAgent = agentOrder.get(executingAgentIndex);
-		if (currentAgent.equals(getOpUserName())) {
+		System.err.println("&ECHOES& " + currentAgent + " vs "
+				+ agentId.getAgentName() + " @" + executingAgentIndex);
+		if (currentAgent.equals(agentId.getAgentName())) {
 			executingAgentIndex++;
+			System.err.println("\\\\\\\\ Increased to " + executingAgentIndex);
 			return true;
 		} else {
 			return false;
@@ -127,6 +137,9 @@ public class SimultaneouslyExecutedCoordinator extends Coordinator {
 		for (currentStep = 1; currentStep <= STEPS; currentStep++) {
 			executeStep();
 		}
+		// TODO send only to prime agent
+		System.err.println("}}{{ Dau semnale la prosti");
+		signal("stopGame");
 	}
 
 	private void executeStep() {
@@ -161,18 +174,22 @@ public class SimultaneouslyExecutedCoordinator extends Coordinator {
 	@OPERATION
 	void registerAgent(OpFeedbackParam<String> wsp) {
 		super.registerAgent(wsp);
-		System.err.println("CEVA E PUTRED IN R'LANDRI");
 		wsp.set("NA");
 	}
 
 	@GUARD
 	boolean isEverybodyReady() {
-		return numReadyAgents == agents.size();
+		return numReadyAgents == regularAgents.getNumRegistered();
 	}
 
 	@GUARD
 	private boolean isNotExecuting() {
-		return !executing;
+		if (firstTimeOnBarrier) {
+			firstTimeOnBarrier = false;
+			return false;
+		} else {
+			return !executing;
+		}
 	}
 
 	@GUARD

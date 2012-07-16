@@ -3,6 +3,7 @@ package org.aria.rlandri.generic.artifacts;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
@@ -19,8 +20,15 @@ public class RealTimeSinglePlayerCoordinator extends Coordinator {
 
 	private final Random random = new Random();
 	private final Map<String, String> workspaces = new HashMap<String, String>();
+	private List<String> agents;
 	private int index = 0;
-	private String last;
+	private String last = null;
+
+	protected void init() throws CartagoException {
+		super.init();
+		this.agents = new ArrayList<String>(regularAgents.getAgentNames());
+		Collections.sort(this.agents);
+	}
 
 	@OPERATION
 	void registerAgent(OpFeedbackParam<String> privateSubenv) {
@@ -32,11 +40,9 @@ public class RealTimeSinglePlayerCoordinator extends Coordinator {
 
 	@PRIME_AGENT_OPERATION
 	void getNextAgent(OpFeedbackParam<String> wspName) {
-		ArrayList<String> agents = new ArrayList<String>(super.agents.keySet());
-		Collections.sort(agents);
-		if (index == agents.size())
+		if (index == agents.size()) {
 			wspName.set("no_more");
-		else {
+		} else {
 			String agentName = agents.get(index);
 			String root = agentName.substring(0, agentName.lastIndexOf('_'));
 			if (agentName.endsWith("_")) {

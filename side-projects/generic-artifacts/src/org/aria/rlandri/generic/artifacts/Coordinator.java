@@ -9,6 +9,7 @@ import java.io.File;
 import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -17,6 +18,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 
 import org.aria.rlandri.generic.artifacts.annotation.GuardedAnnotation;
 import org.aria.rlandri.generic.artifacts.annotation.GuardedAnnotationProcessor;
@@ -40,12 +42,14 @@ public abstract class Coordinator extends Artifact {
 	public static final int realTimeSP = 0, realTimeNeg = 1,
 			turnBasedSimultaneous = 2, turnBasedAlternative = 3;
 
-	protected Map<String, AgentId> agents = new HashMap<String, AgentId>();
-	protected Map<String, AgentId> masterAgents = new HashMap<String, AgentId>();
-	private List<GuardedAnnotation> annotations = new ArrayList<GuardedAnnotation>();
+	protected final AgentRegistry regularAgents = new AgentRegistry();
+	protected final AgentRegistry masterAgents = new AgentRegistry();
+	protected final AgentRegistry primeAgents = new AgentRegistry();
+	private final Map<String, ValidationResult> failures = new HashMap<String, ValidationResult>();
+	private final List<GuardedAnnotation> annotations = new ArrayList<GuardedAnnotation>();
 	private EnvStatus state = EnvStatus.PRIMORDIAL;
-	private HashMap<String, ValidationResult> failures;
-	private boolean typedFailSearch;
+	private boolean typedFailSearch = false;
+	private String environmentType;
 
 	protected class CoordinatorAnnotation extends GuardedAnnotation {
 
@@ -72,8 +76,8 @@ public abstract class Coordinator extends Artifact {
 	 */
 	protected void init() throws CartagoException {
 		try {
-			failures = new HashMap<String, ValidationResult>();
-			typedFailSearch = false;
+			loadProperties();
+
 			File mas2jFile = new File(".").listFiles(new FileFilter() {
 				public boolean accept(File arg0) {
 					return arg0.getAbsolutePath().endsWith("mas2j");
@@ -84,20 +88,28 @@ public abstract class Coordinator extends Artifact {
 			MAS2JProject project = parser.mas();
 			for (AgentParameters ap : project.getAgents()) {
 				String agentName = ap.getAgName();
-				if (isParticipatingAgent(agentName)) {
+				if (isPrimeAgent(agentName)) {
 					if (ap.qty == 1) {
-						agents.put(agentName, null);
+						primeAgents.addAgentName(agentName);
 					} else {
 						for (int i = 1; i <= ap.qty; i++) {
-							agents.put(agentName + i, null);
+							primeAgents.addAgentName(agentName + i);
 						}
 					}
-				} else if (!isPrimeAgent(agentName)) {
+				} else if (isParticipatingAgent(agentName)) {
 					if (ap.qty == 1) {
-						masterAgents.put(agentName, null);
+						regularAgents.addAgentName(agentName);
 					} else {
 						for (int i = 1; i <= ap.qty; i++) {
-							masterAgents.put(agentName + i, null);
+							regularAgents.addAgentName(agentName + i);
+						}
+					}
+				} else {
+					if (ap.qty == 1) {
+						masterAgents.addAgentName(agentName);
+					} else {
+						for (int i = 1; i <= ap.qty; i++) {
+							masterAgents.addAgentName(agentName + i);
 						}
 					}
 				}
@@ -152,16 +164,16 @@ public abstract class Coordinator extends Artifact {
 	 * @return <tt>true</tt> if the calling agent is a registered master agent
 	 */
 	public boolean isRegisteredMasterAgent() {
-		return isRegisteredMasterAgent(getOpUserName());
+		return isRegisteredMasterAgent(getOpUserId());
 	}
 
 	/**
-	 * Returns <tt>true</tt> if <tt>agentName</tt> is a registered master agent.
+	 * Returns <tt>true</tt> if <tt>agentId</tt> is a registered master agent.
 	 * 
-	 * @return <tt>true</tt> if <tt>agentName</tt> is a registered master agent
+	 * @return <tt>true</tt> if <tt>agentId</tt> is a registered master agent
 	 */
-	public boolean isRegisteredMasterAgent(String agentName) {
-		return masterAgents.get(agentName) != null;
+	public boolean isRegisteredMasterAgent(AgentId agentId) {
+		return masterAgents.isRegistered(agentId);
 	}
 
 	public EnvStatus getState() {
@@ -211,6 +223,18 @@ public abstract class Coordinator extends Artifact {
 		} catch (NumberFormatException e) {
 		}
 		return false;
+	}
+
+	private void loadProperties() throws CartagoException {
+		try {
+			Properties prop = new Properties();
+			prop.load(new FileInputStream("config.properties"));
+			this.environmentType = prop.getProperty("environment_type");
+		} catch (FileNotFoundException e) {
+			throw new CartagoException(e.getMessage());
+		} catch (IOException e) {
+			throw new CartagoException(e.getMessage());
+		}
 	}
 
 	/**
@@ -292,23 +316,28 @@ public abstract class Coordinator extends Artifact {
 
 	@OPERATION
 	void registerAgent(OpFeedbackParam<String> wsp) {
-		String agentName = getOpUserName();
-		if (agents.containsKey(agentName)) {
-			agents.put(agentName, getOpUserId());
-		} else {
-			String errFmt = "%s cannot register in this sub-environment";
-			failed(String.format(errFmt, agentName));
+		AgentId agentId = getOpUserId();
+		if (!regularAgents.registerAgent(agentId)) {
+			String errFmt = "%s cannot register as a regular in this sub-environment";
+			failed(String.format(errFmt, agentId));
 		}
 	}
 
 	@OPERATION
 	void registerMasterAgent(OpFeedbackParam<String> wsp) {
-		String agentName = getOpUserName();
-		if (masterAgents.containsKey(agentName)) {
-			masterAgents.put(agentName, getOpUserId());
-		} else {
+		AgentId agentId = getOpUserId();
+		if (!masterAgents.registerAgent(agentId)) {
 			String errFmt = "%s cannot register as a master in this sub-environment";
-			failed(String.format(errFmt, agentName));
+			failed(String.format(errFmt, agentId));
+		}
+	}
+
+	@OPERATION
+	void registerPrimeAgent() {
+		AgentId agentId = getOpUserId();
+		if (!primeAgents.registerAgent(agentId)) {
+			String errFmt = "%s cannot register as a prime in this sub-environment";
+			failed(String.format(errFmt, agentId));
 		}
 	}
 

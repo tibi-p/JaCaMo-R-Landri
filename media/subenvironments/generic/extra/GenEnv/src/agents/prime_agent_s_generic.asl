@@ -12,7 +12,9 @@
 	<-	makeArtifact("initiator",
 			"org.aria.rlandri.generic.artifacts.Initiator", [], _
 		);
-		makeCoordinatorArtifact("coordinator", [], _).
+		makeCoordinatorArtifact("coordinator", [], Coordinator);
+		focus(Coordinator);
+		registerPrimeAgent[artifact_id(Coordinator)].
 
 +!makeLogger: true
 	<-	makeArtifact("logger",
@@ -20,5 +22,4 @@
 		).
 
 +stopGame
-	<-	.print("careful with dat axe");
-		.stopMAS.
+	<-	.stopMAS.
