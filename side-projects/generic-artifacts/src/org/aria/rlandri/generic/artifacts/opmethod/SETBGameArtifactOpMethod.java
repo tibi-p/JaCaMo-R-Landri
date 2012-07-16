@@ -39,6 +39,7 @@ public class SETBGameArtifactOpMethod extends ValidatorArtifactOpMethod {
 				validate(coordinator, actualParams);
 				super.exec(actualParams);
 			} finally {
+				seCoordinator.setExecuting(false);
 				if (isLast)
 					coordinator.setState(EnvStatus.RUNNING);
 			}
