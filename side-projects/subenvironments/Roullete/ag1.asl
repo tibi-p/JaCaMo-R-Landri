@@ -13,7 +13,10 @@
 +!start : true <-
 	?discover_roulette(_).
 
-+ bet(_) : true
++startTurn(currentTurn): true <-
+	.print("O inceput! tura: ",currentTurn).
+
++bet(_) : true
 	<- 
 		.print("can bet");
 		bet("Split",[8,9],3).

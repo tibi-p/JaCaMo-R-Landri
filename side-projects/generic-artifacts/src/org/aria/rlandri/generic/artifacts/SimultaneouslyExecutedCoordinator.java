@@ -111,6 +111,7 @@ public class SimultaneouslyExecutedCoordinator extends Coordinator {
 	}
 
 	private void executeStep() {
+		signal("startTurn", currentStep);
 		timer.schedule(new TimerTask() {
 			public void run() {
 				execInternalOp("changeToEvaluating");
