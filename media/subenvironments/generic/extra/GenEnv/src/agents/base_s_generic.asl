@@ -34,7 +34,6 @@
 	<-	lookupArtifact("coordinator", Coord);
 		+coord_id(Coord);
 		focus(Coord);
-		!registration;
 		.
 
 -!registerCoordinator: true

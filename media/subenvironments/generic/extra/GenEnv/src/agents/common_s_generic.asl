@@ -6,13 +6,14 @@
 
 /* Plans */
 
++startSubenv[artifact_name(_, "coordinator")]
+	<-	!registration;
+		!joinPrivateWorkspace;
+		!start.
+
 +!registration: true
 	<-	registerAgent(Wsp);
 		+wsp_to_join(Wsp).
-
-+startSubenv[artifact_name(_, "coordinator")]
-	<-	!joinPrivateWorkspace;
-		!start.
 
 +!joinPrivateWorkspace: wsp_to_join("NA")
 	<-	-wsp_to_join(_).
