@@ -14,5 +14,100 @@ import org.aria.rlandri.generic.artifacts.annotation.*;
  */
 public class Roulette extends PlayerAlternatedCoordinator {
 
+	int[][] gameState = new int[3][3];
+	int[] score = new int[2];
+
+	boolean ended?()
+	{
+		for(int i=0;i<3;i++)
+		{
+			if(gameState[i][0]==gameState[i][1] && gameState[i][1]==gameState[i][2])
+			{
+				if(gameState[i][0]==1)
+				{
+					score[0]++;
+					return true;
+				}
+				else if(gameState[i][0]==-1)
+				{
+					score[1]++;
+					return true;
+				}
+			}
+
+			if(gameState[0][i]==gameState[1][i] && gameState[1][i]==gameState[2][i])
+			{
+				if(gameState[0][i]==1)
+				{
+					score[0]++;
+					return true;
+				}
+				else if(gameState[0][i]==-1)
+				{
+					score[1]++;
+					return true;
+				}
+			}
+
+		}
+		if(gameState[0][0]==gameState[1][1] && gameState[1][1]==gameState[2][2])
+		{
+			if(gameState[0][0]==1)
+			{
+				score[0]++;
+				return true;
+			}
+			else if(gameState[0][0]==-1)
+			{
+				score[1]++;
+				return true;
+			}
+		}
+
+		if(gameState[0][2]==gameState[1][1] && gameState[1][1]==gameState[2][0])
+		{
+			if(gameState[0][2]==1)
+			{
+				score[0]++;
+				return true;
+			}
+			else if(gameState[0][2]==1)
+			{
+				score[1]++;
+				return true;
+			}
+		}
+		
+		return false;
+	}	
+
+	@GAME_OPERATION(validator = "validateMark")
+	void mark(int i,int j)
+	{
+		if(currentAgent==0)
+		{
+			gameState[i][j]=1;
+		}
+		else
+		{
+			gameState[i][j]=-1;
+		}
+
+		if(ended?())
+		{
+			for(int i=0;i<3;i++)
+				for(int j=0;j<3;j++)
+				{
+					gameState[i][j]=0;
+				}
+		}
+
+	}
+
+	private void validateMark()
+	{
+		
+	}
+
 }
 
