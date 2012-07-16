@@ -6,13 +6,15 @@ import java.io.IOException;
 import java.util.Properties;
 
 import cartago.Artifact;
-import cartago.ArtifactConfig;
+import cartago.ArtifactId;
 import cartago.CartagoException;
 import cartago.OPERATION;
+import cartago.OpFeedbackParam;
 import cartago.OperationException;
 
 public class Initiator extends Artifact {
 
+	// XXX please don't delete this
 	private String environmentType;
 	private String coordinatorClass;
 
@@ -29,11 +31,13 @@ public class Initiator extends Artifact {
 		}
 	}
 
-	// it's @PRIME_AGENT_OPERATION actually
+	// TODO it's @PRIME_AGENT_OPERATION actually
 	@OPERATION
-	void makeCoordinatorArtifact(String artifactName) throws OperationException {
-		makeArtifact(artifactName, coordinatorClass,
-				ArtifactConfig.DEFAULT_CONFIG);
+	void makeCoordinatorArtifact(String artifactName, Object[] params,
+			OpFeedbackParam<ArtifactId> aid) throws OperationException {
+		ArtifactId workspace = lookupArtifact("workspace");
+		execLinkedOp(workspace, "makeArtifact", artifactName, coordinatorClass,
+				params, aid);
 	}
 
 }
