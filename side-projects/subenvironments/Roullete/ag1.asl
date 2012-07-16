@@ -10,10 +10,9 @@
 
 /* Plans */
 
-+!start : true <-
-	?coord_id(R);
-	.print("Moartea neagra", R).
++!start : true
+	<-	true.
 
-+startTurn(currentTurn) : true <-
-	.print("O inceput! tura: ", currentTurn);
-	bet("Split",[8,9],3).
++startTurn(CurrentTurn)
+	<-	.print("Turn ", CurrentTurn, " has started");
+		bet("Split",[8,9],3).

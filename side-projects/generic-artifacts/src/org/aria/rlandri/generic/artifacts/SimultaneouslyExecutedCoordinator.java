@@ -130,7 +130,6 @@ public class SimultaneouslyExecutedCoordinator extends Coordinator {
 	}
 
 	private void executeStep() {
-		System.err.println("TO BE OR NOT TO BE");
 		stepFinished = false;
 		signal("startTurn", currentStep);
 		timer.schedule(new TimerTask() {
