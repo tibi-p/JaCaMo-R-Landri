@@ -23,11 +23,10 @@ import cartago.OpFeedbackParam;
 
 public class PlayerAlternatedCoordinator extends Coordinator {
 
+	private final List<AgentId> order = new LinkedList<AgentId>();
 	private final Timer timer = new Timer();
 	private int currentStep = 0;
 	protected int currentAgent = 0;
-
-	List<String> order = new LinkedList<String>();
 
 	// constants for testing purposes
 	public static final int STEPS = 10;
@@ -37,13 +36,13 @@ public class PlayerAlternatedCoordinator extends Coordinator {
 	@OPERATION
 	void registerAgent(OpFeedbackParam<String> wsp) {
 		super.registerAgent(wsp);
-		order.add(getOpUserName());
+		order.add(getOpUserId());
 		wsp.set("NA");
 	}
 
 	public void failIfNotCurrentTurn() {
-		String userName = getOpUserName();
-		if (userName != order.get(currentAgent)) {
+		AgentId userId = getOpUserId();
+		if (!userId.equals(order.get(currentAgent))) {
 			// TODO: Standard error messages
 			failed("not_your_turn");
 		}
@@ -88,8 +87,7 @@ public class PlayerAlternatedCoordinator extends Coordinator {
 	}
 
 	private void startPlayerTurn() {
-		String name = order.get(currentAgent);
-		AgentId aid = agents.get(name);
+		AgentId aid = order.get(currentAgent);
 		signal(aid, "startTurn", currentStep);
 		currentAgent += 1;
 	}
