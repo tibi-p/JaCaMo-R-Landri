@@ -17,26 +17,17 @@ import cartago.OpFeedbackParam;
 
 public class RealTimeSinglePlayerCoordinator extends Coordinator {
 
+	private final Random random = new Random();
+	private final Map<String, String> workspaces = new HashMap<String, String>();
 	private int index = 0;
 	private String last;
-	Map<String, String> workspaces;
-
-	protected void init() throws CartagoException{
-		super.init();
-		last = "";
-		workspaces = new HashMap<String, String>();
-	}
 
 	@OPERATION
 	void registerAgent(OpFeedbackParam<String> privateSubenv) {
 		super.registerAgent(privateSubenv);
 		String agentName = getOpUserName();
-		if (agentName.matches(".+_[0-9]")) {
-			agentName = agentName.substring(0, agentName.lastIndexOf('_'));
-			privateSubenv.set(workspaces.get(agentName));
-			//System.out.println("for " + agentName + " is " + workspaces.get(agentName));
-		} else
-			privateSubenv.set(workspaces.get(agentName.substring(0, agentName.lastIndexOf('_'))));
+		agentName = agentName.substring(0, agentName.lastIndexOf('_'));
+		privateSubenv.set(workspaces.get(agentName));
 	}
 
 	@PRIME_AGENT_OPERATION
@@ -46,14 +37,10 @@ public class RealTimeSinglePlayerCoordinator extends Coordinator {
 		if (index == agents.size())
 			wspName.set("no_more");
 		else {
-			String root;
-			if (agents.get(index).matches(".+_[0-9]"))
-				root = agents.get(index).substring(0,
-						agents.get(index).lastIndexOf('_') - 1);
-			else {
-				root = agents.get(index);
-				root = root.substring(0, root.lastIndexOf('_'));
-				String name = root + "_private_workspace" + new Random().nextFloat();
+			String agentName = agents.get(index);
+			String root = agentName.substring(0, agentName.lastIndexOf('_'));
+			if (agentName.endsWith("_")) {
+				String name = root + "_private_workspace" + random.nextFloat();
 				workspaces.put(root, name);
 				wspName.set(name);
 				index++;
@@ -65,30 +52,27 @@ public class RealTimeSinglePlayerCoordinator extends Coordinator {
 					wspName.set("no_more");
 					return;
 				}
-				if (agents.get(index).matches(".+_[0-9]"))
-					root = agents.get(index).substring(0,
-							agents.get(index).lastIndexOf('_') - 1);
-				else{
-					root = agents.get(index);
-					root = root.substring(0, root.lastIndexOf('_'));
+				agentName = agents.get(index);
+				root = agentName.substring(0, agentName.lastIndexOf('_'));
+				if (agentName.endsWith("_"))
 					break;
-				}
 			}
 			last = root;
-			if(workspaces.containsKey(root))
+			if (workspaces.containsKey(root)) {
+				// This should NEVER happen, but we choose the safer side
 				wspName.set(workspaces.get(root));
-			else{
-				String name = root + "_private_workspace" + new Random().nextFloat();
+			} else {
+				String name = root + "_private_workspace" + random.nextFloat();
 				workspaces.put(root, name);
 				wspName.set(name);
 			}
 			index++;
 		}
 	}
-	
+
 	@PRIME_AGENT_OPERATION
 	void checkStatus(OpFeedbackParam<String> status) {
-		
+
 	}
 
 	@Override
@@ -102,20 +86,19 @@ public class RealTimeSinglePlayerCoordinator extends Coordinator {
 	@Override
 	protected void updateRank() {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	protected void updateCurrency() {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	protected void saveState() {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 }
-
