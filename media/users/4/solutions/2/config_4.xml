@@ -1,1 +1,1 @@
-<solution><asl-list><asl agentId="8" cardinality="1" file="fibonaci_u4.asl" /></asl-list></solution>
+<solution><asl-list><asl agentId="8" cardinality="2" file="fibonaci_u4.asl" /><asl agentId="6" cardinality="1" file="fibonaci_u4.asl" /></asl-list></solution>
