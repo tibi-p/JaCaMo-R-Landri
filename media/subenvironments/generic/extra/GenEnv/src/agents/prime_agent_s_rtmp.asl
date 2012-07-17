@@ -3,7 +3,9 @@
 /* Initial beliefs and rules */
 /* Initial goals */
 
-!prepare_environment.
+{
+	include("prime_agent_s_generic.asl")
+}
 
 /* Plans */
 
@@ -16,19 +18,7 @@
 +!makeStandardArtifacts: true
 		<- 	!makeLogger;
 			!makeCoordinator.
-		
 			
-+!makeCoordinator: true
-		<- 	makeArtifact("initiator",
-				"org.aria.rlandri.generic.artifacts.Initiator", [], _
-			);
-			makeCoordinatorArtifact("coordinator").
-
-+!makeLogger: true
-		<- 	makeArtifact("logger",
-				"org.aria.rlandri.generic.artifacts.SubenvLogger", [], _
-			).
-
 +!makeAndJoinDefaultWorkspace: true
 		<- 	createWorkspace("SubenvDefaultWorkspace");
 			joinWorkspace("SubenvDefaultWorkspace", Id);

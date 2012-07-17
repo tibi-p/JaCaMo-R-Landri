@@ -12,7 +12,7 @@ public class ValidationResult {
 	public int index;
 
 	/**
-	 * creates a new validation result with the default type of the failure reasons set to "WARNING"
+	 * Creates a new validation result with the default type of the failure reasons set to "WARNING"
 	 * @param agent the agent that failed the validation
 	 */
 	public ValidationResult(String agent) {
@@ -23,16 +23,16 @@ public class ValidationResult {
 	}
 	
 	/**
-	 * @return the agent that generate this failure
+	 * @return The agent that generate this failure
 	 */
 	public String getAgent() {
 		return agent;
 	}
 	
 	/**
-	 * adds a failure reason to this validation result with the type specified
-	 * @param reason one of the reasons for which the validation failed
-	 * @param type the type of failure
+	 * Adds a failure reason to this validation result with the type specified
+	 * @param reason One of the reasons for which the validation failed
+	 * @param type The type of failure
 	 * @return <tt>true</tt> if operation was successful and <tt>false</tt> if undefined type was provided
 	 */
 	
@@ -42,22 +42,22 @@ public class ValidationResult {
 		return true;
 	}
 	/**
-	 * adds a failure reason to this validation result with the default type
-	 * @param reason the reason to be added
+	 * Adds a failure reason to this validation result with the default type
+	 * @param reason The reason to be added
 	 */
 	public void addReason(String reason){
 		reasons.put(reason, defaultType);
 	}
 	/**
-	 * @return the default type associated with reasons if no type is manually specified
+	 * @return The default type associated with reasons if no type is manually specified
 	 */
 	public int getDefaultType() {
 		return defaultType;
 	}
 
 	/**
-	 * sets the default type associated with new failure reasons if no type is manually specified
-	 * @param defaultType this validator result's new default type.
+	 * Sets the default type associated with new failure reasons if no type is manually specified
+	 * @param defaultType This validator result's new default type.
 	 * @return <tt>true</tt> if operation is successful and <tt>false</tt> if undefined type was provided
 	 */
 	public boolean setDefaultType(int defaultType) {
@@ -66,9 +66,9 @@ public class ValidationResult {
 		return true;
 	}
 	/**
-	 * get the associated type for the reason specified
-	 * @param reason the reason that you want to find out the type of
-	 * @return the type of the reason as a string
+	 * Get the associated type for the reason specified
+	 * @param reason The reason that you want to find out the type of
+	 * @return The type of the reason as a string
 	 */
 	public String getType(String reason){
 		String type = "Durrr, this shouldn't be here";
@@ -88,17 +88,17 @@ public class ValidationResult {
 	}
 	
 	/**
-	 * get all the reasons why the validation failed
-	 * @return an <tt>ArrayList</tt> of strings containing the reasons for failure
+	 * Get all the reasons why the validation failed
+	 * @return An <tt>ArrayList</tt> of strings containing the reasons for failure
 	 */
 	public List<String> getReasons(){
 		return new ArrayList<String>(reasons.keySet());
 	}
 	
 	/**
-	 * returns the failure reasons that are of the specified types
-	 * @param types a <tt>list</tt> of types of failures that will filter out the reasons being returned
-	 * @return a <tt>list</tt> of reasons matching the types specified
+	 * Returns the failure reasons that are of the specified types
+	 * @param types A <tt>list</tt> of types of failures that will filter out the reasons being returned
+	 * @return A <tt>list</tt> of reasons matching the types specified
 	 */
 	public List<String> getReasons(List<Integer> types){
 		ArrayList<String> result = new ArrayList<String>();
