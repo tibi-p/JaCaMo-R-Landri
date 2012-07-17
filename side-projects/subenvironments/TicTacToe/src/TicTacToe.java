@@ -10,9 +10,9 @@ import org.aria.rlandri.generic.artifacts.*;
 import org.aria.rlandri.generic.artifacts.annotation.*;
 
 /**
- *      Artifact that implements the auction. 
+ *  
  */
-public class Roulette extends PlayerAlternatedCoordinator {
+public class TicTacToe extends PlayerAlternatedCoordinator {
 
 	// maximum number of games
 	// the duration of all the games should be less than the permitted execution time for the subenv
