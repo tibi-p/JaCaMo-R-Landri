@@ -26,10 +26,13 @@ public class ValidatorArtifactOpMethod extends ArtifactOpMethod {
 
 	protected void validate(Artifact artifact, Object[] actualParams)
 			throws IllegalArgumentException, IllegalAccessException,
-			InvocationTargetException {
+			InvocationTargetException, SecurityException, NoSuchMethodException {
 		if (validatorMethod != null){
 			ValidationResult vres = (ValidationResult) validatorMethod.invoke(artifact, actualParams);
-			if(vres != null) coordinator.addValidationResult(vres);
+			if(vres != null) {
+				coordinator.addValidationResult(vres);
+				invokeParameterless("ggNoRe");
+			}
 		}
 	}
 

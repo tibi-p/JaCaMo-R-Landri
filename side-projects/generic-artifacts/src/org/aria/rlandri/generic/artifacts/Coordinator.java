@@ -421,24 +421,40 @@ public abstract class Coordinator extends Artifact {
 	void getNextFailureReason(OpFeedbackParam<String> reason,
 			OpFeedbackParam<String> type) {
 		ValidationResult vres = failures.get(getOpUserName());
-		if (vres == null)
-			failed("No recorded failures");
+		if (vres == null){
+			reason.set("NA");
+			failures.remove(getOpUserName());
+			return;
+		}
 		if (typedFailSearch) {
 			vres.index = 0;
 			typedFailSearch = false;
+		}
+		if(vres.index == vres.getReasons().size()){
+			failures.remove(getOpUserName());
+			return;
 		}
 		reason.set(vres.getReasons().get(vres.index++));
 		type.set(vres.getType(reason.get()));
 	}
 
+	/*@OPERATION
 	void getNextFailureReason(OpFeedbackParam<String> reason,
 			OpFeedbackParam<String> type, Integer... types) {
+		System.out.println("fratele meleu");
 		ValidationResult vres = failures.get(getOpUserName());
-		if (vres == null)
-			failed("No recorded failures");
+		if (vres == null){
+			reason.set("NA");
+			failures.remove(getOpUserName());
+			return;
+		}
 		if (!typedFailSearch) {
 			vres.index = 0;
 			typedFailSearch = true;
+		}
+		if(vres.index == vres.getReasons().size()){
+			failures.remove(getOpUserName());
+			return;
 		}
 		ArrayList<Integer> typeFilter = new ArrayList<Integer>();
 		for (Integer t : types) {
@@ -448,7 +464,7 @@ public abstract class Coordinator extends Artifact {
 		reason.set(vres.getReasons(typeFilter).get(vres.index++));
 		type.set(vres.getType(reason.get()));
 	}
-
+*/
 	private static final void addAgentToRegistry(AgentRegistry registry,
 			String agentName, int qty) {
 		if (qty > 1) {
