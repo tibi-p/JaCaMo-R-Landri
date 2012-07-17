@@ -117,6 +117,7 @@ public class SimultaneouslyExecutedCoordinator extends Coordinator {
 			}
 		}, STEP_LENGTH);
 		await("isStepFinished");
+		signal("stopTurn", currentStep);
 	}
 
 	@INTERNAL_OPERATION

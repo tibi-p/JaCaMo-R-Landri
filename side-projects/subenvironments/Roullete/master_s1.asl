@@ -13,6 +13,6 @@
 +!start : true
 	<-	true.
 
-+stopTurn(iteration): true <-
-	spinWheel;
-	payout.
++stopTurn(CurrentTurn)
+	<-	spinWheel;
+		payout.
