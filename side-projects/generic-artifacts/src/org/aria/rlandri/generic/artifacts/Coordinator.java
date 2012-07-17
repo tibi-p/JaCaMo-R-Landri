@@ -89,29 +89,11 @@ public abstract class Coordinator extends Artifact {
 			for (AgentParameters ap : project.getAgents()) {
 				String agentName = ap.getAgName();
 				if (isPrimeAgent(agentName)) {
-					if (ap.qty == 1) {
-						primeAgents.addAgentName(agentName);
-					} else {
-						for (int i = 1; i <= ap.qty; i++) {
-							primeAgents.addAgentName(agentName + i);
-						}
-					}
+					addAgentToRegistry(primeAgents, agentName, ap.qty);
 				} else if (isParticipatingAgent(agentName)) {
-					if (ap.qty == 1) {
-						regularAgents.addAgentName(agentName);
-					} else {
-						for (int i = 1; i <= ap.qty; i++) {
-							regularAgents.addAgentName(agentName + i);
-						}
-					}
+					addAgentToRegistry(regularAgents, agentName, ap.qty);
 				} else {
-					if (ap.qty == 1) {
-						masterAgents.addAgentName(agentName);
-					} else {
-						for (int i = 1; i <= ap.qty; i++) {
-							masterAgents.addAgentName(agentName + i);
-						}
-					}
+					addAgentToRegistry(masterAgents, agentName, ap.qty);
 				}
 			}
 			setState(EnvStatus.INITIATED);
@@ -465,6 +447,16 @@ public abstract class Coordinator extends Artifact {
 
 		reason.set(vres.getReasons(typeFilter).get(vres.index++));
 		type.set(vres.getType(reason.get()));
+	}
+
+	private static final void addAgentToRegistry(AgentRegistry registry,
+			String agentName, int qty) {
+		if (qty > 1) {
+			for (int i = 1; i <= qty; i++)
+				registry.addAgentName(agentName + i);
+		} else {
+			registry.addAgentName(agentName);
+		}
 	}
 
 }
