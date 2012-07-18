@@ -1,4 +1,3 @@
-// Agent ag1 in project roulette.mas2j
 
 {
 	include("common_s_generic.asl")
@@ -10,9 +9,9 @@
 
 /* Plans */
 
-+start:true
-	print("Starting").
++!start:true <-
+	.print("Starting").
 
-+startTurn(currentTurn): true <-
-	.print("O inceput! tura: ",currentTurn).
++startTurn(CurrentTurn): true <-
+	.print("O inceput! tura: ",CurrentTurn).
 

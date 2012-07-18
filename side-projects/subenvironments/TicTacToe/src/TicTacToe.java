@@ -34,7 +34,7 @@ public class TicTacToe extends PlayerAlternatedCoordinator {
 		return 0;
 	}
 
-	int ended?()
+	int ended()
 	{
 		for(int i=0;i<3;i++)
 		{
@@ -78,11 +78,11 @@ public class TicTacToe extends PlayerAlternatedCoordinator {
 			gameState[i][j]=-1;
 		}
 
-		int end = ended?();
+		int end = ended();
 		if(end!=0)
 		{
-			for(int i=0;i<3;i++)
-				for(int j=0;j<3;j++)
+			for(int k=0;k<3;k++)
+				for(int m=0;m<3;m++)
 				{
 					gameState[i][j]=0;
 				}
@@ -107,8 +107,8 @@ public class TicTacToe extends PlayerAlternatedCoordinator {
 
 	}
 
-	@GAME_OPERATION(validator = "validateGetState")
-	int [] getState()
+	@GAME_OPERATION(validator = "validateGetGameState")
+	int [] getGameState()
 	{
 		int[] result = new int[9];
 		for(int i=0;i<3;i++)
@@ -119,12 +119,12 @@ public class TicTacToe extends PlayerAlternatedCoordinator {
 		return result;
 	}
 
-	private void validateMark()
+	private void validateMark(int i,int j)
 	{
 		
 	}
 
-	private void validateGetState()
+	private void validateGetGameState()
 	{
 		
 	}

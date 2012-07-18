@@ -1,6 +1,6 @@
 /* Jason Project */
 
-MAS roulette {
+MAS tictactoe{
 
    infrastructure: Centralised
 
@@ -9,6 +9,7 @@ MAS roulette {
    agents:
    
    agent_1_ ag1  agentArchClass c4jason.CAgentArch #2;
+   prime_agent_s_patb agentArchClass c4jason.CAgentArch;
 
    classpath: "lib/moise.jar";   // moise: where the artifacts are included 
               "lib/cartago.jar"; // cartago: platform for artifacts
