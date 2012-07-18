@@ -40,6 +40,8 @@ public class JaCaMoConfig {
 			propMap.put("django_directory", currentDirectory);
 			propMap.put("environment_type", args[1]);
 			propMap.put("coordinator_class", args[2]);
+			if (args.length >= 4)
+				propMap.put("num_steps", args[3]);
 			try {
 				writeProperties(sandboxPath, propMap);
 			} catch (IOException e) {

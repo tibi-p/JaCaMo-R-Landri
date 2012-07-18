@@ -70,7 +70,8 @@ class JaCaMoSandbox(object):
 
     def populate(self, solutionFiles, subenvFiles):
         libraries = filter_listdir(os.path.join('lib', 'rlandri'), 'jar')
-        subprocess.call([
+        
+        args = [
             "java",
             "-classpath",
             os.pathsep.join(libraries),
@@ -78,7 +79,11 @@ class JaCaMoSandbox(object):
             self.root,
             self.subenvironment.envType,
             self.subenvironment.coordinatorClass,
-        ])
+        ]
+        if self.subenvironment.numSteps:
+            print "LALALA",self.subenvironment.numSteps
+            args.append(str(self.subenvironment.numSteps))
+        subprocess.call(args)
 
         for dirname, filelist in solutionFiles.iteritems():
             self.handle_filelist(dirname, filelist)

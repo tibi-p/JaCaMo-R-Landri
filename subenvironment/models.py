@@ -34,6 +34,7 @@ class SubEnvironment(models.Model):
         ('setb', 'Simultaneously-executed Turn-based'),
     ])
     coordinatorClass = models.CharField(max_length=200)
+    numSteps = models.IntegerField()
 
     objects = SubEnvironmentManager()
 
