@@ -25,14 +25,15 @@ public class SETBGameArtifactOpMethod extends ValidatorArtifactOpMethod {
 		invokeParameterless("preliminaryCheck");
 		if (coordinator instanceof SimultaneouslyExecutedCoordinator) {
 			SimultaneouslyExecutedCoordinator seCoordinator = (SimultaneouslyExecutedCoordinator) coordinator;
+			System.err.println("2 PONIES 1 LOLLIPOP");
 			boolean isLast = seCoordinator.waitForEndTurn();
 			try {
 				validate(coordinator, actualParams);
 				super.exec(actualParams);
 			} finally {
-				seCoordinator.setExecuting(false);
 				if (isLast)
 					coordinator.setState(EnvStatus.RUNNING);
+				System.err.println("THE THINGS MEATLOAF WOULD DO FOR LOVE");
 			}
 		}
 	}
