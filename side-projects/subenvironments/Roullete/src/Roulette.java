@@ -39,12 +39,22 @@ public class Roulette extends SimultaneouslyExecutedCoordinator {
 		payoffs.put("Even",1);
 	}
     
-	HashMap<String,Bet> bets = new HashMap<String,Bet>();
+	HashMap<AgentId,Bet> bets = new HashMap<AgentId,Bet>();
 	HashMap<String,Double> standings = new HashMap<String,Double>();
 	
 	String winningColor;
 	int winningNumber;
 	
+	
+	@Override
+	protected void doPreEvaluation()
+	{
+		for(AgentId aid: masterAgents.getAgentIds())
+		{
+			signal(aid,"spinWheel");
+		}
+		setPreEvaluation(true);
+	}
 
 	private double payoff(String betType,double betSum)
 	{
@@ -79,17 +89,16 @@ public class Roulette extends SimultaneouslyExecutedCoordinator {
 	@GAME_OPERATION(validator = "validateBet")
 	void bet(String betName, Object betValues[], double sum)
 	{
-
-		String user = getOpUserName();
+		AgentId aid = getOpUserId();
 		
 		System.out.println(user + " bets " + sum + " gold coins on " + betName);
 		
 		Bet bet = new Bet();
-		System.out.println("MONEY: "+sum+"AGENT: "+getOpUserName());
+		System.out.println("MONEY: "+sum+"AGENT: " + aid);
 		bet.sum = sum;
 		bet.type = betName;
 		bet.betValues = betValues;
-		bets.put(user,bet);
+		bets.put(aid,bet);
 		
 	}
 
@@ -124,9 +133,9 @@ public class Roulette extends SimultaneouslyExecutedCoordinator {
 	public void payout()
 	{
 		Set<String> players = bets.keySet();
-		for(Iterator it = players.iterator();it.hasNext();)
+		for(Iterator<AgentId> it = players.iterator();	it.hasNext();)
 		{
-			String player = (String)it.next();
+			AgentId player = it.next();
 			Bet bet = bets.get(player);
 
 			
@@ -271,12 +280,21 @@ public class Roulette extends SimultaneouslyExecutedCoordinator {
 					won = true;
 			}
 
-			if(won)
-				updateStandings(player,payoff(betType,betSum));
-			else
+			double payoff = 0;
+			if(won) {
+				payoff = payoff(betType,betSum);
+				updateStandings(player,payoff);
+			}
+			else 
+			{
+				payoff = - betSum;
 				updateStandings(player,-betSum);
+			}
+			
+			signal(player, "payoff", currentStep, payoff);
 		}
-		bets = new HashMap<String,Bet>();
+		//bets = new HashMap<String,Bet>();
+		bets.clear();
 		System.out.println(standings);
 	}
 

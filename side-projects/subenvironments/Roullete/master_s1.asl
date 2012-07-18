@@ -14,5 +14,8 @@
 	<-	true.
 
 +stopTurn(CurrentTurn)
+	<- .print(CurrentTurn, " has ended. Hoooray!!!").
+	
++spinWheel(CurrentTurn)
 	<-	spinWheel;
 		payout.
