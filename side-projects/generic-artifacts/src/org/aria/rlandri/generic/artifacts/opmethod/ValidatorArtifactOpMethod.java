@@ -5,6 +5,7 @@ import java.lang.reflect.Method;
 
 import org.aria.rlandri.generic.artifacts.Coordinator;
 import org.aria.rlandri.generic.artifacts.tools.ValidationResult;
+import org.aria.rlandri.generic.artifacts.util.ReflectionUtils;
 
 import cartago.Artifact;
 import cartago.ArtifactOpMethod;
@@ -27,9 +28,10 @@ public class ValidatorArtifactOpMethod extends ArtifactOpMethod {
 	protected void validate(Artifact artifact, Object[] actualParams)
 			throws IllegalArgumentException, IllegalAccessException,
 			InvocationTargetException, SecurityException, NoSuchMethodException {
-		if (validatorMethod != null){
-			ValidationResult vres = (ValidationResult) validatorMethod.invoke(artifact, actualParams);
-			if(vres != null) {
+		if (validatorMethod != null) {
+			Object obj = validatorMethod.invoke(artifact, actualParams);
+			if (obj instanceof ValidationResult) {
+				ValidationResult vres = (ValidationResult) obj;
 				coordinator.addValidationResult(vres);
 				invokeParameterless("ggNoRe");
 			}
@@ -41,7 +43,7 @@ public class ValidatorArtifactOpMethod extends ArtifactOpMethod {
 			IllegalArgumentException, IllegalAccessException,
 			InvocationTargetException {
 		Class<?> clazz = getClass();
-		Method method = clazz.getDeclaredMethod(methodName);
+		Method method = ReflectionUtils.getMethodInHierarchy(clazz, methodName);
 		return method.invoke(this);
 	}
 

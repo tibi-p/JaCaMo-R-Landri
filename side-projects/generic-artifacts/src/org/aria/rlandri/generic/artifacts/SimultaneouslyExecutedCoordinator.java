@@ -1,8 +1,9 @@
 package org.aria.rlandri.generic.artifacts;
 
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -20,7 +21,7 @@ import cartago.OpFeedbackParam;
 
 public class SimultaneouslyExecutedCoordinator extends Coordinator {
 
-	public static final int STEPS = 3;
+	public static final int STEPS = 4;
 	public static final int STEP_LENGTH = 1000;
 
 	protected int currentStep = 0;
@@ -28,54 +29,84 @@ public class SimultaneouslyExecutedCoordinator extends Coordinator {
 	private final Timer timer = new Timer();
 	private TimerTask task = null;
 
-	private final List<String> agentOrder = new ArrayList<String>();
-	private int executingAgentIndex = 0;
+	private final Set<AgentId> readyAgents = new LinkedHashSet<AgentId>();
+	private Iterator<AgentId> executingAgentIterator = null;
+	private AgentId executingAgent = null;
 	private boolean stepFinished = true;
 	private boolean timerExpired = false;
 
 	public boolean waitForEndTurn() {
-		System.err.println(String.format("%s: waiting for end turn",
-				getOpUserId()));
+		System.err.println(String.format("%s: waiting for the end of turn %s",
+				getOpUserId(), currentStep));
 		leaveNoAgentBehind();
 		System.err.println(String.format(
 				"%s: every agent has submitted its action", getOpUserId()));
 		await("isItMyTurn", getOpUserId());
 		System.err.println(String.format("%s: kill the bugs", getOpUserId()));
-		if (executingAgentIndex == agentOrder.size()) {
-			resetTurnInfo();
-			System.err.println(String.format("%s: IESII PI PRIMA CRACA",
-					getOpUserId()));
-			return true;
-		} else {
-			System.err.println(String.format("%s: IESII PI A DOUA CRACA",
-					getOpUserId()));
+		if (executingAgentIterator.hasNext()) {
+			executingAgent = executingAgentIterator.next();
 			return false;
+		} else {
+			return true;
 		}
 	}
 
+	public void resetTurnInfo() {
+		readyAgents.clear();
+		executingAgentIterator = null;
+		executingAgent = null;
+		stepFinished = true;
+		timerExpired = false;
+	}
+
+	/**
+	 * Fails if the current agent has already submitted a move this turn.
+	 */
+	public void failIfHasMoved() {
+		if (hasMoved(getOpUserId()))
+			failed("The current agent has already submitted a move this turn");
+	}
+
+	private boolean hasMoved(AgentId agentId) {
+		return readyAgents.contains(agentId);
+	}
+
 	private boolean isEverybodyReady() {
-		return agentOrder.size() == regularAgents.getNumRegistered();
+		return readyAgents.size() == regularAgents.getNumRegistered();
 	}
 
 	private void leaveNoAgentBehind() {
-		agentOrder.add(getOpUserName());
+		readyAgents.add(getOpUserId());
 		if (isEverybodyReady()) {
 			System.err.println(String.format(
 					"Submitting is over!!! remaining(%s)",
 					task.scheduledExecutionTime() - new Date().getTime()));
-			boolean canceled = task.cancel();
-			System.err.println("Canceled: " + canceled);
-			execInternalOp("transitionToEvaluating");
+			boolean cancelled = task.cancel();
+			System.err.println(String.format("Cancellation has%s succeeded",
+					cancelled ? "" : " not"));
+			if (setupIterator()) {
+				// TODO this can be skipped if it's this agent's turn!
+				execInternalOp("wakerOfAgents");
+			} else {
+				// TODO document/log this impossible situation
+				System.exit(1);
+			}
 		} else {
 			await("isSubmittingOver");
 		}
 	}
 
-	private void resetTurnInfo() {
-		agentOrder.clear();
-		executingAgentIndex = 0;
-		stepFinished = true;
-		timerExpired = false;
+	private boolean setupIterator() {
+		setState(EnvStatus.EVALUATING);
+		executingAgentIterator = readyAgents.iterator();
+		if (executingAgentIterator.hasNext()) {
+			executingAgent = executingAgentIterator.next();
+			return true;
+		} else {
+			System.err.println("WOP WOP WOP WOP");
+			resetTurnInfo();
+			return false;
+		}
 	}
 
 	@PRIME_AGENT_OPERATION
@@ -85,9 +116,10 @@ public class SimultaneouslyExecutedCoordinator extends Coordinator {
 	}
 
 	private void executeStep() {
+		setState(EnvStatus.RUNNING);
 		stepFinished = false;
 		final long startTime = new Date().getTime();
-		System.err.println("The task was scheduled at " + startTime);
+		System.err.println("PRIME: The task was scheduled at " + startTime);
 		task = new TimerTask() {
 			public void run() {
 				String errFmt = "The task scheduled at %s was run at %s (diff=%s)";
@@ -123,11 +155,11 @@ public class SimultaneouslyExecutedCoordinator extends Coordinator {
 		if (!isEverybodyReady()) {
 			EnvStatus state = getState();
 			if (state == EnvStatus.RUNNING) {
-				System.err.println("OOOOOOOOOO NU CE MORTZII MA-SII: "
-						+ agentOrder.size() + " from "
-						+ regularAgents.getNumRegistered());
+				String errFmt = "As the timer expired - %s from %s";
+				System.err.println(String.format(errFmt, readyAgents.size(),
+						regularAgents.getNumRegistered()));
 				timerExpired = true;
-				transitionToEvaluating();
+				setupIterator();
 			} else {
 				// TODO handle me
 			}
@@ -135,9 +167,8 @@ public class SimultaneouslyExecutedCoordinator extends Coordinator {
 	}
 
 	@INTERNAL_OPERATION
-	private void transitionToEvaluating() {
-		System.err.println("OOOOOOOOOO NU CE MORTZII LU' TA-SU");
-		setState(EnvStatus.EVALUATING);
+	private void wakerOfAgents() {
+		System.err.println("DID YOU PAY THE IRON PRICE FOR IT OR THE GOLD?");
 	}
 
 	@INTERNAL_OPERATION
@@ -150,15 +181,7 @@ public class SimultaneouslyExecutedCoordinator extends Coordinator {
 
 	@GUARD
 	private boolean isItMyTurn(AgentId agentId) {
-		String currentAgent = agentOrder.get(executingAgentIndex);
-		System.err.println(String.format(
-				"TURN CHECKING: %s told %s to sod off", currentAgent, agentId));
-		if (currentAgent.equals(agentId.getAgentName())) {
-			executingAgentIndex++;
-			return true;
-		} else {
-			return false;
-		}
+		return executingAgent.equals(agentId);
 	}
 
 	@GUARD
@@ -168,10 +191,6 @@ public class SimultaneouslyExecutedCoordinator extends Coordinator {
 
 	@GUARD
 	private boolean isSubmittingOver() {
-		System.err.println(String.format(
-				"Checking if submitting is over: answer (%s | %s) = %s",
-				timerExpired, isEverybodyReady(), timerExpired
-						|| isEverybodyReady()));
 		return timerExpired || isEverybodyReady();
 	}
 

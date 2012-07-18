@@ -4,7 +4,6 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 
 import org.apache.log4j.Logger;
-import org.aria.rlandri.generic.artifacts.EnvStatus;
 import org.aria.rlandri.generic.artifacts.SimultaneouslyExecutedCoordinator;
 
 public class SETBGameArtifactOpMethod extends ValidatorArtifactOpMethod {
@@ -25,15 +24,13 @@ public class SETBGameArtifactOpMethod extends ValidatorArtifactOpMethod {
 		invokeParameterless("preliminaryCheck");
 		if (coordinator instanceof SimultaneouslyExecutedCoordinator) {
 			SimultaneouslyExecutedCoordinator seCoordinator = (SimultaneouslyExecutedCoordinator) coordinator;
-			System.err.println("2 PONIES 1 LOLLIPOP");
 			boolean isLast = seCoordinator.waitForEndTurn();
 			try {
 				validate(coordinator, actualParams);
 				super.exec(actualParams);
 			} finally {
 				if (isLast)
-					coordinator.setState(EnvStatus.RUNNING);
-				System.err.println("THE THINGS MEATLOAF WOULD DO FOR LOVE");
+					seCoordinator.resetTurnInfo();
 			}
 		}
 	}
@@ -41,6 +38,10 @@ public class SETBGameArtifactOpMethod extends ValidatorArtifactOpMethod {
 	protected void preliminaryCheck() {
 		coordinator.failIfNotRunning();
 		coordinator.failIfNotRegisteredParticipatingAgent();
+		if (coordinator instanceof SimultaneouslyExecutedCoordinator) {
+			SimultaneouslyExecutedCoordinator seCoordinator = (SimultaneouslyExecutedCoordinator) coordinator;
+			seCoordinator.failIfHasMoved();
+		}
 	}
 
 }
