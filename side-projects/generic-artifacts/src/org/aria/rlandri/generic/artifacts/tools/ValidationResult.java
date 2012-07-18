@@ -1,4 +1,4 @@
-package org.aria.rlandri.generic.tools;
+package org.aria.rlandri.generic.artifacts.tools;
 
 import java.util.ArrayList;
 import java.util.HashMap;

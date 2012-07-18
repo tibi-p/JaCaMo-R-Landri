@@ -15,5 +15,10 @@ public class RTGameArtifactOpMethod extends ValidatorArtifactOpMethod {
 		validate(coordinator, actualParams);
 		super.exec(actualParams);
 	}
+	
+
+	protected void ggNoRe(){
+		coordinator.failWithMessage("validation", "validation_fail");
+	}
 
 }

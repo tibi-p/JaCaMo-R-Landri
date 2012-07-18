@@ -31,6 +31,7 @@ public class SimultaneouslyExecutedCoordinator extends Coordinator {
 	private boolean stepFinished = true;
 	private boolean executing = false;
 	private boolean firstTimeOnBarrier = false;
+	private boolean timeoutExpired = false;
 
 	public void setExecuting(boolean isExecuting) {
 		this.executing = isExecuting;
@@ -39,6 +40,7 @@ public class SimultaneouslyExecutedCoordinator extends Coordinator {
 	public boolean waitForEndTurn() {
 		leaveNoAgentBehind();
 		while (!isItMyTurn()) {
+			// TODO use isItMyTurn w/ params = AgentId
 			firstTimeOnBarrier = true;
 			await("isNotExecuting");
 		}
@@ -115,19 +117,22 @@ public class SimultaneouslyExecutedCoordinator extends Coordinator {
 			public void run() {
 				execInternalOp("changeToEvaluating");
 			}
-		}, STEP_LENGTH);
+		}, STEP_LENGTH / 5);
 		await("isStepFinished");
 		signal("stopTurn", currentStep);
 	}
 
 	@INTERNAL_OPERATION
 	void changeToEvaluating() {
-		EnvStatus state = getState();
-		if (state == EnvStatus.RUNNING) {
-			System.err.println("OOOOOOOOOO NU CE MORTZII MA-SII");
-			setState(EnvStatus.EVALUATING);
-		} else {
-			// TODO handle me
+		if (!isEverybodyReady()) {
+			EnvStatus state = getState();
+			if (state == EnvStatus.RUNNING) {
+				System.err.println("OOOOOOOOOO NU CE MORTZII MA-SII");
+				timeoutExpired = true;
+				setState(EnvStatus.EVALUATING);
+			} else {
+				// TODO handle me
+			}
 		}
 	}
 
@@ -147,7 +152,10 @@ public class SimultaneouslyExecutedCoordinator extends Coordinator {
 
 	@GUARD
 	boolean isEverybodyReady() {
-		return numReadyAgents == regularAgents.getNumRegistered();
+		if (timeoutExpired)
+			return true;
+		else
+			return numReadyAgents == regularAgents.getNumRegistered();
 	}
 
 	@GUARD
