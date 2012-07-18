@@ -13,5 +13,7 @@
 	.print("Starting").
 
 +startTurn(CurrentTurn): true <-
-	.print("O inceput! tura: ",CurrentTurn).
+	.print("O inceput! tura: ",CurrentTurn);
+	getGameState(List);
+	.print("Lista",List).
 
