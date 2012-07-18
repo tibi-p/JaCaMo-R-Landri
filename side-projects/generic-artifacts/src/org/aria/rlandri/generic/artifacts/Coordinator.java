@@ -36,15 +36,16 @@ import cartago.GUARD;
 import cartago.IArtifactOp;
 import cartago.OPERATION;
 import cartago.OpFeedbackParam;
+
 /**
- * The main coordinator abstract class from which all particular coordinator implementations stem from
- * @author Everybody
- *
+ * The main coordinator abstract class from which all particular coordinator
+ * implementations stem from.
+ * 
+ * @author Andrei Geacar
+ * @author Mihai Poenaru
+ * @author Tiberiu Popa
  */
 public abstract class Coordinator extends Artifact {
-
-	public static final int realTimeSP = 0, realTimeNeg = 1,
-			turnBasedSimultaneous = 2, turnBasedAlternative = 3;
 
 	protected final AgentRegistry regularAgents = new AgentRegistry();
 	protected final AgentRegistry masterAgents = new AgentRegistry();
@@ -425,7 +426,7 @@ public abstract class Coordinator extends Artifact {
 	void getNextFailureReason(OpFeedbackParam<String> reason,
 			OpFeedbackParam<String> type) {
 		ValidationResult vres = failures.get(getOpUserName());
-		if (vres == null){
+		if (vres == null) {
 			reason.set("NA");
 			failures.remove(getOpUserName());
 			return;
@@ -434,7 +435,7 @@ public abstract class Coordinator extends Artifact {
 			vres.index = 0;
 			typedFailSearch = false;
 		}
-		if(vres.index == vres.getReasons().size()){
+		if (vres.index == vres.getReasons().size()) {
 			failures.remove(getOpUserName());
 			return;
 		}
@@ -447,7 +448,7 @@ public abstract class Coordinator extends Artifact {
 			OpFeedbackParam<String> type, Object... types) {
 
 		ValidationResult vres = failures.get(getOpUserName());
-		if (vres == null){
+		if (vres == null) {
 			reason.set("NA");
 			failures.remove(getOpUserName());
 			return;
@@ -456,7 +457,7 @@ public abstract class Coordinator extends Artifact {
 			vres.index = 0;
 			typedFailSearch = true;
 		}
-		if(vres.index == vres.getReasons().size()){
+		if (vres.index == vres.getReasons().size()) {
 			failures.remove(getOpUserName());
 			return;
 		}

@@ -1,6 +1,7 @@
 package org.aria.rlandri.generic.artifacts;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -19,15 +20,15 @@ import cartago.OpFeedbackParam;
 
 public class SimultaneouslyExecutedCoordinator extends Coordinator {
 
-	private final Timer timer = new Timer();
-	private TimerTask task = null;
-	private int currentStep = 0;
-
 	public static final int STEPS = 3;
 	public static final int STEP_LENGTH = 1000;
 
+	protected int currentStep = 0;
+
+	private final Timer timer = new Timer();
+	private TimerTask task = null;
+
 	private final List<String> agentOrder = new ArrayList<String>();
-	private int numReadyAgents = 0;
 	private int executingAgentIndex = 0;
 	private boolean stepFinished = true;
 	private boolean timerExpired = false;
@@ -40,23 +41,31 @@ public class SimultaneouslyExecutedCoordinator extends Coordinator {
 				"%s: every agent has submitted its action", getOpUserId()));
 		await("isItMyTurn", getOpUserId());
 		System.err.println(String.format("%s: kill the bugs", getOpUserId()));
-		if (executingAgentIndex == numReadyAgents) {
+		if (executingAgentIndex == agentOrder.size()) {
 			resetTurnInfo();
+			System.err.println(String.format("%s: IESII PI PRIMA CRACA",
+					getOpUserId()));
 			return true;
 		} else {
+			System.err.println(String.format("%s: IESII PI A DOUA CRACA",
+					getOpUserId()));
 			return false;
 		}
 	}
 
 	private boolean isEverybodyReady() {
-		return numReadyAgents == regularAgents.getNumRegistered();
+		return agentOrder.size() == regularAgents.getNumRegistered();
 	}
 
 	private void leaveNoAgentBehind() {
-		numReadyAgents++;
 		agentOrder.add(getOpUserName());
-		if (isSubmittingOver()) {
-			setState(EnvStatus.EVALUATING);
+		if (isEverybodyReady()) {
+			System.err.println(String.format(
+					"Submitting is over!!! remaining(%s)",
+					task.scheduledExecutionTime() - new Date().getTime()));
+			boolean canceled = task.cancel();
+			System.err.println("Canceled: " + canceled);
+			execInternalOp("transitionToEvaluating");
 		} else {
 			await("isSubmittingOver");
 		}
@@ -64,20 +73,9 @@ public class SimultaneouslyExecutedCoordinator extends Coordinator {
 
 	private void resetTurnInfo() {
 		agentOrder.clear();
-		numReadyAgents = 0;
 		executingAgentIndex = 0;
 		stepFinished = true;
-	}
-
-	@GUARD
-	private boolean isItMyTurn(AgentId agentId) {
-		String currentAgent = agentOrder.get(executingAgentIndex);
-		if (currentAgent.equals(agentId.getAgentName())) {
-			executingAgentIndex++;
-			return true;
-		} else {
-			return false;
-		}
+		timerExpired = false;
 	}
 
 	@PRIME_AGENT_OPERATION
@@ -88,14 +86,21 @@ public class SimultaneouslyExecutedCoordinator extends Coordinator {
 
 	private void executeStep() {
 		stepFinished = false;
-		signal("startTurn", currentStep);
+		final long startTime = new Date().getTime();
+		System.err.println("The task was scheduled at " + startTime);
 		task = new TimerTask() {
 			public void run() {
-				execInternalOp("changeToEvaluating");
+				String errFmt = "The task scheduled at %s was run at %s (diff=%s)";
+				long runTime = new Date().getTime();
+				System.err.println(String.format(errFmt, startTime, runTime,
+						runTime - startTime));
+				execInternalOp("finishTimer");
 			}
 		};
-		timer.schedule(task, STEP_LENGTH / 1);
+		signal("startTurn", currentStep);
+		timer.schedule(task, STEP_LENGTH);
 		await("isStepFinished");
+		// TODO send only to master
 		signal("stopTurn", currentStep);
 	}
 
@@ -114,17 +119,25 @@ public class SimultaneouslyExecutedCoordinator extends Coordinator {
 	}
 
 	@INTERNAL_OPERATION
-	private void changeToEvaluating() {
+	private void finishTimer() {
 		if (!isEverybodyReady()) {
 			EnvStatus state = getState();
 			if (state == EnvStatus.RUNNING) {
-				System.err.println("OOOOOOOOOO NU CE MORTZII MA-SII");
+				System.err.println("OOOOOOOOOO NU CE MORTZII MA-SII: "
+						+ agentOrder.size() + " from "
+						+ regularAgents.getNumRegistered());
 				timerExpired = true;
-				setState(EnvStatus.EVALUATING);
+				transitionToEvaluating();
 			} else {
 				// TODO handle me
 			}
 		}
+	}
+
+	@INTERNAL_OPERATION
+	private void transitionToEvaluating() {
+		System.err.println("OOOOOOOOOO NU CE MORTZII LU' TA-SU");
+		setState(EnvStatus.EVALUATING);
 	}
 
 	@INTERNAL_OPERATION
@@ -136,12 +149,29 @@ public class SimultaneouslyExecutedCoordinator extends Coordinator {
 	}
 
 	@GUARD
+	private boolean isItMyTurn(AgentId agentId) {
+		String currentAgent = agentOrder.get(executingAgentIndex);
+		System.err.println(String.format(
+				"TURN CHECKING: %s told %s to sod off", currentAgent, agentId));
+		if (currentAgent.equals(agentId.getAgentName())) {
+			executingAgentIndex++;
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	@GUARD
 	private boolean isStepFinished() {
 		return stepFinished;
 	}
 
 	@GUARD
-	boolean isSubmittingOver() {
+	private boolean isSubmittingOver() {
+		System.err.println(String.format(
+				"Checking if submitting is over: answer (%s | %s) = %s",
+				timerExpired, isEverybodyReady(), timerExpired
+						|| isEverybodyReady()));
 		return timerExpired || isEverybodyReady();
 	}
 
