@@ -36,7 +36,11 @@ import cartago.GUARD;
 import cartago.IArtifactOp;
 import cartago.OPERATION;
 import cartago.OpFeedbackParam;
-
+/**
+ * The main coordinator abstract class from which all particular coordinator implementations stem from
+ * @author Everybody
+ *
+ */
 public abstract class Coordinator extends Artifact {
 
 	public static final int realTimeSP = 0, realTimeNeg = 1,
@@ -438,10 +442,10 @@ public abstract class Coordinator extends Artifact {
 		type.set(vres.getType(reason.get()));
 	}
 
-	/*@OPERATION
+	@OPERATION
 	void getNextFailureReason(OpFeedbackParam<String> reason,
-			OpFeedbackParam<String> type, Integer... types) {
-		System.out.println("fratele meleu");
+			OpFeedbackParam<String> type, Object... types) {
+
 		ValidationResult vres = failures.get(getOpUserName());
 		if (vres == null){
 			reason.set("NA");
@@ -457,14 +461,14 @@ public abstract class Coordinator extends Artifact {
 			return;
 		}
 		ArrayList<Integer> typeFilter = new ArrayList<Integer>();
-		for (Integer t : types) {
-			typeFilter.add(t);
+		for (Object t : types) {
+			typeFilter.add(((Number) t).intValue());
 		}
 
 		reason.set(vres.getReasons(typeFilter).get(vres.index++));
 		type.set(vres.getType(reason.get()));
 	}
-*/
+
 	private static final void addAgentToRegistry(AgentRegistry registry,
 			String agentName, int qty) {
 		if (qty > 1) {

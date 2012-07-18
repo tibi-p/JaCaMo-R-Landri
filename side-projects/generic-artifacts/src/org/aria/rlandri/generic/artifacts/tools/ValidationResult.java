@@ -3,7 +3,13 @@ package org.aria.rlandri.generic.artifacts.tools;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-
+/**
+ * Class that contains data structures and methods which allow throwing detailed types of failures
+ * during the validation of GAME_OPERATION type methods. This is stored by a coordinator artifact
+ * and from there it is used by the agent to recover from errors.
+ * @author Mihai Poenaru - JaCaMo/R'Landri
+ *
+ */
 public class ValidationResult {
 	public final static int WARNING = 0, ERROR = 1, FATAL = 2, limit = 2;
 	private HashMap<String, Integer> reasons;
