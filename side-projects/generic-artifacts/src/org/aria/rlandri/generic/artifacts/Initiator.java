@@ -14,7 +14,6 @@ import cartago.OperationException;
 
 public class Initiator extends Artifact {
 
-	// XXX please don't delete this
 	private String environmentType;
 	private String coordinatorClass;
 
@@ -31,13 +30,19 @@ public class Initiator extends Artifact {
 		}
 	}
 
-	// TODO it's @PRIME_AGENT_OPERATION actually
 	@OPERATION
 	void makeCoordinatorArtifact(String artifactName, Object[] params,
 			OpFeedbackParam<ArtifactId> aid) throws OperationException {
-		ArtifactId workspace = lookupArtifact("workspace");
-		execLinkedOp(workspace, "makeArtifact", artifactName, coordinatorClass,
-				params, aid);
+		// Emulate a PRIME_AGENT_OPERATION
+		String primeName = String.format("prime_agent_s_%s", environmentType);
+		String agentName = getOpUserName();
+		if (primeName.equals(agentName)) {
+			ArtifactId workspace = lookupArtifact("workspace");
+			execLinkedOp(workspace, "makeArtifact", artifactName,
+					coordinatorClass, params, aid);
+		} else {
+			failed("Only the prime agent can create the coordinator artifact");
+		}
 	}
 
 }

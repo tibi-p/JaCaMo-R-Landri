@@ -25,8 +25,8 @@ import org.aria.rlandri.generic.artifacts.annotation.GuardedAnnotationProcessor;
 import org.aria.rlandri.generic.artifacts.annotation.MASTER_OPERATION;
 import org.aria.rlandri.generic.artifacts.annotation.PRIME_AGENT_OPERATION;
 import org.aria.rlandri.generic.artifacts.opmethod.MasterArtifactOpMethod;
+import org.aria.rlandri.generic.artifacts.tools.ValidationResult;
 import org.aria.rlandri.generic.artifacts.util.ReflectionUtils;
-import org.aria.rlandri.generic.tools.ValidationResult;
 
 import cartago.AgentId;
 import cartago.Artifact;

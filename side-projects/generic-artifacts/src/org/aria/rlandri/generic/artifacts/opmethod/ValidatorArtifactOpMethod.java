@@ -4,7 +4,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 import org.aria.rlandri.generic.artifacts.Coordinator;
-import org.aria.rlandri.generic.tools.ValidationResult;
+import org.aria.rlandri.generic.artifacts.tools.ValidationResult;
 
 import cartago.Artifact;
 import cartago.ArtifactOpMethod;
