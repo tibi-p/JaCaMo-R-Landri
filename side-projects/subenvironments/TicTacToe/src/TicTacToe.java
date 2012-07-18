@@ -1,6 +1,7 @@
 import cartago.Artifact;
 import cartago.OPERATION;
 import cartago.ObsProperty;
+import cartago.OpFeedbackParam;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -85,23 +86,21 @@ public class TicTacToe extends PlayerAlternatedCoordinator {
 		}
 
 	}
+	//
 
-	@GAME_OPERATION(validator = "validateGetGameState")
-	int[] getGameState() {
-		int[] result = new int[9];
+	@OPERATION
+	void getGameState(OpFeedbackParam<Integer[]> result) {
+		Integer[] res = new Integer[9];
 		for (int i = 0; i < 3; i++)
 			for (int j = 0; j < 3; j++) {
-				result[3 * i + j] = gameState[i][j];
+				res[3 * i + j] = gameState[i][j];
 			}
-		return result;
+		result.set(res);
 	}
 
 	private void validateMark(int i, int j) {
 
 	}
 
-	private void validateGetGameState() {
-
-	}
 
 }
