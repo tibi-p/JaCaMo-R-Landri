@@ -34,6 +34,7 @@ public class SimultaneouslyExecutedCoordinator extends Coordinator {
 	private AgentId executingAgent = null;
 	private boolean stepFinished = true;
 	private boolean timerExpired = false;
+	private boolean preEvaluationDone = false;
 
 	public boolean waitForEndTurn() {
 		System.err.println(String.format("%s: waiting for the end of turn %s",
@@ -57,6 +58,7 @@ public class SimultaneouslyExecutedCoordinator extends Coordinator {
 		executingAgent = null;
 		stepFinished = true;
 		timerExpired = false;
+		preEvaluationDone = false;
 	}
 
 	/**
@@ -67,12 +69,25 @@ public class SimultaneouslyExecutedCoordinator extends Coordinator {
 			failed("The current agent has already submitted a move this turn");
 	}
 
+	protected void doPreEvaluation() {
+		setPreEvaluationDone(true);
+	}
+
+	protected void setPreEvaluationDone(boolean preEvaluationDone) {
+		this.preEvaluationDone = preEvaluationDone;
+	}
+
 	private boolean hasMoved(AgentId agentId) {
 		return readyAgents.contains(agentId);
 	}
 
 	private boolean isEverybodyReady() {
 		return readyAgents.size() == regularAgents.getNumRegistered();
+	}
+
+	@GUARD
+	protected boolean isPreEvaluationDone() {
+		return preEvaluationDone;
 	}
 
 	private void leaveNoAgentBehind() {
@@ -97,15 +112,20 @@ public class SimultaneouslyExecutedCoordinator extends Coordinator {
 	}
 
 	private boolean prepareEvaluation() {
-		setState(EnvStatus.EVALUATING);
-		executingAgentIterator = readyAgents.iterator();
-		if (executingAgentIterator.hasNext()) {
-			executingAgent = executingAgentIterator.next();
-			return true;
-		} else {
-			System.err.println("WOP WOP WOP WOP");
-			resetTurnInfo();
-			return false;
+		try {
+			setState(EnvStatus.EVALUATING);
+			executingAgentIterator = readyAgents.iterator();
+			if (executingAgentIterator.hasNext()) {
+				executingAgent = executingAgentIterator.next();
+				return true;
+			} else {
+				System.err.println("WOP WOP WOP WOP");
+				resetTurnInfo();
+				return false;
+			}
+		} finally {
+			doPreEvaluation();
+			await("isPreEvaluationDone");
 		}
 	}
 
