@@ -34,6 +34,7 @@ public class SimultaneouslyExecutedCoordinator extends Coordinator {
 	private AgentId executingAgent = null;
 	private boolean stepFinished = true;
 	private boolean timerExpired = false;
+	private boolean preEvaluationDone = false;
 
 	public boolean waitForEndTurn() {
 		System.err.println(String.format("%s: waiting for the end of turn %s",
@@ -41,7 +42,7 @@ public class SimultaneouslyExecutedCoordinator extends Coordinator {
 		leaveNoAgentBehind();
 		System.err.println(String.format(
 				"%s: every agent has submitted its action", getOpUserId()));
-		await("isItMyTurn", getOpUserId());
+		await("checkTurn", getOpUserId());
 		System.err.println(String.format("%s: kill the bugs", getOpUserId()));
 		if (executingAgentIterator.hasNext()) {
 			executingAgent = executingAgentIterator.next();
@@ -57,6 +58,7 @@ public class SimultaneouslyExecutedCoordinator extends Coordinator {
 		executingAgent = null;
 		stepFinished = true;
 		timerExpired = false;
+		preEvaluationDone = false;
 	}
 
 	/**
@@ -67,12 +69,25 @@ public class SimultaneouslyExecutedCoordinator extends Coordinator {
 			failed("The current agent has already submitted a move this turn");
 	}
 
+	protected void doPreEvaluation() {
+		setPreEvaluationDone(true);
+	}
+
+	protected void setPreEvaluationDone(boolean preEvaluationDone) {
+		this.preEvaluationDone = preEvaluationDone;
+	}
+
 	private boolean hasMoved(AgentId agentId) {
 		return readyAgents.contains(agentId);
 	}
 
 	private boolean isEverybodyReady() {
 		return readyAgents.size() == regularAgents.getNumRegistered();
+	}
+
+	@GUARD
+	protected boolean isPreEvaluationDone() {
+		return preEvaluationDone;
 	}
 
 	private void leaveNoAgentBehind() {
@@ -84,7 +99,7 @@ public class SimultaneouslyExecutedCoordinator extends Coordinator {
 			boolean cancelled = task.cancel();
 			System.err.println(String.format("Cancellation has%s succeeded",
 					cancelled ? "" : " not"));
-			if (setupIterator()) {
+			if (prepareEvaluation()) {
 				// TODO this can be skipped if it's this agent's turn!
 				execInternalOp("wakerOfAgents");
 			} else {
@@ -96,16 +111,21 @@ public class SimultaneouslyExecutedCoordinator extends Coordinator {
 		}
 	}
 
-	private boolean setupIterator() {
-		setState(EnvStatus.EVALUATING);
-		executingAgentIterator = readyAgents.iterator();
-		if (executingAgentIterator.hasNext()) {
-			executingAgent = executingAgentIterator.next();
-			return true;
-		} else {
-			System.err.println("WOP WOP WOP WOP");
-			resetTurnInfo();
-			return false;
+	private boolean prepareEvaluation() {
+		try {
+			setState(EnvStatus.EVALUATING);
+			executingAgentIterator = readyAgents.iterator();
+			if (executingAgentIterator.hasNext()) {
+				executingAgent = executingAgentIterator.next();
+				return true;
+			} else {
+				System.err.println("WOP WOP WOP WOP");
+				resetTurnInfo();
+				return false;
+			}
+		} finally {
+			doPreEvaluation();
+			await("isPreEvaluationDone");
 		}
 	}
 
@@ -152,17 +172,15 @@ public class SimultaneouslyExecutedCoordinator extends Coordinator {
 
 	@INTERNAL_OPERATION
 	private void finishTimer() {
-		if (!isEverybodyReady()) {
-			EnvStatus state = getState();
-			if (state == EnvStatus.RUNNING) {
-				String errFmt = "As the timer expired - %s from %s";
-				System.err.println(String.format(errFmt, readyAgents.size(),
-						regularAgents.getNumRegistered()));
-				timerExpired = true;
-				setupIterator();
-			} else {
-				// TODO handle me
-			}
+		EnvStatus state = getState();
+		if (state == EnvStatus.RUNNING) {
+			String errFmt = "As the timer expired - %s from %s";
+			System.err.println(String.format(errFmt, readyAgents.size(),
+					regularAgents.getNumRegistered()));
+			timerExpired = true;
+			prepareEvaluation();
+		} else {
+			// TODO handle me
 		}
 	}
 
@@ -180,8 +198,11 @@ public class SimultaneouslyExecutedCoordinator extends Coordinator {
 	}
 
 	@GUARD
-	private boolean isItMyTurn(AgentId agentId) {
-		return executingAgent.equals(agentId);
+	private boolean checkTurn(AgentId agentId) {
+		if (agentId != null)
+			return agentId.equals(executingAgent);
+		else
+			return false;
 	}
 
 	@GUARD

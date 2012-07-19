@@ -26,7 +26,7 @@ public class RealTimeSinglePlayerCoordinator extends Coordinator {
 
 	protected void init() throws CartagoException {
 		super.init();
-		this.agents = new ArrayList<String>(regularAgents.getAgentNames());
+		this.agents = new ArrayList<String>(regularAgents.getUnregisteredAgentNames());
 		Collections.sort(this.agents);
 	}
 
