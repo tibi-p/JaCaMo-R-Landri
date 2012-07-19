@@ -1,14 +1,8 @@
-import cartago.Artifact;
+import org.aria.rlandri.generic.artifacts.PlayerAlternatedCoordinator;
+import org.aria.rlandri.generic.artifacts.annotation.GAME_OPERATION;
+
 import cartago.OPERATION;
-import cartago.ObsProperty;
 import cartago.OpFeedbackParam;
-
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Set;
-
-import org.aria.rlandri.generic.artifacts.*;
-import org.aria.rlandri.generic.artifacts.annotation.*;
 
 /**
  *  
@@ -20,8 +14,8 @@ public class TicTacToe extends PlayerAlternatedCoordinator {
 	// time for the subenv
 	int maxGames;
 
-	int[][] gameState = new int[3][3];
-	int[] score = new int[2];
+	private int[][] gameState = new int[3][3];
+	private int[] score = new int[2];
 
 	int ended() {
 		for (int i = 0; i < 3; i++) {
@@ -38,8 +32,8 @@ public class TicTacToe extends PlayerAlternatedCoordinator {
 				if (cell != 0)
 					return cell;
 			}
-
 		}
+
 		if (gameState[0][0] == gameState[1][1]
 				&& gameState[1][1] == gameState[2][2]) {
 			int cell = gameState[0][0];
@@ -58,17 +52,17 @@ public class TicTacToe extends PlayerAlternatedCoordinator {
 	}
 
 	@GAME_OPERATION(validator = "validateMark")
-	void mark(int i, int j) {
-		if (currentAgent == 0) {
-			gameState[i][j] = 1;
+	void mark(int x, int y) {
+		if (currentIndex == 0) {
+			gameState[x][y] = 1;
 		} else {
-			gameState[i][j] = -1;
+			gameState[x][y] = -1;
 		}
 
 		int end = ended();
 		if (end != 0) {
-			for (int k = 0; k < 3; k++)
-				for (int m = 0; m < 3; m++) {
+			for (int i = 0; i < 3; i++)
+				for (int j = 0; j < 3; j++) {
 					gameState[i][j] = 0;
 				}
 
@@ -86,8 +80,8 @@ public class TicTacToe extends PlayerAlternatedCoordinator {
 		}
 
 	}
-	//
 
+	//
 	@OPERATION
 	void getGameState(OpFeedbackParam<Integer[]> result) {
 		Integer[] res = new Integer[9];
@@ -98,9 +92,8 @@ public class TicTacToe extends PlayerAlternatedCoordinator {
 		result.set(res);
 	}
 
-	private void validateMark(int i, int j) {
+	private void validateMark(int x, int y) {
 
 	}
-
 
 }

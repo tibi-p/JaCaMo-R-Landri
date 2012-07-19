@@ -22,10 +22,10 @@ getFirst([H | T],X,I) :-
 
 +!start:true <-
 	.print("Starting").
-	
-+startTurn(CurrentTurn): true <-
-	.print("O inceput! tura: ",CurrentTurn);
-	getGameState(List);
-	mark(X div 3,X mod 3);
-	.print("x:",X).
 
++startTurn(CurrentTurn): true <-
+	.print("Turn ", CurrentTurn, " has started");
+	getGameState(List);
+	?getFirst(List, X, 0);
+	.print("List: ", List, " - Free: ", X);
+	mark(X div 3,X mod 3).

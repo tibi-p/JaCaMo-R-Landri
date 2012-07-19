@@ -1,11 +1,11 @@
 -- phpMyAdmin SQL Dump
--- version 3.4.5deb1
+-- version 3.5.1
 -- http://www.phpmyadmin.net
 --
--- Host: localhost
--- Generation Time: Jul 19, 2012 at 02:22 PM
--- Server version: 5.1.63
--- PHP Version: 5.3.6-13ubuntu3.8
+-- Host: 127.0.0.1
+-- Generation Time: Jul 19, 2012 at 06:37 PM
+-- Server version: 5.5.25a-log
+-- PHP Version: 5.4.4
 
 SET SQL_MODE="NO_AUTO_VALUE_ON_ZERO";
 SET time_zone = "+00:00";
@@ -158,10 +158,10 @@ CREATE TABLE IF NOT EXISTS `auth_user` (
 --
 
 INSERT INTO `auth_user` (`id`, `username`, `first_name`, `last_name`, `email`, `password`, `is_staff`, `is_active`, `is_superuser`, `last_login`, `date_joined`) VALUES
-(1, 'admin', '', '', 'popa.tiberiu@gmail.com', 'pbkdf2_sha256$10000$Pel4TDYzKAof$zawDS1r9uzj0ZkO/N17caDtFPsDFwcLo9unbfJVXTlU=', 1, 1, 1, '2012-07-19 11:02:23', '2012-07-12 11:13:16'),
-(2, 'tibi', '', '', '', 'pbkdf2_sha256$10000$j4VqrRFjDGoy$mMDRAp9YUBpIDZXDoQDBJLe4ZhNQilyHnU7f4LUqIt4=', 0, 1, 0, '2012-07-19 11:16:07', '2012-07-12 11:14:25'),
+(1, 'admin', '', '', 'popa.tiberiu@gmail.com', 'pbkdf2_sha256$10000$Pel4TDYzKAof$zawDS1r9uzj0ZkO/N17caDtFPsDFwcLo9unbfJVXTlU=', 1, 1, 1, '2012-07-19 11:38:57', '2012-07-12 11:13:16'),
+(2, 'tibi', '', '', '', 'pbkdf2_sha256$10000$j4VqrRFjDGoy$mMDRAp9YUBpIDZXDoQDBJLe4ZhNQilyHnU7f4LUqIt4=', 0, 1, 0, '2012-07-19 15:25:39', '2012-07-12 11:14:25'),
 (3, 'andrei', '', '', '', 'pbkdf2_sha256$10000$WDjG5qD6agbH$GtnTKn45ca2zlUa1uSEgtGolmWIzJ/9+iqhTaUZ86z8=', 0, 1, 0, '2012-07-19 10:52:46', '2012-07-12 11:14:40'),
-(4, 'mihai', '', '', '', 'pbkdf2_sha256$10000$Ac6AXMUmTKvR$EyJJuVXpvAAq/6hPqgufSiTLweRfKQPSvoJHuvVDVbA=', 0, 1, 0, '2012-07-13 12:56:40', '2012-07-12 11:14:46');
+(4, 'mihai', '', '', '', 'pbkdf2_sha256$10000$Ac6AXMUmTKvR$EyJJuVXpvAAq/6hPqgufSiTLweRfKQPSvoJHuvVDVbA=', 0, 1, 0, '2012-07-19 15:42:44', '2012-07-12 11:14:46');
 
 -- --------------------------------------------------------
 
@@ -257,7 +257,7 @@ CREATE TABLE IF NOT EXISTS `django_admin_log` (
   PRIMARY KEY (`id`),
   KEY `django_admin_log_403f60f` (`user_id`),
   KEY `django_admin_log_1bb8f392` (`content_type_id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=35 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=36 ;
 
 --
 -- Dumping data for table `django_admin_log`
@@ -297,7 +297,8 @@ INSERT INTO `django_admin_log` (`id`, `action_time`, `user_id`, `content_type_id
 (31, '2012-07-19 11:08:36', 1, 10, '4', 'RouletteFeedback', 2, 'Changed file for artifact "artifacts".'),
 (32, '2012-07-19 11:08:46', 1, 10, '4', 'RouletteFeedback', 2, 'Changed file for artifact "artifacts".'),
 (33, '2012-07-19 11:09:19', 1, 10, '4', 'RouletteFeedback', 2, 'Deleted artifact "artifacts".'),
-(34, '2012-07-19 11:09:37', 1, 10, '4', 'RouletteFeedback', 2, 'Added artifact "artifacts".');
+(34, '2012-07-19 11:09:37', 1, 10, '4', 'RouletteFeedback', 2, 'Added artifact "artifacts".'),
+(35, '2012-07-19 11:40:56', 1, 10, '5', 'TicTacToe', 1, '');
 
 -- --------------------------------------------------------
 
@@ -359,9 +360,11 @@ CREATE TABLE IF NOT EXISTS `django_session` (
 --
 
 INSERT INTO `django_session` (`session_key`, `session_data`, `expire_date`) VALUES
+('0dfc9489f5c6e98dc4495e48146b8fbb', 'Njg4Njc3OWZjMzRjMjAwYjVhZGUxMjE2Nzg4NThlN2E2YzEyNjMyNjqAAn1xAShVEl9hdXRoX3Vz\nZXJfYmFja2VuZHECVSlkamFuZ28uY29udHJpYi5hdXRoLmJhY2tlbmRzLk1vZGVsQmFja2VuZHED\nVQ1fYXV0aF91c2VyX2lkcQSKAQR1Lg==\n', '2012-08-02 15:42:44'),
 ('35a8865d6e58152c435adf0fd15cabfe', 'NmJmZWUyZWExMGEyNzU1NGUwZjg2MzhiNzA4ZjA3MDI5YTg0MzNiYjqAAn1xAShVEl9hdXRoX3Vz\nZXJfYmFja2VuZHECVSlkamFuZ28uY29udHJpYi5hdXRoLmJhY2tlbmRzLk1vZGVsQmFja2VuZHED\nVQ1fYXV0aF91c2VyX2lkcQSKAQJ1Lg==\n', '2012-07-26 20:42:57'),
 ('5296f51a696da9b19d726334a35c1684', 'Njg4Njc3OWZjMzRjMjAwYjVhZGUxMjE2Nzg4NThlN2E2YzEyNjMyNjqAAn1xAShVEl9hdXRoX3Vz\nZXJfYmFja2VuZHECVSlkamFuZ28uY29udHJpYi5hdXRoLmJhY2tlbmRzLk1vZGVsQmFja2VuZHED\nVQ1fYXV0aF91c2VyX2lkcQSKAQR1Lg==\n', '2012-07-27 12:56:40'),
 ('547d91c72d15e6c0feda776647b25a21', 'Njg4Njc3OWZjMzRjMjAwYjVhZGUxMjE2Nzg4NThlN2E2YzEyNjMyNjqAAn1xAShVEl9hdXRoX3Vz\nZXJfYmFja2VuZHECVSlkamFuZ28uY29udHJpYi5hdXRoLmJhY2tlbmRzLk1vZGVsQmFja2VuZHED\nVQ1fYXV0aF91c2VyX2lkcQSKAQR1Lg==\n', '2012-07-27 10:33:25'),
+('6eca57c77d0679172d49a556bc936325', 'NmJmZWUyZWExMGEyNzU1NGUwZjg2MzhiNzA4ZjA3MDI5YTg0MzNiYjqAAn1xAShVEl9hdXRoX3Vz\nZXJfYmFja2VuZHECVSlkamFuZ28uY29udHJpYi5hdXRoLmJhY2tlbmRzLk1vZGVsQmFja2VuZHED\nVQ1fYXV0aF91c2VyX2lkcQSKAQJ1Lg==\n', '2012-08-02 11:41:08'),
 ('fa1ce20d846d0738ed812dbe3f2457b1', 'NmJmZWUyZWExMGEyNzU1NGUwZjg2MzhiNzA4ZjA3MDI5YTg0MzNiYjqAAn1xAShVEl9hdXRoX3Vz\nZXJfYmFja2VuZHECVSlkamFuZ28uY29udHJpYi5hdXRoLmJhY2tlbmRzLk1vZGVsQmFja2VuZHED\nVQ1fYXV0aF91c2VyX2lkcQSKAQJ1Lg==\n', '2012-08-02 11:16:07');
 
 -- --------------------------------------------------------
@@ -467,14 +470,7 @@ CREATE TABLE IF NOT EXISTS `simulator_abstractprocess` (
   `created` datetime NOT NULL,
   PRIMARY KEY (`id`),
   KEY `simulator_abstractprocess_6c4d8baf` (`solution_id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=22 ;
-
---
--- Dumping data for table `simulator_abstractprocess`
---
-
-INSERT INTO `simulator_abstractprocess` (`id`, `solution_id`, `created`) VALUES
-(21, 5, '2012-07-19 11:16:54');
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -496,7 +492,7 @@ CREATE TABLE IF NOT EXISTS `solution_solution` (
   PRIMARY KEY (`id`),
   KEY `solution_solution_75b32dfd` (`envUser_id`),
   KEY `solution_solution_e004a33` (`subEnvironment_id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=6 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=7 ;
 
 --
 -- Dumping data for table `solution_solution`
@@ -506,7 +502,8 @@ INSERT INTO `solution_solution` (`id`, `name`, `envUser_id`, `subEnvironment_id`
 (1, 'Gambler', 2, 1, 'You win some, lose some, it''s all the same to me!', 1, 'users/2/solutions/1/gambler.zip', '', '', '2012-07-12 11:25:15'),
 (2, 'Auction solution', 4, 3, 'DA-MI HOTELU', 1, 'users/4/solutions/3/rtmp_agents.zip', '', '', '2012-07-13 10:38:01'),
 (4, 'Factorial', 4, 2, 'ae', 1, 'users/4/solutions/2/rtmp_agents.zip', '', '', '2012-07-13 10:56:26'),
-(5, 'sail', 2, 4, 'description', 0, 'users/2/solutions/4/agenti.zip', '', '', '2012-07-19 10:55:12');
+(5, 'sail', 2, 4, 'description', 0, 'users/2/solutions/4/agenti.zip', '', '', '2012-07-19 10:55:12'),
+(6, 'Toer', 2, 5, 'Really dumb agent for TicTacToe!', 1, 'users/2/solutions/5/toer_agent.zip', '', '', '2012-07-19 11:42:36');
 
 -- --------------------------------------------------------
 
@@ -544,7 +541,7 @@ CREATE TABLE IF NOT EXISTS `subenvironment_artifact` (
   `file` varchar(100) NOT NULL,
   PRIMARY KEY (`id`),
   KEY `subenvironment_artifact_4d5c45ed` (`subenvironment_id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=7 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=8 ;
 
 --
 -- Dumping data for table `subenvironment_artifact`
@@ -554,7 +551,8 @@ INSERT INTO `subenvironment_artifact` (`id`, `name`, `subenvironment_id`, `file`
 (1, 'Biased Artifacts', 1, 'subenvironments/1/artifacts/roulette_artifacts.zip'),
 (2, 'Factorial', 2, 'subenvironments/2/artifacts/rtsp_test.zip'),
 (3, 'Auction', 3, 'subenvironments/3/artifacts/rtmp_test.zip'),
-(6, 'artifacts', 4, 'subenvironments/4/artifacts/artifacts.zip');
+(6, 'Feedback Artifacts', 4, 'subenvironments/4/artifacts/artifacts.zip'),
+(7, 'TicTac Artifacts', 5, 'subenvironments/5/artifacts/tictac_artifacts.zip');
 
 -- --------------------------------------------------------
 
@@ -607,7 +605,7 @@ CREATE TABLE IF NOT EXISTS `subenvironment_ownerrelationship` (
   PRIMARY KEY (`id`),
   KEY `subenvironment_ownerrelationship_e004a33` (`subEnvironment_id`),
   KEY `subenvironment_ownerrelationship_75b32dfd` (`envUser_id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=5 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=8 ;
 
 --
 -- Dumping data for table `subenvironment_ownerrelationship`
@@ -617,7 +615,10 @@ INSERT INTO `subenvironment_ownerrelationship` (`id`, `subEnvironment_id`, `envU
 (1, 1, 3, 300),
 (2, 2, 4, 300),
 (3, 3, 4, 300),
-(4, 4, 4, 100);
+(4, 4, 4, 100),
+(5, 5, 3, 298),
+(6, 5, 2, 1),
+(7, 5, 4, 1);
 
 -- --------------------------------------------------------
 
@@ -636,7 +637,7 @@ CREATE TABLE IF NOT EXISTS `subenvironment_subenvironment` (
   `numSteps` int(11) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `subenvironment_subenvironment_77550576` (`ring_id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=5 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=6 ;
 
 --
 -- Dumping data for table `subenvironment_subenvironment`
@@ -644,9 +645,10 @@ CREATE TABLE IF NOT EXISTS `subenvironment_subenvironment` (
 
 INSERT INTO `subenvironment_subenvironment` (`id`, `name`, `description`, `ring_id`, `index`, `envType`, `coordinatorClass`, `numSteps`) VALUES
 (1, 'Roulette', 'European Roulette', 2, 1, 'setb', 'Roulette', 3),
-(2, 'Factorial', 'Subenvironment pt prosti', 3, 1, 'rtsp', 'Factorial', NULL),
+(2, 'Factorial', 'Subenvironment pentru oamenii limitati din punct de vedere mental', 3, 1, 'rtsp', 'Factorial', NULL),
 (3, 'Auction', 'You must buy hotel Cismigiu', 3, 2, 'rtmp', 'Auction', NULL),
-(4, 'RouletteFeedback', 'Roulette with instant feedback after bet', 2, 2, 'setb', 'RouletteFeedback', 2);
+(4, 'Roulette Feedback', 'Roulette with instant feedback after bet', 2, 2, 'setb', 'RouletteFeedback', 2),
+(5, 'TicTacToe', 'The glorious game of TicTacToe.', 3, 6, 'patb', 'TicTacToe', 5);
 
 --
 -- Constraints for dumped tables
