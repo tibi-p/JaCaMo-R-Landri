@@ -52,7 +52,7 @@ public class Roulette extends SimultaneouslyExecutedCoordinator {
 		for (AgentId aid : masterAgents.getAgentIds()) {
 			signal(aid, "spinWheel");
 		}
-		setPreEvaluation(true);
+
 	}
 
 	private double payoff(String betType, double betSum) {
@@ -77,7 +77,9 @@ public class Roulette extends SimultaneouslyExecutedCoordinator {
 	}
 
 	@GAME_OPERATION(validator = "validateBet")
-	void bet(String betName, Object betValues[], double sum) {
+	void bet(String betName, Object betValues[], double sum,
+			OpFeedbackParam<Integer> currentStep,
+			OpFeedbackParam<Integer> payoff) {
 		AgentId aid = getOpUserId();
 
 		System.out.println(user + " bets " + sum + " gold coins on " + betName);
@@ -87,8 +89,9 @@ public class Roulette extends SimultaneouslyExecutedCoordinator {
 		bet.sum = sum;
 		bet.type = betName;
 		bet.betValues = betValues;
-		bets.put(aid, bet);
 
+		payoff = computePayoffForPlayer(bet);
+		updateStandings(aid, payoff);
 	}
 
 	void validateBet(String betName, Object betValues[], double sum) {
@@ -105,7 +108,7 @@ public class Roulette extends SimultaneouslyExecutedCoordinator {
 				winningColor = "green";
 			winningColor = "black";
 		}
-
+		setPreEvaluation(true);
 		System.out.println("Winning number: " + winningNumber + " and color: "
 				+ winningColor);
 	}
@@ -233,21 +236,17 @@ public class Roulette extends SimultaneouslyExecutedCoordinator {
 			return -betSum;
 	}
 
-	// TODO: Validation is not done here (eg. users can win with ill formed
-	// bets)!!!!!!!!!!!!!!
-	@MASTER_OPERATION(validator = "validatePayout")
-	public void payout() {
-		Set<String> players = bets.keySet();
-		for (Iterator<AgentId> it = players.iterator(); it.hasNext();) {
-			AgentId player = it.next();
-			Bet bet = bets.get(player);
-			payoff = computePayoffForPlayer(bet);
-			updateStandings(player, payoff);
-			signal(player, "payoff", currentStep, payoff);
-		}
-		bets.clear();
-		System.out.println(standings);
-	}
+	/*
+	 * //TODO: Validation is not done here (eg. users can win with ill formed
+	 * bets)!!!!!!!!!!!!!!
+	 * 
+	 * @MASTER_OPERATION(validator = "validatePayout") public void payout() {
+	 * Set<String> players = bets.keySet(); for(Iterator<AgentId> it =
+	 * players.iterator(); it.hasNext();) { AgentId player = it.next(); Bet bet
+	 * = bets.get(player); payoff = computePayoffForPlayer(bet);
+	 * updateStandings(player,payoff); signal(player, "payoff", currentStep,
+	 * payoff); } bets.clear(); System.out.println(standings); }
+	 */
 
 	void validatePayout() {
 
