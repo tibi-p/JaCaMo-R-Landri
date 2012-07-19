@@ -1,7 +1,9 @@
 package org.aria.rlandri.generic.artifacts;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -19,63 +21,90 @@ import cartago.OpFeedbackParam;
 
 public class SimultaneouslyExecutedCoordinator extends Coordinator {
 
-	private final Timer timer = new Timer();
-	private TimerTask task = null;
-	private int currentStep = 0;
-
-	public static final int STEPS = 3;
+	public static final int STEPS = 4;
 	public static final int STEP_LENGTH = 1000;
 
-	private final List<String> agentOrder = new ArrayList<String>();
-	private int numReadyAgents = 0;
-	private int executingAgentIndex = 0;
+	protected int currentStep = 0;
+
+	private final Timer timer = new Timer();
+	private TimerTask task = null;
+
+	private final Set<AgentId> readyAgents = new LinkedHashSet<AgentId>();
+	private Iterator<AgentId> executingAgentIterator = null;
+	private AgentId executingAgent = null;
 	private boolean stepFinished = true;
 	private boolean timerExpired = false;
 
 	public boolean waitForEndTurn() {
-		System.err.println(String.format("%s: waiting for end turn",
-				getOpUserId()));
+		System.err.println(String.format("%s: waiting for the end of turn %s",
+				getOpUserId(), currentStep));
 		leaveNoAgentBehind();
 		System.err.println(String.format(
 				"%s: every agent has submitted its action", getOpUserId()));
 		await("isItMyTurn", getOpUserId());
 		System.err.println(String.format("%s: kill the bugs", getOpUserId()));
-		if (executingAgentIndex == numReadyAgents) {
-			resetTurnInfo();
-			return true;
-		} else {
+		if (executingAgentIterator.hasNext()) {
+			executingAgent = executingAgentIterator.next();
 			return false;
+		} else {
+			return true;
 		}
 	}
 
+	public void resetTurnInfo() {
+		readyAgents.clear();
+		executingAgentIterator = null;
+		executingAgent = null;
+		stepFinished = true;
+		timerExpired = false;
+	}
+
+	/**
+	 * Fails if the current agent has already submitted a move this turn.
+	 */
+	public void failIfHasMoved() {
+		if (hasMoved(getOpUserId()))
+			failed("The current agent has already submitted a move this turn");
+	}
+
+	private boolean hasMoved(AgentId agentId) {
+		return readyAgents.contains(agentId);
+	}
+
 	private boolean isEverybodyReady() {
-		return numReadyAgents == regularAgents.getNumRegistered();
+		return readyAgents.size() == regularAgents.getNumRegistered();
 	}
 
 	private void leaveNoAgentBehind() {
-		numReadyAgents++;
-		agentOrder.add(getOpUserName());
-		if (isSubmittingOver()) {
-			setState(EnvStatus.EVALUATING);
+		readyAgents.add(getOpUserId());
+		if (isEverybodyReady()) {
+			System.err.println(String.format(
+					"Submitting is over!!! remaining(%s)",
+					task.scheduledExecutionTime() - new Date().getTime()));
+			boolean cancelled = task.cancel();
+			System.err.println(String.format("Cancellation has%s succeeded",
+					cancelled ? "" : " not"));
+			if (setupIterator()) {
+				// TODO this can be skipped if it's this agent's turn!
+				execInternalOp("wakerOfAgents");
+			} else {
+				// TODO document/log this impossible situation
+				System.exit(1);
+			}
 		} else {
 			await("isSubmittingOver");
 		}
 	}
 
-	private void resetTurnInfo() {
-		agentOrder.clear();
-		numReadyAgents = 0;
-		executingAgentIndex = 0;
-		stepFinished = true;
-	}
-
-	@GUARD
-	private boolean isItMyTurn(AgentId agentId) {
-		String currentAgent = agentOrder.get(executingAgentIndex);
-		if (currentAgent.equals(agentId.getAgentName())) {
-			executingAgentIndex++;
+	private boolean setupIterator() {
+		setState(EnvStatus.EVALUATING);
+		executingAgentIterator = readyAgents.iterator();
+		if (executingAgentIterator.hasNext()) {
+			executingAgent = executingAgentIterator.next();
 			return true;
 		} else {
+			System.err.println("WOP WOP WOP WOP");
+			resetTurnInfo();
 			return false;
 		}
 	}
@@ -87,15 +116,23 @@ public class SimultaneouslyExecutedCoordinator extends Coordinator {
 	}
 
 	private void executeStep() {
+		setState(EnvStatus.RUNNING);
 		stepFinished = false;
-		signal("startTurn", currentStep);
+		final long startTime = new Date().getTime();
+		System.err.println("PRIME: The task was scheduled at " + startTime);
 		task = new TimerTask() {
 			public void run() {
-				execInternalOp("changeToEvaluating");
+				String errFmt = "The task scheduled at %s was run at %s (diff=%s)";
+				long runTime = new Date().getTime();
+				System.err.println(String.format(errFmt, startTime, runTime,
+						runTime - startTime));
+				execInternalOp("finishTimer");
 			}
 		};
-		timer.schedule(task, STEP_LENGTH / 1);
+		signal("startTurn", currentStep);
+		timer.schedule(task, STEP_LENGTH);
 		await("isStepFinished");
+		// TODO send only to master
 		signal("stopTurn", currentStep);
 	}
 
@@ -114,17 +151,24 @@ public class SimultaneouslyExecutedCoordinator extends Coordinator {
 	}
 
 	@INTERNAL_OPERATION
-	private void changeToEvaluating() {
+	private void finishTimer() {
 		if (!isEverybodyReady()) {
 			EnvStatus state = getState();
 			if (state == EnvStatus.RUNNING) {
-				System.err.println("OOOOOOOOOO NU CE MORTZII MA-SII");
+				String errFmt = "As the timer expired - %s from %s";
+				System.err.println(String.format(errFmt, readyAgents.size(),
+						regularAgents.getNumRegistered()));
 				timerExpired = true;
-				setState(EnvStatus.EVALUATING);
+				setupIterator();
 			} else {
 				// TODO handle me
 			}
 		}
+	}
+
+	@INTERNAL_OPERATION
+	private void wakerOfAgents() {
+		System.err.println("DID YOU PAY THE IRON PRICE FOR IT OR THE GOLD?");
 	}
 
 	@INTERNAL_OPERATION
@@ -136,12 +180,17 @@ public class SimultaneouslyExecutedCoordinator extends Coordinator {
 	}
 
 	@GUARD
+	private boolean isItMyTurn(AgentId agentId) {
+		return executingAgent.equals(agentId);
+	}
+
+	@GUARD
 	private boolean isStepFinished() {
 		return stepFinished;
 	}
 
 	@GUARD
-	boolean isSubmittingOver() {
+	private boolean isSubmittingOver() {
 		return timerExpired || isEverybodyReady();
 	}
 
