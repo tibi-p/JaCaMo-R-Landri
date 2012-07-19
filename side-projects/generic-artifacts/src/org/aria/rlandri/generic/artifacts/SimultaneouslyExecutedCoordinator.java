@@ -69,6 +69,14 @@ public class SimultaneouslyExecutedCoordinator extends Coordinator {
 			failed("The current agent has already submitted a move this turn");
 	}
 
+	@Override
+	protected void fillOperations() throws CartagoException {
+		addOperation(new CoordinatorAnnotation(GAME_OPERATION.class,
+				SETBGameArtifactOpMethod.class, true));
+		addOperation(new CoordinatorAnnotation(PRIME_AGENT_OPERATION.class,
+				PrimeAgentArtifactOpMethod.class, false));
+	}
+
 	protected void doPreEvaluation() {
 		setPreEvaluationDone(true);
 	}
@@ -83,11 +91,6 @@ public class SimultaneouslyExecutedCoordinator extends Coordinator {
 
 	private boolean isEverybodyReady() {
 		return readyAgents.size() == regularAgents.getNumRegistered();
-	}
-
-	@GUARD
-	protected boolean isPreEvaluationDone() {
-		return preEvaluationDone;
 	}
 
 	private void leaveNoAgentBehind() {
@@ -156,14 +159,6 @@ public class SimultaneouslyExecutedCoordinator extends Coordinator {
 		signal("stopTurn", currentStep);
 	}
 
-	@Override
-	protected void fillOperations() throws CartagoException {
-		addOperation(new CoordinatorAnnotation(GAME_OPERATION.class,
-				SETBGameArtifactOpMethod.class, true));
-		addOperation(new CoordinatorAnnotation(PRIME_AGENT_OPERATION.class,
-				PrimeAgentArtifactOpMethod.class, false));
-	}
-
 	@OPERATION
 	void registerAgent(OpFeedbackParam<String> wsp) {
 		super.registerAgent(wsp);
@@ -203,6 +198,11 @@ public class SimultaneouslyExecutedCoordinator extends Coordinator {
 			return agentId.equals(executingAgent);
 		else
 			return false;
+	}
+
+	@GUARD
+	protected boolean isPreEvaluationDone() {
+		return preEvaluationDone;
 	}
 
 	@GUARD

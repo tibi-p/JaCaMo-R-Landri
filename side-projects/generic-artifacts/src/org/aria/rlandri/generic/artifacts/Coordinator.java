@@ -38,7 +38,6 @@ import cartago.AgentId;
 import cartago.Artifact;
 import cartago.ArtifactGuardMethod;
 import cartago.CartagoException;
-import cartago.GUARD;
 import cartago.IArtifactOp;
 import cartago.OPERATION;
 import cartago.OpFeedbackParam;
@@ -162,6 +161,10 @@ public abstract class Coordinator extends Artifact {
 	public void failIfNotRegisteredParticipatingAgent() {
 		if (!isRegisteredParticipatingAgent())
 			failed("The current agent is not a registered participating agent");
+	}
+
+	public boolean isNotRunning() {
+		return state != EnvStatus.RUNNING;
 	}
 
 	/**
@@ -432,11 +435,6 @@ public abstract class Coordinator extends Artifact {
 		updateRank();
 		updateCurrency();
 		saveState();
-	}
-
-	@GUARD
-	boolean isNotRunning() {
-		return state != EnvStatus.RUNNING;
 	}
 
 	public void addValidationResult(ValidationResult vres) {

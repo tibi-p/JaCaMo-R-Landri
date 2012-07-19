@@ -17,10 +17,14 @@ public class PATBGameArtifactOpMethod extends ValidatorArtifactOpMethod {
 		if (coordinator instanceof PlayerAlternatedCoordinator) {
 			PlayerAlternatedCoordinator paCoordinator = (PlayerAlternatedCoordinator) coordinator;
 			paCoordinator.failIfNotCurrentTurn();
+			coordinator.setState(EnvStatus.EVALUATING);
+			try {
+				validate(actualParams);
+				super.exec(actualParams);
+			} finally {
+				paCoordinator.resetTurnInfo();
+			}
 		}
-		coordinator.setState(EnvStatus.EVALUATING);
-		validate(actualParams);
-		super.exec(actualParams);
 	}
 
 }

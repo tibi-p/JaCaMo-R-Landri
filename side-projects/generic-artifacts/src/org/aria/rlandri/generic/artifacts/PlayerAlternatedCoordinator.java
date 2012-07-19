@@ -12,6 +12,7 @@ import org.aria.rlandri.generic.artifacts.opmethod.PrimeAgentArtifactOpMethod;
 
 import cartago.AgentId;
 import cartago.CartagoException;
+import cartago.GUARD;
 import cartago.INTERNAL_OPERATION;
 import cartago.OPERATION;
 import cartago.OpFeedbackParam;
@@ -24,21 +25,20 @@ import cartago.OpFeedbackParam;
 public class PlayerAlternatedCoordinator extends Coordinator {
 
 	protected AgentId currentAgent = null;
+	protected int currentIndex = 0;
 
 	private final List<AgentId> order = new ArrayList<AgentId>();
 	private final Timer timer = new Timer();
+	private TimerTask task = null;
 	private int currentStep = 0;
+	private boolean stepFinished = true;
 
 	// constants for testing purposes
-	public static final int STEPS = 10;
+	public static final int STEPS = 5;
 	public static final int TURN_LENGTH = 1000;
 
-	// TODO use status here
-	@OPERATION
-	void registerAgent(OpFeedbackParam<String> wsp) {
-		super.registerAgent(wsp);
-		order.add(getOpUserId());
-		wsp.set("NA");
+	public void resetTurnInfo() {
+		stepFinished = true;
 	}
 
 	public void failIfNotCurrentTurn() {
@@ -49,18 +49,26 @@ public class PlayerAlternatedCoordinator extends Coordinator {
 		}
 	}
 
-	@PRIME_AGENT_OPERATION
-	void startSubenv() {
-		super.startSubenv();
-		execInternalOp("runSubEnv");
-	}
-
 	@Override
 	protected void fillOperations() throws CartagoException {
 		addOperation(new CoordinatorAnnotation(GAME_OPERATION.class,
 				PATBGameArtifactOpMethod.class, true));
 		addOperation(new CoordinatorAnnotation(PRIME_AGENT_OPERATION.class,
 				PrimeAgentArtifactOpMethod.class, false));
+	}
+
+	// TODO use status here
+	@OPERATION
+	void registerAgent(OpFeedbackParam<String> wsp) {
+		super.registerAgent(wsp);
+		order.add(getOpUserId());
+		wsp.set("NA");
+	}
+
+	@PRIME_AGENT_OPERATION
+	void startSubenv() {
+		super.startSubenv();
+		execInternalOp("runSubEnv");
 	}
 
 	@INTERNAL_OPERATION
@@ -71,35 +79,45 @@ public class PlayerAlternatedCoordinator extends Coordinator {
 	}
 
 	@INTERNAL_OPERATION
-	void changeToEvaluating() {
+	void finishTimer() {
 		EnvStatus state = getState();
 		if (state == EnvStatus.RUNNING) {
 			setState(EnvStatus.EVALUATING);
+			resetTurnInfo();
 		} else {
 			// TODO handle me
 		}
 	}
 
 	private void executeStep() {
+		currentIndex = 0;
 		for (AgentId agentId : order) {
 			currentAgent = agentId;
 			startPlayerTurn();
 			executePlayerTurn();
+			currentIndex++;
 		}
 	}
 
 	private void startPlayerTurn() {
 		setState(EnvStatus.RUNNING);
+		stepFinished = false;
 		signal(currentAgent, "startTurn", currentStep);
 	}
 
 	private void executePlayerTurn() {
-		timer.schedule(new TimerTask() {
+		task = new TimerTask() {
 			public void run() {
-				execInternalOp("changeToEvaluating");
+				execInternalOp("finishTimer");
 			}
-		}, TURN_LENGTH);
-		await("isNotRunning");
+		};
+		timer.schedule(task, TURN_LENGTH);
+		await("isStepFinished");
+	}
+
+	@GUARD
+	private boolean isStepFinished() {
+		return stepFinished;
 	}
 
 	@Override
