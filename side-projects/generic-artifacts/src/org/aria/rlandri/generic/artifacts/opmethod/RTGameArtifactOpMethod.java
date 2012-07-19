@@ -17,8 +17,6 @@ public class RTGameArtifactOpMethod extends ValidatorArtifactOpMethod {
 	}
 	
 
-	protected void ggNoRe(){
-		coordinator.failWithMessage("validation", "validation_fail");
-	}
+	
 
 }

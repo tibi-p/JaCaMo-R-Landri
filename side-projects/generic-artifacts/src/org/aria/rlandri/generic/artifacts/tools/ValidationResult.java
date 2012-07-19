@@ -76,21 +76,8 @@ public class ValidationResult {
 	 * @param reason The reason that you want to find out the type of
 	 * @return The type of the reason as a string
 	 */
-	public String getType(String reason){
-		String type = "Durrr, this shouldn't be here";
-		switch(reasons.get(reason)){
-			case WARNING:
-				type = "WARNING";
-				break;
-			case ERROR:
-				type = "ERROR";
-				break;
-			case FATAL:
-				type = "FATAL";
-				break;
-		}
-		
-		return type;
+	public int getType(String reason){
+		return reasons.get(reason);
 	}
 	
 	/**

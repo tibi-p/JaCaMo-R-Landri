@@ -37,7 +37,9 @@ public class ValidatorArtifactOpMethod extends ArtifactOpMethod {
 			}
 		}
 	}
-
+	protected void ggNoRe(){
+		coordinator.failValidation();
+	}
 	protected Object invokeParameterless(String methodName)
 			throws SecurityException, NoSuchMethodException,
 			IllegalArgumentException, IllegalAccessException,
