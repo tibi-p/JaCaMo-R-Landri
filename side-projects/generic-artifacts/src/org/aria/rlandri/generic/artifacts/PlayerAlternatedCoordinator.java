@@ -1,6 +1,6 @@
 package org.aria.rlandri.generic.artifacts;
 
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -23,10 +23,11 @@ import cartago.OpFeedbackParam;
 
 public class PlayerAlternatedCoordinator extends Coordinator {
 
-	private final List<AgentId> order = new LinkedList<AgentId>();
+	protected AgentId currentAgent = null;
+
+	private final List<AgentId> order = new ArrayList<AgentId>();
 	private final Timer timer = new Timer();
 	private int currentStep = 0;
-	protected int currentAgent = 0;
 
 	// constants for testing purposes
 	public static final int STEPS = 10;
@@ -42,7 +43,7 @@ public class PlayerAlternatedCoordinator extends Coordinator {
 
 	public void failIfNotCurrentTurn() {
 		AgentId userId = getOpUserId();
-		if (!userId.equals(order.get(currentAgent))) {
+		if (!userId.equals(currentAgent)) {
 			// TODO: Standard error messages
 			failed("not_your_turn");
 		}
@@ -80,16 +81,16 @@ public class PlayerAlternatedCoordinator extends Coordinator {
 	}
 
 	private void executeStep() {
-		for (currentAgent = 0; currentAgent < order.size(); currentAgent++) {
+		for (AgentId agentId : order) {
+			currentAgent = agentId;
 			startPlayerTurn();
 			executePlayerTurn();
 		}
 	}
 
 	private void startPlayerTurn() {
-		AgentId aid = order.get(currentAgent);
-		signal(aid, "startTurn", currentStep);
-		currentAgent += 1;
+		setState(EnvStatus.RUNNING);
+		signal(currentAgent, "startTurn", currentStep);
 	}
 
 	private void executePlayerTurn() {
