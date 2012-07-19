@@ -23,6 +23,12 @@ abstract public class RealTimeMultiPlayerCoordinator extends Coordinator {
 		wspName.set("no_more");
 	}
 
+	@PRIME_AGENT_OPERATION
+	void startSubenv() {
+		super.startSubenv();
+		setState(EnvStatus.RUNNING);
+	}
+
 	@Override
 	protected void fillOperations() throws CartagoException {
 		addOperation(new CoordinatorAnnotation(GAME_OPERATION.class,
@@ -30,4 +36,5 @@ abstract public class RealTimeMultiPlayerCoordinator extends Coordinator {
 		addOperation(new CoordinatorAnnotation(PRIME_AGENT_OPERATION.class,
 				PrimeAgentArtifactOpMethod.class, false));
 	}
+
 }

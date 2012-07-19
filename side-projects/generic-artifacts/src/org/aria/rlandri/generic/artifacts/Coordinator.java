@@ -403,7 +403,6 @@ public abstract class Coordinator extends Artifact {
 	@PRIME_AGENT_OPERATION
 	void startSubenv() {
 		signal("startSubenv");
-		setState(EnvStatus.RUNNING);
 	}
 
 	@OPERATION

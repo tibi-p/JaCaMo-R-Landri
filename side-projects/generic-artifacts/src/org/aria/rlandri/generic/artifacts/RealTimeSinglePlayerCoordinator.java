@@ -39,6 +39,12 @@ public class RealTimeSinglePlayerCoordinator extends Coordinator {
 	}
 
 	@PRIME_AGENT_OPERATION
+	void startSubenv() {
+		super.startSubenv();
+		setState(EnvStatus.RUNNING);
+	}
+
+	@PRIME_AGENT_OPERATION
 	void getNextAgent(OpFeedbackParam<String> wspName) {
 		if (index == agents.size()) {
 			wspName.set("no_more");
