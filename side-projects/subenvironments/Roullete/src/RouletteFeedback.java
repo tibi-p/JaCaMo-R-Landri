@@ -1,8 +1,11 @@
+import cartago.AgentId;
 import cartago.Artifact;
 import cartago.OPERATION;
 import cartago.ObsProperty;
+import cartago.OpFeedbackParam;
 
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Iterator;
 import java.util.Set;
 
@@ -12,7 +15,7 @@ import org.aria.rlandri.generic.artifacts.annotation.*;
 /**
  * Artifact that implements the auction.
  */
-public class Roulette extends SimultaneouslyExecutedCoordinator {
+public class RouletteFeedback extends SimultaneouslyExecutedCoordinator {
 
 	int[] numbers = new int[] { 0, 32, 15, 19, 4, 21, 2, 25, 17, 34, 6, 27, 13,
 			36, 11, 30, 8, 23, 10, 5, 24, 16, 33, 1, 20, 14, 31, 9, 22, 18, 29,
@@ -41,8 +44,8 @@ public class Roulette extends SimultaneouslyExecutedCoordinator {
 		payoffs.put("Even", 1);
 	}
 
-	HashMap<AgentId, Bet> bets = new HashMap<AgentId, Bet>();
-	HashMap<String, Double> standings = new HashMap<String, Double>();
+	private final Map<AgentId, Bet> bets = new HashMap<AgentId, Bet>();
+	private final Map<AgentId, Double> standings = new HashMap<AgentId, Double>();
 
 	String winningColor;
 	int winningNumber;
@@ -50,7 +53,7 @@ public class Roulette extends SimultaneouslyExecutedCoordinator {
 	@Override
 	protected void doPreEvaluation() {
 		for (AgentId aid : masterAgents.getAgentIds()) {
-			signal(aid, "spinWheel");
+			signal(aid, "spinWheel", currentStep);
 		}
 
 	}
@@ -59,7 +62,7 @@ public class Roulette extends SimultaneouslyExecutedCoordinator {
 		return betSum * payoffs.get(betType).intValue();
 	}
 
-	private void updateStandings(String player, double value) {
+	private void updateStandings(AgentId player, double value) {
 		if (standings.containsKey(player)) {
 			double oldValue = standings.get(player);
 			standings.put(player, oldValue + value);
@@ -69,20 +72,23 @@ public class Roulette extends SimultaneouslyExecutedCoordinator {
 	}
 
 	@GAME_OPERATION(validator = "validateBet")
-	void bet(String betName, double sum) {
-		this.bet(betName, null, sum);
+	void bet(String betName, double sum, OpFeedbackParam<Integer> currentStep,
+			OpFeedbackParam<Double> payoff) {
+		this.bet(betName, null, sum, currentStep, payoff);
 	}
 
-	void validateBet(String betName, double sum) {
+	void validateBet(String betName, double sum,
+			OpFeedbackParam<Integer> currentStep,
+			OpFeedbackParam<Double> payoff) {
 	}
 
 	@GAME_OPERATION(validator = "validateBet")
 	void bet(String betName, Object betValues[], double sum,
 			OpFeedbackParam<Integer> currentStep,
-			OpFeedbackParam<Integer> payoff) {
+			OpFeedbackParam<Double> payoff) {
 		AgentId aid = getOpUserId();
 
-		System.out.println(user + " bets " + sum + " gold coins on " + betName);
+		System.out.println(aid + " bets " + sum + " gold coins on " + betName);
 
 		Bet bet = new Bet();
 		System.out.println("MONEY: " + sum + "AGENT: " + aid);
@@ -90,11 +96,16 @@ public class Roulette extends SimultaneouslyExecutedCoordinator {
 		bet.type = betName;
 		bet.betValues = betValues;
 
-		payoff = computePayoffForPlayer(bet);
-		updateStandings(aid, payoff);
+		double pay = computePayoffForPlayer(bet);
+		updateStandings(aid,pay);
+		
+		currentStep.set(this.currentStep);
+		payoff.set(pay);
 	}
 
-	void validateBet(String betName, Object betValues[], double sum) {
+	void validateBet(String betName, Object betValues[], double sum,
+			OpFeedbackParam<Integer> currentStep,
+			OpFeedbackParam<Double> payoff) {
 	}
 
 	@MASTER_OPERATION(validator = "validateSpinWheel")
@@ -108,7 +119,7 @@ public class Roulette extends SimultaneouslyExecutedCoordinator {
 				winningColor = "green";
 			winningColor = "black";
 		}
-		setPreEvaluation(true);
+		setPreEvaluationDone(true);
 		System.out.println("Winning number: " + winningNumber + " and color: "
 				+ winningColor);
 	}
@@ -234,22 +245,6 @@ public class Roulette extends SimultaneouslyExecutedCoordinator {
 			return payoff(betType, betSum);
 		else
 			return -betSum;
-	}
-
-	/*
-	 * //TODO: Validation is not done here (eg. users can win with ill formed
-	 * bets)!!!!!!!!!!!!!!
-	 * 
-	 * @MASTER_OPERATION(validator = "validatePayout") public void payout() {
-	 * Set<String> players = bets.keySet(); for(Iterator<AgentId> it =
-	 * players.iterator(); it.hasNext();) { AgentId player = it.next(); Bet bet
-	 * = bets.get(player); payoff = computePayoffForPlayer(bet);
-	 * updateStandings(player,payoff); signal(player, "payoff", currentStep,
-	 * payoff); } bets.clear(); System.out.println(standings); }
-	 */
-
-	void validatePayout() {
-
 	}
 
 }
