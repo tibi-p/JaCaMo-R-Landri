@@ -16,16 +16,12 @@ getFirst([0 | T],X,I) :-
 getFirst([H | T],X,I) :-
 	getFirst(T,X,I+1).
 
-
-
 /* Initial goals */
 
 /* Plans */
 
 +!start:true <-
 	.print("Starting").
-
-
 	
 +startTurn(CurrentTurn): true <-
 	.print("O inceput! tura: ",CurrentTurn);
