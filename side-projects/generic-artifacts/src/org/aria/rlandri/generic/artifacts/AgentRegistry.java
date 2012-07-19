@@ -10,7 +10,7 @@ public class AgentRegistry {
 	private final Set<String> agentNames = new HashSet<String>();
 	private final Set<AgentId> agentIds = new HashSet<AgentId>();
 
-	public Set<String> getAgentNames() {
+	public Set<String> getUnregisteredAgentNames() {
 		return agentNames;
 	}
 

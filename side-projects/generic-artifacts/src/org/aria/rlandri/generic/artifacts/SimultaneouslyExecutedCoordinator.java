@@ -41,7 +41,7 @@ public class SimultaneouslyExecutedCoordinator extends Coordinator {
 		leaveNoAgentBehind();
 		System.err.println(String.format(
 				"%s: every agent has submitted its action", getOpUserId()));
-		await("isItMyTurn", getOpUserId());
+		await("checkTurn", getOpUserId());
 		System.err.println(String.format("%s: kill the bugs", getOpUserId()));
 		if (executingAgentIterator.hasNext()) {
 			executingAgent = executingAgentIterator.next();
@@ -84,7 +84,7 @@ public class SimultaneouslyExecutedCoordinator extends Coordinator {
 			boolean cancelled = task.cancel();
 			System.err.println(String.format("Cancellation has%s succeeded",
 					cancelled ? "" : " not"));
-			if (setupIterator()) {
+			if (prepareEvaluation()) {
 				// TODO this can be skipped if it's this agent's turn!
 				execInternalOp("wakerOfAgents");
 			} else {
@@ -96,7 +96,7 @@ public class SimultaneouslyExecutedCoordinator extends Coordinator {
 		}
 	}
 
-	private boolean setupIterator() {
+	private boolean prepareEvaluation() {
 		setState(EnvStatus.EVALUATING);
 		executingAgentIterator = readyAgents.iterator();
 		if (executingAgentIterator.hasNext()) {
@@ -152,17 +152,15 @@ public class SimultaneouslyExecutedCoordinator extends Coordinator {
 
 	@INTERNAL_OPERATION
 	private void finishTimer() {
-		if (!isEverybodyReady()) {
-			EnvStatus state = getState();
-			if (state == EnvStatus.RUNNING) {
-				String errFmt = "As the timer expired - %s from %s";
-				System.err.println(String.format(errFmt, readyAgents.size(),
-						regularAgents.getNumRegistered()));
-				timerExpired = true;
-				setupIterator();
-			} else {
-				// TODO handle me
-			}
+		EnvStatus state = getState();
+		if (state == EnvStatus.RUNNING) {
+			String errFmt = "As the timer expired - %s from %s";
+			System.err.println(String.format(errFmt, readyAgents.size(),
+					regularAgents.getNumRegistered()));
+			timerExpired = true;
+			prepareEvaluation();
+		} else {
+			// TODO handle me
 		}
 	}
 
@@ -180,8 +178,11 @@ public class SimultaneouslyExecutedCoordinator extends Coordinator {
 	}
 
 	@GUARD
-	private boolean isItMyTurn(AgentId agentId) {
-		return executingAgent.equals(agentId);
+	private boolean checkTurn(AgentId agentId) {
+		if (agentId != null)
+			return agentId.equals(executingAgent);
+		else
+			return false;
 	}
 
 	@GUARD
