@@ -1,5 +1,9 @@
 package org.aria.rlandri.generic.artifacts;
 
+import jason.asSyntax.Atom;
+import jason.asSyntax.ListTerm;
+import jason.asSyntax.ListTermImpl;
+import jason.asSyntax.Structure;
 import jason.mas2j.AgentParameters;
 import jason.mas2j.MAS2JProject;
 import jason.mas2j.parser.ParseException;
@@ -19,6 +23,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+
+import ora4mas.nopl.JasonTermWrapper;
 
 import org.aria.rlandri.generic.artifacts.annotation.GuardedAnnotation;
 import org.aria.rlandri.generic.artifacts.annotation.GuardedAnnotationProcessor;
@@ -50,11 +56,16 @@ public abstract class Coordinator extends Artifact {
 	protected final AgentRegistry regularAgents = new AgentRegistry();
 	protected final AgentRegistry masterAgents = new AgentRegistry();
 	protected final AgentRegistry primeAgents = new AgentRegistry();
+	
 	private final Map<String, ValidationResult> failures = new HashMap<String, ValidationResult>();
 	private final List<GuardedAnnotation> annotations = new ArrayList<GuardedAnnotation>();
 	private EnvStatus state = EnvStatus.PRIMORDIAL;
-	private boolean typedFailSearch = false;
 	private String environmentType;
+	
+	public static final String VALIDATION_FUNCTOR = "op_error";
+	public static final String TURN_FUNCTOR = "turn_error";
+	public static final String GAME_FUNCTOR = "game_error";
+	
 
 	protected class CoordinatorAnnotation extends GuardedAnnotation {
 
@@ -116,6 +127,29 @@ public abstract class Coordinator extends Artifact {
 	public void failWithMessage(String section, String message) {
 		String failMsg = String.format("%s: %s", section, message);
 		failed(failMsg);
+	}
+	
+	public void failValidation() {
+		ValidationResult vres = failures.get(getOpUserName());
+		ListTerm validationErrorList = new ListTermImpl();
+		for (String reason : vres.getReasons()) {
+			Structure term;
+			switch(vres.getType(reason)){
+			case ValidationResult.WARNING:
+				term = new Structure("warning");
+				break;
+			case ValidationResult.ERROR:
+				term = new Structure("error");
+				break;
+			default:
+				term = new Structure("fatal");
+				break;
+			}
+			term.addTerm(new Atom(reason));
+			validationErrorList.add(term);
+		}
+		//failed("asdasfsgsgsfgsdfhsfg");
+		failed("validation", VALIDATION_FUNCTOR, new JasonTermWrapper(validationErrorList));
 	}
 
 	/**
@@ -419,54 +453,6 @@ public abstract class Coordinator extends Artifact {
 
 	public void addValidationResult(ValidationResult vres) {
 		failures.put(vres.getAgent(), vres);
-	}
-
-	@OPERATION
-	void getNextFailureReason(OpFeedbackParam<String> reason,
-			OpFeedbackParam<String> type) {
-		ValidationResult vres = failures.get(getOpUserName());
-		if (vres == null) {
-			reason.set("NA");
-			failures.remove(getOpUserName());
-			return;
-		}
-		if (typedFailSearch) {
-			vres.index = 0;
-			typedFailSearch = false;
-		}
-		if (vres.index == vres.getReasons().size()) {
-			failures.remove(getOpUserName());
-			return;
-		}
-		reason.set(vres.getReasons().get(vres.index++));
-		type.set(vres.getType(reason.get()));
-	}
-
-	@OPERATION
-	void getNextFailureReason(OpFeedbackParam<String> reason,
-			OpFeedbackParam<String> type, Object... types) {
-
-		ValidationResult vres = failures.get(getOpUserName());
-		if (vres == null) {
-			reason.set("NA");
-			failures.remove(getOpUserName());
-			return;
-		}
-		if (!typedFailSearch) {
-			vres.index = 0;
-			typedFailSearch = true;
-		}
-		if (vres.index == vres.getReasons().size()) {
-			failures.remove(getOpUserName());
-			return;
-		}
-		ArrayList<Integer> typeFilter = new ArrayList<Integer>();
-		for (Object t : types) {
-			typeFilter.add(((Number) t).intValue());
-		}
-
-		reason.set(vres.getReasons(typeFilter).get(vres.index++));
-		type.set(vres.getType(reason.get()));
 	}
 
 	private static final void addAgentToRegistry(AgentRegistry registry,
