@@ -10,13 +10,11 @@ public class RTGameArtifactOpMethod extends ValidatorArtifactOpMethod {
 			Method validatorMethod) {
 		super(coordinator, method, validatorMethod);
 	}
+
 	public void exec(Object[] actualParams) throws Exception {
 		coordinator.failIfNotRunning();
-		validate(coordinator, actualParams);
+		validate(actualParams);
 		super.exec(actualParams);
 	}
-	
-
-	
 
 }

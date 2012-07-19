@@ -19,7 +19,7 @@ public class PATBGameArtifactOpMethod extends ValidatorArtifactOpMethod {
 			paCoordinator.failIfNotCurrentTurn();
 		}
 		coordinator.setState(EnvStatus.EVALUATING);
-		validate(coordinator, actualParams);
+		validate(actualParams);
 		super.exec(actualParams);
 	}
 

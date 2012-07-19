@@ -20,7 +20,7 @@ public class PrimeAgentArtifactOpMethod extends ValidatorArtifactOpMethod {
 		String msgFmt = "%s: trying to execute as prime with parameters %s";
 		logger.debug(String.format(msgFmt, this, Arrays.toString(actualParams)));
 		invokeParameterless("preliminaryCheck");
-		validate(coordinator, actualParams);
+		validate(actualParams);
 		super.exec(actualParams);
 	}
 

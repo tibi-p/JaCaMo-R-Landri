@@ -26,7 +26,7 @@ public class SETBGameArtifactOpMethod extends ValidatorArtifactOpMethod {
 			SimultaneouslyExecutedCoordinator seCoordinator = (SimultaneouslyExecutedCoordinator) coordinator;
 			boolean isLast = seCoordinator.waitForEndTurn();
 			try {
-				validate(coordinator, actualParams);
+				validate(actualParams);
 				super.exec(actualParams);
 			} finally {
 				if (isLast)

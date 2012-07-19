@@ -53,19 +53,18 @@ import cartago.OpFeedbackParam;
  */
 public abstract class Coordinator extends Artifact {
 
+	public static final String VALIDATION_FUNCTOR = "op_error";
+	public static final String TURN_FUNCTOR = "turn_error";
+	public static final String GAME_FUNCTOR = "game_error";
+
 	protected final AgentRegistry regularAgents = new AgentRegistry();
 	protected final AgentRegistry masterAgents = new AgentRegistry();
 	protected final AgentRegistry primeAgents = new AgentRegistry();
-	
+
 	private final Map<String, ValidationResult> failures = new HashMap<String, ValidationResult>();
 	private final List<GuardedAnnotation> annotations = new ArrayList<GuardedAnnotation>();
 	private EnvStatus state = EnvStatus.PRIMORDIAL;
 	private String environmentType;
-	
-	public static final String VALIDATION_FUNCTOR = "op_error";
-	public static final String TURN_FUNCTOR = "turn_error";
-	public static final String GAME_FUNCTOR = "game_error";
-	
 
 	protected class CoordinatorAnnotation extends GuardedAnnotation {
 
@@ -128,28 +127,17 @@ public abstract class Coordinator extends Artifact {
 		String failMsg = String.format("%s: %s", section, message);
 		failed(failMsg);
 	}
-	
+
 	public void failValidation() {
 		ValidationResult vres = failures.get(getOpUserName());
 		ListTerm validationErrorList = new ListTermImpl();
 		for (String reason : vres.getReasons()) {
-			Structure term;
-			switch(vres.getType(reason)){
-			case ValidationResult.WARNING:
-				term = new Structure("warning");
-				break;
-			case ValidationResult.ERROR:
-				term = new Structure("error");
-				break;
-			default:
-				term = new Structure("fatal");
-				break;
-			}
+			Structure term = new Structure(vres.getType(reason).getName());
 			term.addTerm(new Atom(reason));
 			validationErrorList.add(term);
 		}
-		//failed("asdasfsgsgsfgsdfhsfg");
-		failed("validation", VALIDATION_FUNCTOR, new JasonTermWrapper(validationErrorList));
+		failed("validation", VALIDATION_FUNCTOR, new JasonTermWrapper(
+				validationErrorList));
 	}
 
 	/**
