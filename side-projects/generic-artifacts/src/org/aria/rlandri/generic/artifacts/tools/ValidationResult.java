@@ -77,7 +77,7 @@ public class ValidationResult {
 	}
 
 	/**
-	 * @return The default type associated with reasons if no type is manually
+	 * @return the default type associated with reasons if no type is manually
 	 *         specified
 	 */
 	public ValidationType getDefaultType() {
@@ -86,12 +86,10 @@ public class ValidationResult {
 
 	/**
 	 * Sets the default type associated with new failure reasons if no type is
-	 * manually specified
+	 * manually specified.
 	 * 
 	 * @param defaultType
-	 *            This validator result's new default type.
-	 * @return <tt>true</tt> if operation is successful and <tt>false</tt> if
-	 *         undefined type was provided
+	 *            this validator result's new default type
 	 */
 	public void setDefaultType(ValidationType defaultType) {
 		this.defaultType = defaultType;
@@ -125,12 +123,14 @@ public class ValidationResult {
 	 *            reasons being returned
 	 * @return A <tt>list</tt> of reasons matching the types specified
 	 */
-	public List<String> getReasons(List<Integer> types) {
-		ArrayList<String> result = new ArrayList<String>();
+	public List<String> getReasons(List<ValidationType> types) {
+		List<String> result = new ArrayList<String>();
 
-		for (String reason : reasons.keySet()) {
-			if (types.contains(reasons.get(reason)))
-				result.add(reason);
+		if (types != null) {
+			for (String reason : reasons.keySet()) {
+				if (types.contains(reasons.get(reason)))
+					result.add(reason);
+			}
 		}
 
 		return result;
@@ -145,43 +145,40 @@ public class ValidationResult {
 	 * @return a <tt>list</tt> of reasons matching the type specified
 	 */
 	public List<String> getReasons(ValidationType type) {
-		ArrayList<String> result = new ArrayList<String>();
+		List<String> result = new ArrayList<String>();
 
-		for (String reason : reasons.keySet()) {
-			if (reasons.get(reason).equals(type))
-				result.add(reason);
+		if (type != null) {
+			for (String reason : reasons.keySet()) {
+				if (type.equals(reasons.get(reason)))
+					result.add(reason);
+			}
 		}
 
 		return result;
 	}
 
-	@Override
 	/**
-	 * a string representation of the reasons and their respective types
+	 * Returns a string representation of the reasons and their respective
+	 * types.
+	 * 
 	 * @return a string representation of this object
 	 */
+	@Override
 	public String toString() {
-		String result = reasons.keySet().isEmpty() ? "The operation failed for the following reasons: \n"
-				: "The operation was successful";
-
-		for (String reason : reasons.keySet()) {
-			String type = "Durrr, this shouldn't be here";
-			switch (reasons.get(reason)) {
-			case WARNING:
-				type = "WARNING";
-				break;
-			case ERROR:
-				type = "ERROR";
-				break;
-			case FATAL:
-				type = "FATAL";
-				break;
-			}
-
-			result += "\t[" + type + "] " + reason + "\n";
+		if (reasons.isEmpty()) {
+			return "The operation was successful";
 		}
 
-		return result;
+		String msg = "The operation failed for the following reasons:\n";
+		StringBuilder sb = new StringBuilder(msg);
+
+		for (Map.Entry<String, ValidationType> entry : reasons.entrySet()) {
+			String reason = entry.getKey();
+			ValidationType type = entry.getValue();
+			sb.append(String.format("\t[%s] %s\n", type, reason));
+		}
+
+		return new String(sb);
 	}
 
 }
