@@ -55,8 +55,6 @@ public class TicTacToe extends PlayerAlternatedCoordinator {
 
 	@GAME_OPERATION(validator = "validateMark")
 	void mark(int x, int y) {
-		System.err.println(String.format("{%s}: push it at %s %s",
-				getOpUserId(), x, y));
 		if (currentIndex == 0) {
 			gameState[x][y] = 1;
 		} else {
