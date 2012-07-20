@@ -11,6 +11,8 @@ import java.util.Set;
 import org.aria.rlandri.generic.artifacts.*;
 import org.aria.rlandri.generic.artifacts.annotation.*;
 
+import org.aria.rlandri.generic.artifacts.tools.*;
+
 /**
  * Artifact that implements the auction.
  */
@@ -61,16 +63,20 @@ public class Roulette extends SimultaneouslyExecutedCoordinator {
 		return betSum * payoffs.get(betType).intValue();
 	}
 
-	
-	private void initStandings(){
-		
+	private void initStandings() {
+
 		Set<AgentId> ids = regularAgents.getAgentIds();
-		for(AgentId id: ids)
-		{
-			double value = 30+ (int)(Math.random()*20);
-			standings.put(id,value);
+		for (AgentId id : ids) {
+			double value = 30 + (int) (Math.random() * 20);
+			standings.put(id, value);
 		}
-		System.out.println("Initial standings: "+standings);
+		System.out.println("Initial standings: " + standings);
+	}
+
+	@PRIME_AGENT_OPERATION
+	protected void startSubenv() {
+		super.startSubenv();
+		initStandings();
 	}
 
 	private void updateStandings(AgentId player, double value) {
@@ -87,7 +93,8 @@ public class Roulette extends SimultaneouslyExecutedCoordinator {
 		this.bet(betName, null, sum);
 	}
 
-	void validateBet(String betName, double sum) {
+	ValidationResult validateBet(String betName, double sum) {
+		return validateBet(betName, null, sum);
 	}
 
 	@GAME_OPERATION(validator = "validateBet")
@@ -105,7 +112,39 @@ public class Roulette extends SimultaneouslyExecutedCoordinator {
 
 	}
 
-	void validateBet(String betName, Object betValues[], double sum) {
+	ValidationResult validateBet(String betName, Object betValues[], double sum) {
+
+		AgentId aid = getOpUserId();
+		System.out.println("VALIDATION " + aid);
+		ValidationResult vr = new ValidationResult(aid.getAgentName());
+		double money = standings.get(aid);
+		if (money < sum) {
+			vr.addReason("insufficient_funds", ValidationType.ERROR);
+		}
+
+		if (betName.equals("Single")) {
+			int value = ((Number) betValues[0]).intValue();
+			if (value < 0 || value > 36)
+				vr.addReason("invalid_single_number_bet", ValidationType.ERROR);
+		}
+
+		if (betName.equals("Split")) {
+			int val1 = ((Number) betValues[0]).intValue();
+			int val2 = ((Number) betValues[1]).intValue();
+			int abs = Math.abs(val1 - val2);
+			if (abs != 1 && abs != 3)
+				vr.addReason("invalid_split_bet", ValidationType.ERROR);
+		}
+
+		if (betName.equals("Street")) {
+			int val1 = ((Number) betValues[0]).intValue();
+			int val2 = ((Number) betValues[1]).intValue();
+			int val3 = ((Number) betValues[2]).intValue();
+			if (!(val2 - val1 == 1 && val3 - val2 == 1))
+				vr.addReason("invalid_street_bet", ValidationType.ERROR);
+		}
+
+		return vr;
 	}
 
 	@MASTER_OPERATION(validator = "validateSpinWheel")
@@ -260,7 +299,8 @@ public class Roulette extends SimultaneouslyExecutedCoordinator {
 					winningColor, payoff);
 		}
 		bets.clear();
-		System.out.println("Standings at turn "+(currentStep-1)+":"+standings);
+		System.out.println("Standings at turn " + (currentStep - 1) + ":"
+				+ standings);
 	}
 
 	void validatePayout() {
