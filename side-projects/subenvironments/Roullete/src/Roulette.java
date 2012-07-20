@@ -61,6 +61,18 @@ public class Roulette extends SimultaneouslyExecutedCoordinator {
 		return betSum * payoffs.get(betType).intValue();
 	}
 
+	
+	private void initStandings(){
+		
+		Set<AgentId> ids = regularAgents.getAgentIds();
+		for(AgentId id: ids)
+		{
+			double value = 30+ (int)(Math.random()*20);
+			standings.put(id,value);
+		}
+		System.out.println("Initial standings: "+standings);
+	}
+
 	private void updateStandings(AgentId player, double value) {
 		if (standings.containsKey(player)) {
 			double oldValue = standings.get(player);
@@ -108,8 +120,8 @@ public class Roulette extends SimultaneouslyExecutedCoordinator {
 			winningColor = "black";
 		}
 
-		System.out.println("Winning number: " + winningNumber + " and color: "
-				+ winningColor);
+		System.out.println("Turn" + currentStep + ". Winning number: "
+				+ winningNumber + " and color: " + winningColor);
 	}
 
 	void validateSpinWheel() {
@@ -244,10 +256,11 @@ public class Roulette extends SimultaneouslyExecutedCoordinator {
 			Bet bet = entry.getValue();
 			double payoff = computePayoffForPlayer(bet);
 			updateStandings(player, payoff);
-			signal(player, "payoff", currentStep, payoff);
+			signal(player, "payoff", currentStep - 1, winningNumber,
+					winningColor, payoff);
 		}
 		bets.clear();
-		System.out.println(standings);
+		System.out.println("Standings at turn "+(currentStep-1)+":"+standings);
 	}
 
 	void validatePayout() {

@@ -78,14 +78,12 @@ public class RouletteFeedback extends SimultaneouslyExecutedCoordinator {
 	}
 
 	void validateBet(String betName, double sum,
-			OpFeedbackParam<Integer> currentStep,
-			OpFeedbackParam<Double> payoff) {
+			OpFeedbackParam<Integer> currentStep, OpFeedbackParam<Double> payoff) {
 	}
 
 	@GAME_OPERATION(validator = "validateBet")
 	void bet(String betName, Object betValues[], double sum,
-			OpFeedbackParam<Integer> currentStep,
-			OpFeedbackParam<Double> payoff) {
+			OpFeedbackParam<Integer> currentStep, OpFeedbackParam<Double> payoff) {
 		AgentId aid = getOpUserId();
 
 		System.out.println(aid + " bets " + sum + " gold coins on " + betName);
@@ -97,15 +95,14 @@ public class RouletteFeedback extends SimultaneouslyExecutedCoordinator {
 		bet.betValues = betValues;
 
 		double pay = computePayoffForPlayer(bet);
-		updateStandings(aid,pay);
-		
+		updateStandings(aid, pay);
+
 		currentStep.set(this.currentStep);
 		payoff.set(pay);
 	}
 
 	void validateBet(String betName, Object betValues[], double sum,
-			OpFeedbackParam<Integer> currentStep,
-			OpFeedbackParam<Double> payoff) {
+			OpFeedbackParam<Integer> currentStep, OpFeedbackParam<Double> payoff) {
 	}
 
 	@MASTER_OPERATION(validator = "validateSpinWheel")
