@@ -154,9 +154,9 @@ public class Roulette extends SimultaneouslyExecutedCoordinator {
 		winningNumber = numbers[value];
 		winningColor = "red";
 		if (value % 2 == 0) {
+			winningColor = "black";
 			if (value == 0)
 				winningColor = "green";
-			winningColor = "black";
 		}
 
 		System.out.println("Turn" + currentStep + ". Winning number: "
