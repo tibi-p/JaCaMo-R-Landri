@@ -1,5 +1,7 @@
 import org.aria.rlandri.generic.artifacts.PlayerAlternatedCoordinator;
 import org.aria.rlandri.generic.artifacts.annotation.GAME_OPERATION;
+import org.aria.rlandri.generic.artifacts.tools.ValidationResult;
+import org.aria.rlandri.generic.artifacts.tools.ValidationType;
 
 import cartago.OPERATION;
 import cartago.OpFeedbackParam;
@@ -17,7 +19,7 @@ public class TicTacToe extends PlayerAlternatedCoordinator {
 	private int[][] gameState = new int[3][3];
 	private int[] score = new int[2];
 
-	int ended() {
+	private int ended() {
 		for (int i = 0; i < 3; i++) {
 			if (gameState[i][0] == gameState[i][1]
 					&& gameState[i][1] == gameState[i][2]) {
@@ -53,6 +55,8 @@ public class TicTacToe extends PlayerAlternatedCoordinator {
 
 	@GAME_OPERATION(validator = "validateMark")
 	void mark(int x, int y) {
+		System.err.println(String.format("{%s}: push it at %s %s",
+				getOpUserId(), x, y));
 		if (currentIndex == 0) {
 			gameState[x][y] = 1;
 		} else {
@@ -78,7 +82,6 @@ public class TicTacToe extends PlayerAlternatedCoordinator {
 				}
 			}
 		}
-
 	}
 
 	//
@@ -92,8 +95,16 @@ public class TicTacToe extends PlayerAlternatedCoordinator {
 		result.set(res);
 	}
 
-	private void validateMark(int x, int y) {
+	protected ValidationResult validateMark(int x, int y) {
+		ValidationResult vres = new ValidationResult(getOpUserName());
 
+		if (x < 0 || x > 2)
+			vres.addReason("row_between_0_2", ValidationType.ERROR);
+
+		if (y < 0 || y > 2)
+			vres.addReason("column_between_0_2", ValidationType.ERROR);
+
+		return vres;
 	}
 
 }

@@ -37,6 +37,13 @@ public class PlayerAlternatedCoordinator extends Coordinator {
 	public static final int STEPS = 5;
 	public static final int TURN_LENGTH = 1000;
 
+	public void prepareEvaluation() {
+		boolean cancelled = task.cancel();
+		System.err.println(String.format("Cancellation has%s succeeded",
+				cancelled ? "" : " not"));
+		setState(EnvStatus.EVALUATING);
+	}
+
 	public void resetTurnInfo() {
 		stepFinished = true;
 	}
