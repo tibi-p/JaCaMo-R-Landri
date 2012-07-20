@@ -10,7 +10,6 @@ getFirst([],X,I) :-
 	X = -1.
 
 getFirst([0 | T],X,I) :-
-	.print("here") &
 	X = I.
 
 getFirst([H | T],X,I) :-
@@ -23,9 +22,19 @@ getFirst([H | T],X,I) :-
 +!start:true <-
 	.print("Starting").
 
-+startTurn(CurrentTurn): true <-
++startTurn(CurrentTurn) <-
 	.print("Turn ", CurrentTurn, " has started");
-	getGameState(List);
-	?getFirst(List, X, 0);
-	.print("List: ", List, " - Free: ", X);
-	mark(X div 3,X mod 3).
+	.wait(89);
+	!toePlan(CurrentTurn).
+
++!toePlan(CurrentTurn)
+	<-	getGameState(List);
+		?getFirst(List, X, 0);
+		.print("List: ", List, " - Free: ", X);
+		mark(X div 3, X mod 3).
+
+-!toePlan(CurrentTurn)[error_msg("validation"), op_error(ErrList)]
+	<- .print(ErrList).
+
+-!toePlan(CurrentTurn)[error_msg(ErrMsg)]
+	<- .print("Non-standard error message: ", ErrMsg).

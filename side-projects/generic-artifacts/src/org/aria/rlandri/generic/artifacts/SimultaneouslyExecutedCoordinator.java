@@ -99,9 +99,6 @@ public class SimultaneouslyExecutedCoordinator extends Coordinator {
 			System.err.println(String.format(
 					"Submitting is over!!! remaining(%s)",
 					task.scheduledExecutionTime() - new Date().getTime()));
-			boolean cancelled = task.cancel();
-			System.err.println(String.format("Cancellation has%s succeeded",
-					cancelled ? "" : " not"));
 			if (prepareEvaluation()) {
 				// TODO this can be skipped if it's this agent's turn!
 				execInternalOp("wakerOfAgents");
@@ -116,6 +113,9 @@ public class SimultaneouslyExecutedCoordinator extends Coordinator {
 
 	private boolean prepareEvaluation() {
 		try {
+			boolean cancelled = task.cancel();
+			System.err.println(String.format("Cancellation has%s succeeded",
+					cancelled ? "" : " not"));
 			setState(EnvStatus.EVALUATING);
 			executingAgentIterator = readyAgents.iterator();
 			if (executingAgentIterator.hasNext()) {
