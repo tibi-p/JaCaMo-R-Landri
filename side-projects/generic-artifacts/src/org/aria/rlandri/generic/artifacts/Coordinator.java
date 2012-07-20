@@ -395,6 +395,11 @@ public abstract class Coordinator extends Artifact {
 				MasterArtifactOpMethod.class, true));
 	}
 
+	@PRIME_AGENT_OPERATION
+	protected void startSubenv() {
+		signal("startSubenv");
+	}
+
 	@OPERATION
 	void registerAgent(OpFeedbackParam<String> wsp) {
 		failIfNotInitiated();
@@ -423,11 +428,6 @@ public abstract class Coordinator extends Artifact {
 			String errFmt = "%s cannot register as a prime in this sub-environment";
 			failed(String.format(errFmt, agentId));
 		}
-	}
-
-	@PRIME_AGENT_OPERATION
-	void startSubenv() {
-		signal("startSubenv");
 	}
 
 	@OPERATION

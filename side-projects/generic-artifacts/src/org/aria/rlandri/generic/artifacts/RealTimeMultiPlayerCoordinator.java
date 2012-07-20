@@ -24,7 +24,7 @@ abstract public class RealTimeMultiPlayerCoordinator extends Coordinator {
 	}
 
 	@PRIME_AGENT_OPERATION
-	void startSubenv() {
+	protected void startSubenv() {
 		super.startSubenv();
 		setState(EnvStatus.RUNNING);
 	}

@@ -133,7 +133,7 @@ public class SimultaneouslyExecutedCoordinator extends Coordinator {
 	}
 
 	@PRIME_AGENT_OPERATION
-	void startSubenv() {
+	protected void startSubenv() {
 		super.startSubenv();
 		execInternalOp("runSubEnv");
 	}

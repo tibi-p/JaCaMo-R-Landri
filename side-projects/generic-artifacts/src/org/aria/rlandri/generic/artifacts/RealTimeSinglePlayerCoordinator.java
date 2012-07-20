@@ -16,7 +16,7 @@ import cartago.CartagoException;
 import cartago.OPERATION;
 import cartago.OpFeedbackParam;
 
-public class RealTimeSinglePlayerCoordinator extends Coordinator {
+public abstract class RealTimeSinglePlayerCoordinator extends Coordinator {
 
 	private final Random random = new Random();
 	private final Map<String, String> workspaces = new HashMap<String, String>();
@@ -26,7 +26,8 @@ public class RealTimeSinglePlayerCoordinator extends Coordinator {
 
 	protected void init() throws CartagoException {
 		super.init();
-		this.agents = new ArrayList<String>(regularAgents.getUnregisteredAgentNames());
+		this.agents = new ArrayList<String>(
+				regularAgents.getUnregisteredAgentNames());
 		Collections.sort(this.agents);
 	}
 
@@ -39,7 +40,7 @@ public class RealTimeSinglePlayerCoordinator extends Coordinator {
 	}
 
 	@PRIME_AGENT_OPERATION
-	void startSubenv() {
+	protected void startSubenv() {
 		super.startSubenv();
 		setState(EnvStatus.RUNNING);
 	}
@@ -93,24 +94,6 @@ public class RealTimeSinglePlayerCoordinator extends Coordinator {
 				RTGameArtifactOpMethod.class, true));
 		addOperation(new CoordinatorAnnotation(PRIME_AGENT_OPERATION.class,
 				PrimeAgentArtifactOpMethod.class, false));
-	}
-
-	@Override
-	protected void updateRank() {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	protected void updateCurrency() {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	protected void saveState() {
-		// TODO Auto-generated method stub
-
 	}
 
 }
