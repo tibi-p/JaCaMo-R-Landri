@@ -165,7 +165,7 @@ public class Roulette extends SimultaneouslyExecutedCoordinator {
 		
 		if(betName.equals("Six")){
 			if(betValues.length!=6)
-				vr.addReason("invalid_corner_bet",ValidationType.ERROR);
+				vr.addReason("invalid_corner_bet(wrong_number_of_arguments)",ValidationType.ERROR);
 			for(int i=0;i<betValues.length-1;i++)
 			{
 				if(((Number)betValues[i+1]).intValue()-((Number)betValues[i]).intValue()!=1)
