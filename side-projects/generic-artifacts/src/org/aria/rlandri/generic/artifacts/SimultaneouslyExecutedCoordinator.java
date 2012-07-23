@@ -19,7 +19,7 @@ import cartago.INTERNAL_OPERATION;
 import cartago.OPERATION;
 import cartago.OpFeedbackParam;
 
-public class SimultaneouslyExecutedCoordinator extends Coordinator {
+public abstract class SimultaneouslyExecutedCoordinator extends Coordinator {
 
 	public static final int STEPS = 4;
 	public static final int STEP_LENGTH = 1000;
@@ -215,19 +215,5 @@ public class SimultaneouslyExecutedCoordinator extends Coordinator {
 		return timerExpired || isEverybodyReady();
 	}
 
-	@Override
-	protected void updateRank() {
-		// TODO Auto-generated method stub
-	}
-
-	@Override
-	protected void updateCurrency() {
-		// TODO Auto-generated method stub
-	}
-
-	@Override
-	protected void saveState() {
-		// TODO Auto-generated method stub
-	}
 
 }

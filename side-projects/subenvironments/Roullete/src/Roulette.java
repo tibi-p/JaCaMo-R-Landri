@@ -307,4 +307,18 @@ public class Roulette extends SimultaneouslyExecutedCoordinator {
 
 	}
 
+	@Override
+	protected void updateRank() {
+
+	}
+
+	@Override
+	protected void updateCurrency() {
+
+	}
+
+	@Override
+	protected void saveState() {
+
+	}
 }
