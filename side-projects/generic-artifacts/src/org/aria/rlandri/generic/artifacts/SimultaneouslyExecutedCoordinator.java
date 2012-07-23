@@ -35,6 +35,7 @@ public class SimultaneouslyExecutedCoordinator extends Coordinator {
 	private boolean stepFinished = true;
 	private boolean timerExpired = false;
 	private boolean preEvaluationDone = false;
+	private boolean postEvaluationDone = false;
 
 	public boolean waitForEndTurn() {
 		System.err.println(String.format("%s: waiting for the end of turn %s",
@@ -53,12 +54,21 @@ public class SimultaneouslyExecutedCoordinator extends Coordinator {
 	}
 
 	public void resetTurnInfo() {
+		execInternalOp("internalResetTurnInfo");
+	}
+
+	@INTERNAL_OPERATION
+	public void internalResetTurnInfo() {
+		doPostEvaluation();
+		await("isPostEvaluationDone");
+
 		readyAgents.clear();
 		executingAgentIterator = null;
 		executingAgent = null;
 		stepFinished = true;
 		timerExpired = false;
 		preEvaluationDone = false;
+		postEvaluationDone = false;
 	}
 
 	/**
@@ -81,8 +91,16 @@ public class SimultaneouslyExecutedCoordinator extends Coordinator {
 		setPreEvaluationDone(true);
 	}
 
+	protected void doPostEvaluation() {
+		setPostEvaluationDone(true);
+	}
+
 	protected void setPreEvaluationDone(boolean preEvaluationDone) {
 		this.preEvaluationDone = preEvaluationDone;
+	}
+
+	protected void setPostEvaluationDone(boolean postEvaluationDone) {
+		this.postEvaluationDone = postEvaluationDone;
 	}
 
 	private boolean hasMoved(AgentId agentId) {
@@ -112,23 +130,22 @@ public class SimultaneouslyExecutedCoordinator extends Coordinator {
 	}
 
 	private boolean prepareEvaluation() {
-		try {
-			boolean cancelled = task.cancel();
-			System.err.println(String.format("Cancellation has%s succeeded",
-					cancelled ? "" : " not"));
-			setState(EnvStatus.EVALUATING);
-			executingAgentIterator = readyAgents.iterator();
-			if (executingAgentIterator.hasNext()) {
-				executingAgent = executingAgentIterator.next();
-				return true;
-			} else {
-				System.err.println("WOP WOP WOP WOP");
-				resetTurnInfo();
-				return false;
-			}
-		} finally {
-			doPreEvaluation();
-			await("isPreEvaluationDone");
+		boolean cancelled = task.cancel();
+		System.err.println(String.format("Cancellation has%s succeeded",
+				cancelled ? "" : " not"));
+
+		doPreEvaluation();
+		await("isPreEvaluationDone");
+
+		setState(EnvStatus.EVALUATING);
+		executingAgentIterator = readyAgents.iterator();
+		if (executingAgentIterator.hasNext()) {
+			executingAgent = executingAgentIterator.next();
+			return true;
+		} else {
+			System.err.println("WOP WOP WOP WOP");
+			resetTurnInfo();
+			return false;
 		}
 	}
 
@@ -203,6 +220,11 @@ public class SimultaneouslyExecutedCoordinator extends Coordinator {
 	@GUARD
 	protected boolean isPreEvaluationDone() {
 		return preEvaluationDone;
+	}
+
+	@GUARD
+	protected boolean isPostEvaluationDone() {
+		return postEvaluationDone;
 	}
 
 	@GUARD
