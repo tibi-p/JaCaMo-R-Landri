@@ -17,12 +17,7 @@ import cartago.INTERNAL_OPERATION;
 import cartago.OPERATION;
 import cartago.OpFeedbackParam;
 
-/**
- * @author Andrei Geacar
- * 
- */
-
-public class PlayerAlternatedCoordinator extends Coordinator {
+public abstract class PlayerAlternatedCoordinator extends Coordinator {
 
 	protected AgentId currentAgent = null;
 	protected int currentIndex = 0;
@@ -125,20 +120,5 @@ public class PlayerAlternatedCoordinator extends Coordinator {
 	@GUARD
 	private boolean isStepFinished() {
 		return stepFinished;
-	}
-
-	@Override
-	protected void updateRank() {
-		// TODO Auto-generated method stub
-	}
-
-	@Override
-	protected void updateCurrency() {
-		// TODO Auto-generated method stub
-	}
-
-	@Override
-	protected void saveState() {
-		// TODO Auto-generated method stub
 	}
 }

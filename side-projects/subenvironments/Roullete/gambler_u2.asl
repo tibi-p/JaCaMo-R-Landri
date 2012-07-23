@@ -34,6 +34,6 @@
 +payoff(Turn,Number,Color,Payoff): Payoff < 0
 	<- 
 	//.print("At turn ",Turn," the result was: ",Number,Color,". The bet was lost. Amount lost:",-Payoff).
-		.print("Doubling the sum and playing again");
+		.print("Doubling the sum and playing again after turn ", Turn);
 		!betPlan(2*(-Payoff)).
 

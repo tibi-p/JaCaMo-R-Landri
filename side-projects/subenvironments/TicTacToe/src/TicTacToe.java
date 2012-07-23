@@ -105,4 +105,19 @@ public class TicTacToe extends PlayerAlternatedCoordinator {
 		return vres;
 	}
 
+	@Override
+	protected void updateRank() {
+
+	}
+
+	@Override
+	protected void updateCurrency() {
+
+	}
+
+	@Override
+	protected void saveState() {
+
+	}
+
 }

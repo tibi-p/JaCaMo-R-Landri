@@ -244,4 +244,19 @@ public class RouletteFeedback extends SimultaneouslyExecutedCoordinator {
 			return -betSum;
 	}
 
+	@Override
+	protected void updateRank() {
+
+	}
+
+	@Override
+	protected void updateCurrency() {
+
+	}
+
+	@Override
+	protected void saveState() {
+
+	}
+
 }
