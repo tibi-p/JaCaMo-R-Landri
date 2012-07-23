@@ -1,10 +1,15 @@
 <project name="roulette" basedir="." default="clean-build">
 
+	<property name="django.dir" value="../../.." />
 	<property name="src.dir" value="src" />
+	<property name="asl.dir" value="asl" />
 	<property name="build.dir" value="build" />
 	<property name="classes.dir" value="${build.dir}/classes" />
-	<property name="jar.dir" value="../../../media/subenvironments/1/artifacts" />
+	<property name="subenvironment.dir" value="${django.dir}/media/subenvironments/1" />
+	<property name="mediauser.dir" value="${django.dir}/media/users/2" />
+	<property name="jar.dir" value="${subenvironment.dir}/artifacts" />
 	<property name="zip.dir" value="${jar.dir}" />
+	<property name="master.agent.dir" value="${subenvironment.dir}/agents" />
 	<property name="lib.dir" value="../../../lib/jacamo" />
 	<property name="dependencies.dir" value="../../../media/subenvironments/generic/extra" />
 
@@ -17,7 +22,16 @@
 		<delete dir="${build.dir}" />
 	</target>
 
-	<target name="zip-src">
+	<target name="master-agent-src">
+		<mkdir dir="${master.agent.dir}" />
+		<zip destfile="${master.agent.dir}/${ant.project.name}_master_agents.zip" update="true">
+			<fileset dir="${asl.dir}" includes="*.asl">
+				<filename regex=".*_s[0-9]+\.asl" />
+			</fileset>
+		</zip>
+	</target>
+
+	<target name="zip-src" depends="master-agent-src">
 		<mkdir dir="${zip.dir}" />
 		<zip destfile="${zip.dir}/${ant.project.name}_artifacts.zip" basedir="${src.dir}" update="true">
 		</zip>
