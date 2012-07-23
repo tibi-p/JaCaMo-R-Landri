@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: 127.0.0.1
--- Generation Time: Jul 19, 2012 at 06:37 PM
+-- Generation Time: Jul 24, 2012 at 12:40 AM
 -- Server version: 5.5.25a-log
 -- PHP Version: 5.4.4
 
@@ -159,7 +159,7 @@ CREATE TABLE IF NOT EXISTS `auth_user` (
 
 INSERT INTO `auth_user` (`id`, `username`, `first_name`, `last_name`, `email`, `password`, `is_staff`, `is_active`, `is_superuser`, `last_login`, `date_joined`) VALUES
 (1, 'admin', '', '', 'popa.tiberiu@gmail.com', 'pbkdf2_sha256$10000$Pel4TDYzKAof$zawDS1r9uzj0ZkO/N17caDtFPsDFwcLo9unbfJVXTlU=', 1, 1, 1, '2012-07-19 11:38:57', '2012-07-12 11:13:16'),
-(2, 'tibi', '', '', '', 'pbkdf2_sha256$10000$j4VqrRFjDGoy$mMDRAp9YUBpIDZXDoQDBJLe4ZhNQilyHnU7f4LUqIt4=', 0, 1, 0, '2012-07-19 15:25:39', '2012-07-12 11:14:25'),
+(2, 'tibi', '', '', '', 'pbkdf2_sha256$10000$j4VqrRFjDGoy$mMDRAp9YUBpIDZXDoQDBJLe4ZhNQilyHnU7f4LUqIt4=', 0, 1, 0, '2012-07-19 16:59:55', '2012-07-12 11:14:25'),
 (3, 'andrei', '', '', '', 'pbkdf2_sha256$10000$WDjG5qD6agbH$GtnTKn45ca2zlUa1uSEgtGolmWIzJ/9+iqhTaUZ86z8=', 0, 1, 0, '2012-07-19 10:52:46', '2012-07-12 11:14:40'),
 (4, 'mihai', '', '', '', 'pbkdf2_sha256$10000$Ac6AXMUmTKvR$EyJJuVXpvAAq/6hPqgufSiTLweRfKQPSvoJHuvVDVbA=', 0, 1, 0, '2012-07-19 15:42:44', '2012-07-12 11:14:46');
 
@@ -360,7 +360,7 @@ CREATE TABLE IF NOT EXISTS `django_session` (
 --
 
 INSERT INTO `django_session` (`session_key`, `session_data`, `expire_date`) VALUES
-('0dfc9489f5c6e98dc4495e48146b8fbb', 'Njg4Njc3OWZjMzRjMjAwYjVhZGUxMjE2Nzg4NThlN2E2YzEyNjMyNjqAAn1xAShVEl9hdXRoX3Vz\nZXJfYmFja2VuZHECVSlkamFuZ28uY29udHJpYi5hdXRoLmJhY2tlbmRzLk1vZGVsQmFja2VuZHED\nVQ1fYXV0aF91c2VyX2lkcQSKAQR1Lg==\n', '2012-08-02 15:42:44'),
+('1014068fe4de627e9a61490193b9c791', 'NmJmZWUyZWExMGEyNzU1NGUwZjg2MzhiNzA4ZjA3MDI5YTg0MzNiYjqAAn1xAShVEl9hdXRoX3Vz\nZXJfYmFja2VuZHECVSlkamFuZ28uY29udHJpYi5hdXRoLmJhY2tlbmRzLk1vZGVsQmFja2VuZHED\nVQ1fYXV0aF91c2VyX2lkcQSKAQJ1Lg==\n', '2012-08-02 16:59:55'),
 ('35a8865d6e58152c435adf0fd15cabfe', 'NmJmZWUyZWExMGEyNzU1NGUwZjg2MzhiNzA4ZjA3MDI5YTg0MzNiYjqAAn1xAShVEl9hdXRoX3Vz\nZXJfYmFja2VuZHECVSlkamFuZ28uY29udHJpYi5hdXRoLmJhY2tlbmRzLk1vZGVsQmFja2VuZHED\nVQ1fYXV0aF91c2VyX2lkcQSKAQJ1Lg==\n', '2012-07-26 20:42:57'),
 ('5296f51a696da9b19d726334a35c1684', 'Njg4Njc3OWZjMzRjMjAwYjVhZGUxMjE2Nzg4NThlN2E2YzEyNjMyNjqAAn1xAShVEl9hdXRoX3Vz\nZXJfYmFja2VuZHECVSlkamFuZ28uY29udHJpYi5hdXRoLmJhY2tlbmRzLk1vZGVsQmFja2VuZHED\nVQ1fYXV0aF91c2VyX2lkcQSKAQR1Lg==\n', '2012-07-27 12:56:40'),
 ('547d91c72d15e6c0feda776647b25a21', 'Njg4Njc3OWZjMzRjMjAwYjVhZGUxMjE2Nzg4NThlN2E2YzEyNjMyNjqAAn1xAShVEl9hdXRoX3Vz\nZXJfYmFja2VuZHECVSlkamFuZ28uY29udHJpYi5hdXRoLmJhY2tlbmRzLk1vZGVsQmFja2VuZHED\nVQ1fYXV0aF91c2VyX2lkcQSKAQR1Lg==\n', '2012-07-27 10:33:25'),
@@ -525,8 +525,8 @@ CREATE TABLE IF NOT EXISTS `subenvironment_agent` (
 --
 
 INSERT INTO `subenvironment_agent` (`id`, `name`, `subenvironment_id`, `file`) VALUES
-(1, 'Rolling Master', 1, 'subenvironments/1/agents/rolling_master.zip'),
-(2, 'master', 4, 'subenvironments/4/agents/master.zip');
+(1, 'Roulette Master', 1, 'subenvironments/1/agents/roulette_master_agents.zip'),
+(2, 'Roulette Feedback Master', 4, 'subenvironments/4/agents/roulette_feedback_master_agents.zip');
 
 -- --------------------------------------------------------
 
@@ -551,7 +551,7 @@ INSERT INTO `subenvironment_artifact` (`id`, `name`, `subenvironment_id`, `file`
 (1, 'Biased Artifacts', 1, 'subenvironments/1/artifacts/roulette_artifacts.zip'),
 (2, 'Factorial', 2, 'subenvironments/2/artifacts/rtsp_test.zip'),
 (3, 'Auction', 3, 'subenvironments/3/artifacts/rtmp_test.zip'),
-(6, 'Feedback Artifacts', 4, 'subenvironments/4/artifacts/artifacts.zip'),
+(6, 'Feedback Artifacts', 4, 'subenvironments/4/artifacts/roulette_feedback_artifacts.zip'),
 (7, 'TicTac Artifacts', 5, 'subenvironments/5/artifacts/tictac_artifacts.zip');
 
 -- --------------------------------------------------------
