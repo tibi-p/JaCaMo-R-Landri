@@ -19,7 +19,10 @@
 		!betPlan(5).
 
 +!betPlan(BetSum)
-	<- bet("Split",[2,5],BetSum).
+	<- 
+		getBallance(Ballance);
+		.print("My ballance is: ",Ballance);
+		bet("Six",[1,2,3,4,5,5],BetSum).
 	
 -!betPlan(BetSum)[error_msg("validation"),op_error(ErrList)]
 	<-	.print(" Error: ",ErrList).

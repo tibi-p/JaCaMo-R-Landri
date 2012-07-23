@@ -2,6 +2,7 @@ import cartago.AgentId;
 import cartago.Artifact;
 import cartago.OPERATION;
 import cartago.ObsProperty;
+import cartago.OpFeedbackParam;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -27,7 +28,6 @@ public class Roulette extends SimultaneouslyExecutedCoordinator {
 	{
 		payoffs.put("0", 35);
 		payoffs.put("Single", 35);
-		payoffs.put("Split", 17);
 		payoffs.put("Street", 11);
 		payoffs.put("Corner", 8);
 		payoffs.put("Six", 5);
@@ -123,12 +123,16 @@ public class Roulette extends SimultaneouslyExecutedCoordinator {
 		}
 
 		if (betName.equals("Single")) {
+			if(betValues.length!=1)
+				vr.addReason("invalid_corner_bet",ValidationType.ERROR);
 			int value = ((Number) betValues[0]).intValue();
 			if (value < 0 || value > 36)
 				vr.addReason("invalid_single_number_bet", ValidationType.ERROR);
 		}
 
 		if (betName.equals("Split")) {
+			if(betValues.length!=2)
+				vr.addReason("invalid_corner_bet",ValidationType.ERROR);
 			int val1 = ((Number) betValues[0]).intValue();
 			int val2 = ((Number) betValues[1]).intValue();
 			int abs = Math.abs(val1 - val2);
@@ -137,11 +141,39 @@ public class Roulette extends SimultaneouslyExecutedCoordinator {
 		}
 
 		if (betName.equals("Street")) {
+			if(betValues.length!=3)
+				vr.addReason("invalid_corner_bet",ValidationType.ERROR);
 			int val1 = ((Number) betValues[0]).intValue();
 			int val2 = ((Number) betValues[1]).intValue();
 			int val3 = ((Number) betValues[2]).intValue();
 			if (!(val2 - val1 == 1 && val3 - val2 == 1))
 				vr.addReason("invalid_street_bet", ValidationType.ERROR);
+		}
+		
+		if (betName.equals("Corner")){
+			if(betValues.length!=4)
+				vr.addReason("invalid_corner_bet",ValidationType.ERROR);
+			int val1 = ((Number) betValues[0]).intValue();
+			int val2 = ((Number) betValues[1]).intValue();
+			int val3 = ((Number) betValues[2]).intValue();
+			int val4 = ((Number) betValues[3]).intValue();
+			if(!(val2-val1==1 && val4-val3==1 && val3-val1==3))
+			{
+				vr.addReason("invalid_corner_bet",ValidationType.ERROR);
+			}
+		}
+		
+		if(betName.equals("Six")){
+			if(betValues.length!=6)
+				vr.addReason("invalid_corner_bet",ValidationType.ERROR);
+			for(int i=0;i<betValues.length-1;i++)
+			{
+				if(((Number)betValues[i+1]).intValue()-((Number)betValues[i]).intValue()!=1)
+				{
+					vr.addReason("invalid_six_bet",ValidationType.ERROR);
+					break;
+				}
+			}
 		}
 
 		return vr;
@@ -286,8 +318,6 @@ public class Roulette extends SimultaneouslyExecutedCoordinator {
 			return -betSum;
 	}
 
-	// TODO: Validation is not done here (eg. users can win with ill formed
-	// bets)!!!!!!!!!!!!!!
 	@MASTER_OPERATION(validator = "validatePayout")
 	public void payout() {
 		for (Map.Entry<AgentId, Bet> entry : bets.entrySet()) {
@@ -305,6 +335,16 @@ public class Roulette extends SimultaneouslyExecutedCoordinator {
 
 	void validatePayout() {
 
+	}
+
+	/**
+	 * Operation used by the agents to obtain their economic status
+	 */
+	@OPERATION
+	void getBallance(OpFeedbackParam<Double> result) {
+		AgentId aid = getOpUserId();
+		double res = standings.get(aid);
+		result.set(res);
 	}
 
 	@Override
