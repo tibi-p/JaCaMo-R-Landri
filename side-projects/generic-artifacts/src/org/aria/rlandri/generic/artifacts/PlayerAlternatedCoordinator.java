@@ -17,6 +17,12 @@ import cartago.INTERNAL_OPERATION;
 import cartago.OPERATION;
 import cartago.OpFeedbackParam;
 
+/**
+ * The abstract coordinator class for player-alternated turn-based
+ * sub-environments.
+ * 
+ * @author Andrei Geacar
+ */
 public abstract class PlayerAlternatedCoordinator extends Coordinator {
 
 	protected AgentId currentAgent = null;
