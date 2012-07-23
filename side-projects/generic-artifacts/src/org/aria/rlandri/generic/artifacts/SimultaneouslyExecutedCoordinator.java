@@ -19,6 +19,12 @@ import cartago.INTERNAL_OPERATION;
 import cartago.OPERATION;
 import cartago.OpFeedbackParam;
 
+/**
+ * The abstract coordinator class for simultaneously-executed turn-based
+ * sub-environments.
+ * 
+ * @author Tiberiu Popa
+ */
 public abstract class SimultaneouslyExecutedCoordinator extends Coordinator {
 
 	public static final int STEPS = 4;
@@ -236,6 +242,5 @@ public abstract class SimultaneouslyExecutedCoordinator extends Coordinator {
 	private boolean isSubmittingOver() {
 		return timerExpired || isEverybodyReady();
 	}
-
 
 }
