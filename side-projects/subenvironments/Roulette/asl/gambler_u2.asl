@@ -16,27 +16,22 @@ betSum(2).
 	<-	true.
 
 +startTurn(N)
-	<-	
-	.print("Turn ",N, " has started");
+	<-	.print("Turn ",N, " has started");
 		?betSum(Sum);
 		!betPlan(Sum).
 
 +!betPlan(Sum)
-	<- 
-		getBallance(Ballance);
-		.print("My ballance is: ",Ballance);
-		bet("Street",[1,2,3],Sum).
-	
+	<-	getBalance(Balance);
+		.print("My balance is: ", Balance);
+		bet("Street", [1,2,3], Sum).
+
 -!betPlan(BetSum)[error_msg("validation"),op_error(ErrList)]
 	<-	.print(" Error: ",ErrList).
 
-+payoff(Turn,Number,Color,Payoff): Payoff > 0 
-	<-	
-		.print("Won ",Payoff);
-		-+betSum(2).	
++payoff(Turn,Number,Color,Payoff): Payoff > 0
+	<-	.print("Won ",Payoff);
+		-+betSum(2).
 
 +payoff(Turn,Number,Color,Payoff): Payoff < 0
-	<- 
-		.print("Lost ",-Payoff);
+	<-	.print("Lost ",-Payoff);
 		-+betSum(2*(-Payoff)).
-
