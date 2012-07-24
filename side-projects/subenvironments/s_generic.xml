@@ -37,7 +37,7 @@
 		<mkdir dir="${master.agent.dir}" />
 		<zip destfile="${solution.agent.dir}/${ant.project.name}_solution_agents.zip">
 			<fileset dir="${asl.dir}" includes="*.asl">
-				<filename regex=".*_s[0-9]+\.asl" />
+				<filename regex=".*_u[0-9]+\.asl" />
 			</fileset>
 		</zip>
 	</target>

@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: 127.0.0.1
--- Generation Time: Jul 24, 2012 at 12:40 AM
+-- Generation Time: Jul 24, 2012 at 11:46 AM
 -- Server version: 5.5.25a-log
 -- PHP Version: 5.4.4
 
@@ -259,47 +259,6 @@ CREATE TABLE IF NOT EXISTS `django_admin_log` (
   KEY `django_admin_log_1bb8f392` (`content_type_id`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=36 ;
 
---
--- Dumping data for table `django_admin_log`
---
-
-INSERT INTO `django_admin_log` (`id`, `action_time`, `user_id`, `content_type_id`, `object_id`, `object_repr`, `action_flag`, `change_message`) VALUES
-(1, '2012-07-12 11:14:25', 1, 3, '2', 'tibi', 1, ''),
-(2, '2012-07-12 11:14:40', 1, 3, '3', 'andrei', 1, ''),
-(3, '2012-07-12 11:14:46', 1, 3, '4', 'mihai', 1, ''),
-(4, '2012-07-12 11:17:44', 1, 8, '1', 'The White City of R''Landri', 1, ''),
-(5, '2012-07-12 11:19:42', 1, 10, '1', 'Roulette', 1, ''),
-(6, '2012-07-12 11:24:02', 1, 16, '1', 'admin', 3, ''),
-(7, '2012-07-12 11:25:42', 1, 17, '1', 'Chivu (tibi)', 1, ''),
-(8, '2012-07-12 11:25:48', 1, 17, '2', 'Mutu (tibi)', 1, ''),
-(9, '2012-07-12 11:26:03', 1, 17, '3', 'Pacyno (andrei)', 1, ''),
-(10, '2012-07-12 11:26:34', 1, 17, '4', 'Obama (andrei)', 1, ''),
-(11, '2012-07-12 11:27:02', 1, 17, '5', 'Kovesi (andrei)', 1, ''),
-(12, '2012-07-12 11:27:23', 1, 17, '6', 'Carlos (mihai)', 1, ''),
-(13, '2012-07-12 11:27:34', 1, 17, '7', 'Gigel (mihai)', 1, ''),
-(14, '2012-07-12 11:27:42', 1, 17, '8', 'Gogu (mihai)', 1, ''),
-(15, '2012-07-12 11:30:48', 1, 12, '1', 'Generic Artifacts', 1, ''),
-(16, '2012-07-12 11:30:49', 1, 12, '2', 'Generic Artifacts', 1, ''),
-(17, '2012-07-12 11:30:57', 1, 12, '2', 'Generic Artifacts', 3, ''),
-(18, '2012-07-12 11:31:10', 1, 12, '3', 'Logging Properties', 1, ''),
-(19, '2012-07-12 11:31:31', 1, 12, '4', 'Generic Environment', 1, ''),
-(20, '2012-07-12 22:01:39', 1, 10, '1', 'Roulette', 2, 'Changed envType.'),
-(21, '2012-07-12 22:09:57', 1, 10, '1', 'Roulette', 2, 'Changed coordinatorClass.'),
-(22, '2012-07-13 10:31:18', 1, 10, '2', 'Factorial', 1, ''),
-(23, '2012-07-13 10:33:01', 1, 10, '3', 'Auction', 1, ''),
-(24, '2012-07-13 11:49:44', 1, 10, '1', 'Roulette', 2, 'Added agent "Rolling Master".'),
-(25, '2012-07-19 10:51:51', 1, 10, '4', 'RouletteFeedback', 1, ''),
-(26, '2012-07-19 11:02:41', 1, 10, '4', 'RouletteFeedback', 2, 'Changed file for artifact "artifacts".'),
-(27, '2012-07-19 11:02:48', 1, 10, '4', 'RouletteFeedback', 2, 'Deleted artifact "artifacts".'),
-(28, '2012-07-19 11:03:07', 1, 10, '4', 'RouletteFeedback', 2, 'Added artifact "artifacts".'),
-(29, '2012-07-19 11:06:45', 1, 10, '4', 'RouletteFeedback', 2, 'Changed file for artifact "artifacts".'),
-(30, '2012-07-19 11:07:04', 1, 10, '4', 'RouletteFeedback', 2, 'Changed file for artifact "artifacts".'),
-(31, '2012-07-19 11:08:36', 1, 10, '4', 'RouletteFeedback', 2, 'Changed file for artifact "artifacts".'),
-(32, '2012-07-19 11:08:46', 1, 10, '4', 'RouletteFeedback', 2, 'Changed file for artifact "artifacts".'),
-(33, '2012-07-19 11:09:19', 1, 10, '4', 'RouletteFeedback', 2, 'Deleted artifact "artifacts".'),
-(34, '2012-07-19 11:09:37', 1, 10, '4', 'RouletteFeedback', 2, 'Added artifact "artifacts".'),
-(35, '2012-07-19 11:40:56', 1, 10, '5', 'TicTacToe', 1, '');
-
 -- --------------------------------------------------------
 
 --
@@ -354,18 +313,6 @@ CREATE TABLE IF NOT EXISTS `django_session` (
   PRIMARY KEY (`session_key`),
   KEY `django_session_3da3d3d8` (`expire_date`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-
---
--- Dumping data for table `django_session`
---
-
-INSERT INTO `django_session` (`session_key`, `session_data`, `expire_date`) VALUES
-('1014068fe4de627e9a61490193b9c791', 'NmJmZWUyZWExMGEyNzU1NGUwZjg2MzhiNzA4ZjA3MDI5YTg0MzNiYjqAAn1xAShVEl9hdXRoX3Vz\nZXJfYmFja2VuZHECVSlkamFuZ28uY29udHJpYi5hdXRoLmJhY2tlbmRzLk1vZGVsQmFja2VuZHED\nVQ1fYXV0aF91c2VyX2lkcQSKAQJ1Lg==\n', '2012-08-02 16:59:55'),
-('35a8865d6e58152c435adf0fd15cabfe', 'NmJmZWUyZWExMGEyNzU1NGUwZjg2MzhiNzA4ZjA3MDI5YTg0MzNiYjqAAn1xAShVEl9hdXRoX3Vz\nZXJfYmFja2VuZHECVSlkamFuZ28uY29udHJpYi5hdXRoLmJhY2tlbmRzLk1vZGVsQmFja2VuZHED\nVQ1fYXV0aF91c2VyX2lkcQSKAQJ1Lg==\n', '2012-07-26 20:42:57'),
-('5296f51a696da9b19d726334a35c1684', 'Njg4Njc3OWZjMzRjMjAwYjVhZGUxMjE2Nzg4NThlN2E2YzEyNjMyNjqAAn1xAShVEl9hdXRoX3Vz\nZXJfYmFja2VuZHECVSlkamFuZ28uY29udHJpYi5hdXRoLmJhY2tlbmRzLk1vZGVsQmFja2VuZHED\nVQ1fYXV0aF91c2VyX2lkcQSKAQR1Lg==\n', '2012-07-27 12:56:40'),
-('547d91c72d15e6c0feda776647b25a21', 'Njg4Njc3OWZjMzRjMjAwYjVhZGUxMjE2Nzg4NThlN2E2YzEyNjMyNjqAAn1xAShVEl9hdXRoX3Vz\nZXJfYmFja2VuZHECVSlkamFuZ28uY29udHJpYi5hdXRoLmJhY2tlbmRzLk1vZGVsQmFja2VuZHED\nVQ1fYXV0aF91c2VyX2lkcQSKAQR1Lg==\n', '2012-07-27 10:33:25'),
-('6eca57c77d0679172d49a556bc936325', 'NmJmZWUyZWExMGEyNzU1NGUwZjg2MzhiNzA4ZjA3MDI5YTg0MzNiYjqAAn1xAShVEl9hdXRoX3Vz\nZXJfYmFja2VuZHECVSlkamFuZ28uY29udHJpYi5hdXRoLmJhY2tlbmRzLk1vZGVsQmFja2VuZHED\nVQ1fYXV0aF91c2VyX2lkcQSKAQJ1Lg==\n', '2012-08-02 11:41:08'),
-('fa1ce20d846d0738ed812dbe3f2457b1', 'NmJmZWUyZWExMGEyNzU1NGUwZjg2MzhiNzA4ZjA3MDI5YTg0MzNiYjqAAn1xAShVEl9hdXRoX3Vz\nZXJfYmFja2VuZHECVSlkamFuZ28uY29udHJpYi5hdXRoLmJhY2tlbmRzLk1vZGVsQmFja2VuZHED\nVQ1fYXV0aF91c2VyX2lkcQSKAQJ1Lg==\n', '2012-08-02 11:16:07');
 
 -- --------------------------------------------------------
 
@@ -499,10 +446,10 @@ CREATE TABLE IF NOT EXISTS `solution_solution` (
 --
 
 INSERT INTO `solution_solution` (`id`, `name`, `envUser_id`, `subEnvironment_id`, `description`, `isVisible`, `agents`, `artifacts`, `organizations`, `lastModified`) VALUES
-(1, 'Gambler', 2, 1, 'You win some, lose some, it''s all the same to me!', 1, 'users/2/solutions/1/gambler.zip', '', '', '2012-07-12 11:25:15'),
+(1, 'Gambler', 2, 1, 'You win some, lose some, it''s all the same to me!', 1, 'users/2/solutions/1/roulette_solution_agents.zip', '', '', '2012-07-12 11:25:15'),
 (2, 'Auction solution', 4, 3, 'DA-MI HOTELU', 1, 'users/4/solutions/3/rtmp_agents.zip', '', '', '2012-07-13 10:38:01'),
-(4, 'Factorial', 4, 2, 'ae', 1, 'users/4/solutions/2/rtmp_agents.zip', '', '', '2012-07-13 10:56:26'),
-(5, 'sail', 2, 4, 'description', 0, 'users/2/solutions/4/agenti.zip', '', '', '2012-07-19 10:55:12'),
+(4, 'Factorial', 4, 2, 'Trivial computation!', 1, 'users/4/solutions/2/rtmp_agents.zip', '', '', '2012-07-13 10:56:26'),
+(5, 'sail', 2, 4, 'description', 1, 'users/2/solutions/4/roulette_feedback_solution_agents.zip', '', '', '2012-07-19 10:55:12'),
 (6, 'Toer', 2, 5, 'Really dumb agent for TicTacToe!', 1, 'users/2/solutions/5/toer_agent.zip', '', '', '2012-07-19 11:42:36');
 
 -- --------------------------------------------------------
