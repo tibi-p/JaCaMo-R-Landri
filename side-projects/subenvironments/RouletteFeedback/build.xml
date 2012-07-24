@@ -1,11 +1,8 @@
 <project name="roulette_feedback" basedir="." default="clean-build">
 
-	<import file="../s_generic.xml" />
+	<property name="subenvid" value="4" />
+	<property name="userid" value="2" />
 
-	<property name="subenvironment.dir" value="${django.dir}/media/subenvironments/4" />
-	<property name="mediauser.dir" value="${django.dir}/media/users/2" />
-	<property name="jar.dir" value="${subenvironment.dir}/artifacts" />
-	<property name="zip.dir" value="${jar.dir}" />
-	<property name="master.agent.dir" value="${subenvironment.dir}/agents" />
+	<import file="../s_generic.xml" />
 
 </project>

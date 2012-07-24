@@ -1,16 +1,12 @@
-import cartago.AgentId;
-import cartago.Artifact;
-import cartago.OPERATION;
-import cartago.ObsProperty;
-import cartago.OpFeedbackParam;
-
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Iterator;
-import java.util.Set;
 
-import org.aria.rlandri.generic.artifacts.*;
-import org.aria.rlandri.generic.artifacts.annotation.*;
+import org.aria.rlandri.generic.artifacts.SimultaneouslyExecutedCoordinator;
+import org.aria.rlandri.generic.artifacts.annotation.GAME_OPERATION;
+import org.aria.rlandri.generic.artifacts.annotation.MASTER_OPERATION;
+
+import cartago.AgentId;
+import cartago.OpFeedbackParam;
 
 /**
  * Artifact that implements the auction.
@@ -44,18 +40,16 @@ public class RouletteFeedback extends SimultaneouslyExecutedCoordinator {
 		payoffs.put("Even", 1);
 	}
 
-	private final Map<AgentId, Bet> bets = new HashMap<AgentId, Bet>();
 	private final Map<AgentId, Double> standings = new HashMap<AgentId, Double>();
 
-	String winningColor;
-	int winningNumber;
+	private String winningColor;
+	private int winningNumber;
 
 	@Override
 	protected void doPreEvaluation() {
 		for (AgentId aid : masterAgents.getAgentIds()) {
 			signal(aid, "spinWheel", currentStep);
 		}
-
 	}
 
 	private double payoff(String betType, double betSum) {
