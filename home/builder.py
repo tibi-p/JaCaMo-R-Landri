@@ -10,7 +10,7 @@ from simulator.sandbox import filter_listdir
 import os
 import subprocess
 
-def build_sub_projects(root):
+def build_side_projects(root):
     "Build all projects from a directory"
     libraries = filter_listdir(os.path.join('lib', 'ant'), 'jar')
     build_xml = os.path.join(root, 'build.xml')
@@ -24,10 +24,3 @@ def build_sub_projects(root):
             "-f",
             build_xml,
         ])
-
-def build_main(argv):
-    build_sub_projects('side-projects')
-
-if __name__ == '__main__':
-    import sys
-    build_main(sys.argv)
