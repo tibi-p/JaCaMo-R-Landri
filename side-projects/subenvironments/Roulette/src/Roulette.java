@@ -51,15 +51,14 @@ public class Roulette extends SimultaneouslyExecutedCoordinator {
 	int winningNumber;
 
 	@Override
-	protected void doPreEvaluation() {
+	protected void doPostEvaluation() {
 		for (AgentId aid : masterAgents.getAgentIds()) {
 			signal(aid, "spinWheel", currentStep);
 		}
-		setPreEvaluationDone(true);
 	}
 
 	private double payoff(String betType, double betSum) {
-		return betSum * payoffs.get(betType).intValue();
+		return betSum * payoffs.get(betType);
 	}
 
 	private void initStandings() {
@@ -327,6 +326,7 @@ public class Roulette extends SimultaneouslyExecutedCoordinator {
 					winningColor, payoff);
 		}
 		bets.clear();
+		setPostEvaluationDone(true);
 		String msgFmt = "Standings at turn %d: %s";
 		System.out.println(String.format(msgFmt, currentStep, standings));
 	}
