@@ -47,8 +47,8 @@ public class Roulette extends SimultaneouslyExecutedCoordinator {
 	private final Map<AgentId, Bet> bets = new HashMap<AgentId, Bet>();
 	private final Map<AgentId, Double> standings = new HashMap<AgentId, Double>();
 
-	String winningColor;
-	int winningNumber;
+	private String winningColor;
+	private int winningNumber;
 
 	@Override
 	protected void doPostEvaluation() {
@@ -322,8 +322,8 @@ public class Roulette extends SimultaneouslyExecutedCoordinator {
 			Bet bet = entry.getValue();
 			double payoff = computePayoffForPlayer(bet);
 			updateStandings(player, payoff);
-			signal(player, "payoff", currentStep - 1, winningNumber,
-					winningColor, payoff);
+			signal(player, "payoff", currentStep, winningNumber, winningColor,
+					payoff);
 		}
 		bets.clear();
 		setPostEvaluationDone(true);
