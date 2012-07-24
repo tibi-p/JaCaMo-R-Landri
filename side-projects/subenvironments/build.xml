@@ -2,6 +2,7 @@
 
 	<target name="generic-target">
 		<ant dir="Roulette" inheritAll="false" target="${target-param}" />
+		<ant dir="RouletteFeedback" inheritAll="false" target="${target-param}" />
 	</target>
 
 	<target name="clean">

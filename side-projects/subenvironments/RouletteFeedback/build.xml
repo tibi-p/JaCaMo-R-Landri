@@ -1,11 +1,11 @@
-<project name="roulette" basedir="." default="clean-build">
+<project name="roulette_feedback" basedir="." default="clean-build">
 
 	<property name="django.dir" value="../../.." />
 	<property name="src.dir" value="src" />
 	<property name="asl.dir" value="asl" />
 	<property name="build.dir" value="build" />
 	<property name="classes.dir" value="${build.dir}/classes" />
-	<property name="subenvironment.dir" value="${django.dir}/media/subenvironments/1" />
+	<property name="subenvironment.dir" value="${django.dir}/media/subenvironments/4" />
 	<property name="mediauser.dir" value="${django.dir}/media/users/2" />
 	<property name="jar.dir" value="${subenvironment.dir}/artifacts" />
 	<property name="zip.dir" value="${jar.dir}" />

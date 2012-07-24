@@ -7,7 +7,7 @@ MAS roulette {
 	environment: c4jason.CartagoEnvironment
 
 	agents:
-		agent_1_ gambler_u2 agentArchClass c4jason.CAgentArch;
+		agent_1_ gambler_feedback_u2 agentArchClass c4jason.CAgentArch;
 		master_s1  agentArchClass c4jason.CAgentArch;
 
 	classpath:
