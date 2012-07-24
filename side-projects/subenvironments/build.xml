@@ -1,6 +1,7 @@
 <project name="rlandri-subenvironments" basedir="." default="clean-build">
 
 	<target name="generic-target">
+		<ant dir="Factorial" inheritAll="false" target="${target-param}" />
 		<ant dir="Roulette" inheritAll="false" target="${target-param}" />
 		<ant dir="RouletteFeedback" inheritAll="false" target="${target-param}" />
 	</target>
