@@ -1,0 +1,8 @@
+<project name="auction" basedir="." default="clean-build">
+
+	<property name="subenvid" value="3" />
+	<property name="userid" value="4" />
+
+	<import file="../s_generic.xml" />
+
+</project>
