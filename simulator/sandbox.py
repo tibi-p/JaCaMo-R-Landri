@@ -104,7 +104,7 @@ class JaCaMoSandbox(object):
         for agent in agents:
             agTpl = [ '%(name)s' ]
             for k, v in paramTemplates.iteritems():
-                if k in agent:
+                if agent.get(k):
                     agTpl.append(v)
             agTpl = '\t\t%s;' % (' '.join(agTpl),)
             ags.append(agTpl % agent)
