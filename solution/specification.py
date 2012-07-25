@@ -50,19 +50,9 @@ class SolutionSpecification(object):
 
     @staticmethod
     def parse(xmlFile):
-        agents = []
         dom = parse(xmlFile)
         nodes = dom.getElementsByTagName('asl')
-        for node in nodes:
-            agentId = node.getAttribute('agentId')
-            filename = node.getAttribute('file')
-            cardinality = node.getAttribute('cardinality')
-            agents.append({
-                'arch': 'c4jason.CAgentArch',
-                'name': 'agent_%s_' % (agentId,),
-                'code': filename,
-                'no': cardinality,
-            })
+        agents = [ node_to_config(node) for node in nodes ]
 
         artifacts = None
         nodes = dom.getElementsByTagName('artifacts')
@@ -100,3 +90,16 @@ def node_to_datatables(node):
     cardinality = node.getAttribute('cardinality')
     return [ [agent_name, ''], [filename, ''], [agent_class, ''],
         [cardinality, ''] ]
+
+def node_to_config(node):
+    agent_id = node.getAttribute('agentId')
+    filename = node.getAttribute('file')
+    agent_class = node.getAttribute('agentClass')
+    cardinality = node.getAttribute('cardinality')
+    return {
+        'arch': 'c4jason.CAgentArch',
+        'name': 'agent_%s_' % (agent_id,),
+        'code': filename,
+        'class': agent_class,
+        'no': cardinality,
+    }

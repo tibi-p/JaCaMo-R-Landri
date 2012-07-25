@@ -97,6 +97,7 @@ class JaCaMoSandbox(object):
         paramTemplates = {
             'code': '%(code)s',
             'arch': 'agentArchClass %(arch)s',
+            'class': 'agentClass %(class)s',
             'no': '#%(no)s',
         }
         ags = [ ]
