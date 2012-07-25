@@ -1,23 +1,20 @@
-from zipfile import ZipFile
-from zipfile import BadZipfile
-
+from zipfile import BadZipfile, ZipFile
 
 class Validator(object):
-    
+
     ORG_PREFIX = 'org/aria/'
     PROJECT_PREFIX = 'rlandri/'
-    
-    
+
     @staticmethod
-    def validateAgentMapping(agentList):
-        names = []
-        for ag in agentList:
+    def validateAgentMapping(agents):
+        names = set()
+        for ag in agents:
             if ag['agentId'] in names:
                 return False
             else:
-                names.append(ag['agentId'])
+                names.add(ag['agentId'])
         return True
-    
+
     @staticmethod
     def validateSolution(jarFile, userID):
         try:
