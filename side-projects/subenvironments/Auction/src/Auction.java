@@ -11,6 +11,7 @@ import cartago.OpFeedbackParam;
 
 public class Auction extends RealTimeMultiPlayerCoordinator {
 
+	private final Random random = new Random();
 	private AgentId lastBidder;
 	private int currentBid;
 	private boolean timeUp, started;
@@ -95,7 +96,7 @@ public class Auction extends RealTimeMultiPlayerCoordinator {
 
 	@GAME_OPERATION(validator = "herp")
 	protected void getRandomBudget(OpFeedbackParam<Integer> budget) {
-		budget.set(new Random().nextInt(100));
+		budget.set(random.nextInt(100));
 	}
 
 	protected ValidationResult herp(OpFeedbackParam<Integer> number) {

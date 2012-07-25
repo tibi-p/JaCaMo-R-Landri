@@ -57,17 +57,56 @@ public abstract class Coordinator extends Artifact {
 	public static final String TURN_FUNCTOR = "turn_error";
 	public static final String GAME_FUNCTOR = "game_error";
 
+	/**
+	 * The registry of regular agents.
+	 */
 	protected final AgentRegistry regularAgents = new AgentRegistry();
+	/**
+	 * The registry of master agents.
+	 */
 	protected final AgentRegistry masterAgents = new AgentRegistry();
+	/**
+	 * The registry of prime agents.
+	 */
 	protected final AgentRegistry primeAgents = new AgentRegistry();
 
+	// TODO check if this is RLY necessary
 	private final Map<String, ValidationResult> failures = new HashMap<String, ValidationResult>();
+	/**
+	 * The list of guarded annotations used by the coordinator.
+	 */
 	private final List<GuardedAnnotation> annotations = new ArrayList<GuardedAnnotation>();
+	/**
+	 * The current state of the coordinator.
+	 */
 	private EnvStatus state = EnvStatus.PRIMORDIAL;
+	/**
+	 * The type of sub-environment.
+	 */
 	private String environmentType;
 
+	/**
+	 * Implementation of guarded annotations for the coordinator.
+	 * 
+	 * @author Tiberiu Popa
+	 */
 	protected class CoordinatorAnnotation extends GuardedAnnotation {
 
+		/**
+		 * Constructs a new <tt>CoordinatorAnnotation</tt>.
+		 * 
+		 * @param annotationClass
+		 *            the class of the annotation
+		 * @param opMethodClass
+		 *            the class of the artifact operation
+		 * @param mandatoryValidator
+		 *            whether the validator element is mandatory in the
+		 *            annotation
+		 * @throws CartagoException
+		 *             if a security manager is present and somehow gets upset
+		 *             in the process or if <tt>annotationClass</tt> does not
+		 *             possess the required methods
+		 */
 		public CoordinatorAnnotation(
 				Class<? extends Annotation> annotationClass,
 				Class<? extends IArtifactOp> opMethodClass,
