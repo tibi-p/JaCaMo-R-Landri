@@ -106,11 +106,8 @@ public class Roulette extends SimultaneouslyExecutedCoordinator {
 	@GAME_OPERATION(validator = "validateBet")
 	void bet(String betName, Object betValues[], double sum) {
 		AgentId aid = getOpUserId();
-
 		System.out.println(aid + " bets " + sum + " gold coins on " + betName);
-
 		Bet bet = new Bet();
-		System.out.println("MONEY: " + sum + "AGENT: " + aid);
 		bet.sum = sum;
 		bet.type = betName;
 		bet.betValues = betValues;
@@ -234,7 +231,7 @@ public class Roulette extends SimultaneouslyExecutedCoordinator {
 
 		if (betType.equals("Street")) {
 			int value = ((Number) values[0]).intValue();
-			if(winningNumber>=value && winningNumber<value+3)
+			if (winningNumber >= value && winningNumber < value + 3)
 				won = true;
 		}
 
@@ -252,36 +249,39 @@ public class Roulette extends SimultaneouslyExecutedCoordinator {
 		if (betType.equals("Six")) {
 
 			int value = ((Number) values[0]).intValue();
-			if(winningNumber>=value && winningNumber<value+6)
+			if (winningNumber >= value && winningNumber < value + 6)
 				won = true;
 		}
 
 		if (betType.equals("Column1")) {
-			if(winningNumber>0 && winningNumber<=36 && winningNumber%3==1)
+			if (winningNumber > 0 && winningNumber <= 36
+					&& winningNumber % 3 == 1)
 				won = true;
 		}
 		if (betType.equals("Column2")) {
-			if(winningNumber>0 && winningNumber<=36 && winningNumber%3==2)
+			if (winningNumber > 0 && winningNumber <= 36
+					&& winningNumber % 3 == 2)
 				won = true;
 		}
 
 		if (betType.equals("Column3")) {
-			if(winningNumber>0 && winningNumber<=36 && winningNumber%3==0)
+			if (winningNumber > 0 && winningNumber <= 36
+					&& winningNumber % 3 == 0)
 				won = true;
 		}
 
 		if (betType.equals("Dozen1")) {
-			if(winningNumber>0 && winningNumber<=12)
+			if (winningNumber > 0 && winningNumber <= 12)
 				won = true;
 		}
 
 		if (betType.equals("Dozen2")) {
-			if(winningNumber>12 && winningNumber<=24)
+			if (winningNumber > 12 && winningNumber <= 24)
 				won = true;
 		}
 
 		if (betType.equals("Dozen3")) {
-			if(winningNumber>24 && winningNumber<=36)
+			if (winningNumber > 24 && winningNumber <= 36)
 				won = true;
 		}
 
