@@ -34,6 +34,7 @@ def make_custom_agent_form(agent_kwargs={ }, asl_kwargs={ }):
     class AgentForm(forms.Form):
         agent_name = forms.models.ModelChoiceField(**agent_kwargs)
         asl = forms.ChoiceField(**asl_kwargs)
+        agent_class = forms.CharField(required=False)
         cardinality = forms.IntegerField(min_value=1)
 
     return AgentForm
@@ -297,6 +298,7 @@ def change_agent_mapping(request, solutionId):
                 solution = get_solution_or_404(user, id=solutionId)
                 config = solution.get_config_filepath()
                 agents = json.loads(params[u'json'])
+                # TODO Y U forgot to handle this?
                 Validator.validateAgentMapping(agents)
                 # TODO server-side validation goes here
                 # also check IDs!!

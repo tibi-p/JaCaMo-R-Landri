@@ -44,15 +44,9 @@ class SolutionSpecification(object):
 
     @staticmethod
     def parseAgentMapping(xmlFile):
-        lst = []
         dom = parse(xmlFile)
         nodes = dom.getElementsByTagName('asl')
-        for node in nodes:
-            agentName = node.getAttribute('agentId')
-            file = node.getAttribute('file')
-            cardinality = node.getAttribute('cardinality')
-            lst.append([[agentName, ''], [file, ''], [cardinality, '']])
-        return lst
+        return [ node_to_datatables(node) for node in nodes ]
 
     @staticmethod
     def parse(xmlFile):
@@ -98,3 +92,11 @@ class SolutionSpecification(object):
 def node_attr_filepath(node, attr):
     filename = node.getAttribute(attr)
     return default_storage.path(filename)
+
+def node_to_datatables(node):
+    agent_name = node.getAttribute('agentId')
+    filename = node.getAttribute('file')
+    agent_class = node.getAttribute('agentClass')
+    cardinality = node.getAttribute('cardinality')
+    return [ [agent_name, ''], [filename, ''], [agent_class, ''],
+        [cardinality, ''] ]

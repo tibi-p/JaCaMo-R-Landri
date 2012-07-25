@@ -155,6 +155,7 @@ table.dataTable tr.even.row_selected td {
             var aoColumns = [
                 { "sTitle": "Agent Name" },
                 { "sTitle": "Agent Code" },
+                { "sTitle": "Agent Class" },
                 // TODO numAgentsCol ?
                 { "sTitle": "Number of Instances", "sClass": "center numAgentsCol" },
             ];
@@ -193,6 +194,13 @@ table.dataTable tr.even.row_selected td {
                 aoColumns: [
                     null,
                     null,
+                    {
+                        oValidationOptions: {
+                            rules: {
+                                // TODO do me
+                            },
+                        },
+                    },
                     {
                         oValidationOptions: {
                             rules: {
@@ -284,7 +292,7 @@ table.dataTable tr.even.row_selected td {
             var btnTpl = '#btn-agent-{0}';
             var btnId = $.validator.format(btnTpl, solutionId);
             $(btnId).click(function () {
-                var keys = [ 'agentId', 'file', 'cardinality' ];
+                var keys = [ 'agentId', 'file', 'agentClass', 'cardinality' ];
                 var nodes = otTable.fnGetNodes();
                 var agents = [ ];
                 for (var i = 0; i < nodes.length; i++) {
