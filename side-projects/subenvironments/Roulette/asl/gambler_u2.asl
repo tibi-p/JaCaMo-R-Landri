@@ -14,22 +14,28 @@ diff(0).
 /* Plans */
 
 +!start : true
-	<-	getBalance(B);
-		+startSum(B);
-		.print("My initial balance is ",B).
+	<-	true.
 		
-+startTurn(N) 
-	<-	.print("Turn ",N," has started");
++startTurn(N): N = 1
+	<-	.print("Turn ",1," has started");
+		getBalance(B);
+		+startSum(B);
+		.print("My initial balance is ",B);
+		!decideBet.
+
++startTurn(N) : N>1
+	<- 
+		.print("Turn ",1," has started");
 		!decideBet.
 		
-+!decideBet : diff <= 0
++!decideBet : diff(D) & D<=0
 	<-	getBalance(Balance);
-		startSum(Start);
+		?startSum(Start);
 		Start-Balance < 30;
 		?betSum(Sum);
 		!safeBet(Sum).
 
-+!decideBet : diff > 0
++!decideBet : diff(D) & D>0
 	<-	
 		?betSum(Sum);
 		!riskyBet(Sum).
@@ -42,9 +48,9 @@ diff(0).
 +!riskyBet(Sum)
 	<- 
 		.print("Decided to make a risky bet");
-		bet("Single",9).
+		bet("Single",[9],Sum).
 
-+payoff(Turn,Number,Color,Payoff):
++payoff(Turn,Number,Color,Payoff)
 	<-	.print("Payoff in turn ",Turn," is ",Payoff);
 		?diff(Diff);
 		-+diff(Diff+Payoff).

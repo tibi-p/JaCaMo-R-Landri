@@ -234,12 +234,8 @@ public class Roulette extends SimultaneouslyExecutedCoordinator {
 
 		if (betType.equals("Street")) {
 			int value = ((Number) values[0]).intValue();
-			for (int i = value; i < value + 3; i++) {
-				if (winningNumber == i) {
-					won = true;
-					break;
-				}
-			}
+			if(winningNumber>=value && winningNumber<value+3)
+				won = true;
 		}
 
 		if (betType.equals("Corner")) {
@@ -256,63 +252,37 @@ public class Roulette extends SimultaneouslyExecutedCoordinator {
 		if (betType.equals("Six")) {
 
 			int value = ((Number) values[0]).intValue();
-			for (int i = value; i < value + 6; i++) {
-				if (winningNumber == i) {
-					won = true;
-					break;
-				}
-			}
-
+			if(winningNumber>=value && winningNumber<value+6)
+				won = true;
 		}
 
 		if (betType.equals("Column1")) {
-			for (int i = 1; i <= 36; i += 3) {
-
-			}
+			if(winningNumber>0 && winningNumber<=36 && winningNumber%3==1)
+				won = true;
 		}
 		if (betType.equals("Column2")) {
-			for (int i = 2; i <= 36; i += 3) {
-				if (winningNumber == i) {
-					won = true;
-					break;
-				}
-			}
+			if(winningNumber>0 && winningNumber<=36 && winningNumber%3==2)
+				won = true;
 		}
 
 		if (betType.equals("Column3")) {
-			for (int i = 3; i <= 36; i += 3) {
-				if (winningNumber == i) {
-					won = true;
-					break;
-				}
-			}
+			if(winningNumber>0 && winningNumber<=36 && winningNumber%3==0)
+				won = true;
 		}
 
 		if (betType.equals("Dozen1")) {
-			for (int i = 1; i <= 12; i += 1) {
-				if (winningNumber == i) {
-					won = true;
-					break;
-				}
-			}
+			if(winningNumber>0 && winningNumber<=12)
+				won = true;
 		}
 
 		if (betType.equals("Dozen2")) {
-			for (int i = 13; i <= 24; i += 1) {
-				if (winningNumber == i) {
-					won = true;
-					break;
-				}
-			}
+			if(winningNumber>12 && winningNumber<=24)
+				won = true;
 		}
 
 		if (betType.equals("Dozen3")) {
-			for (int i = 25; i <= 36; i += 1) {
-				if (winningNumber == i) {
-					won = true;
-					break;
-				}
-			}
+			if(winningNumber>24 && winningNumber<=36)
+				won = true;
 		}
 
 		if (betType.equals("Manque")) {
