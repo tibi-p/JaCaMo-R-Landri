@@ -18,20 +18,35 @@ import cartago.OpFeedbackParam;
  */
 public class Roulette extends SimultaneouslyExecutedCoordinator {
 
+	/**
+	 * Roulette numbers in the order found on the wheel
+	 */
 	private static final int[] numbers = new int[] { 0, 32, 15, 19, 4, 21, 2,
 			25, 17, 34, 6, 27, 13, 36, 11, 30, 8, 23, 10, 5, 24, 16, 33, 1, 20,
 			14, 31, 9, 22, 18, 29, 7, 28, 12, 35, 3, 26 };
 
+	/**
+	 * Street bets. Each bet is defined by the smallest number
+	 */
 	private static final int[] streetBets = new int[] { 1, 4, 7, 10, 13, 16,
 			19, 22, 25, 28, 31, 34 };
 
+	/**
+	 * Corner bets. Each bet is defined by the smallest number
+	 */
 	private static final int[] cornerBets = new int[] { 1, 2, 4, 5, 7, 8, 10,
 			11, 13, 14, 16, 17, 19, 20, 22, 23, 25, 26, 28, 29, 31, 32 };
 
+	/**
+	 * Six bets. Each bet is defined by the smallest number
+	 */
 	private static final int[] sixBets = new int[] { 1, 7, 13, 19, 25, 31 };
 
+	/**
+	 * Payoffs hashmap. Each entry represents the payout for the corresponding
+	 * bet
+	 */
 	private final HashMap<String, Integer> payoffs = new HashMap<String, Integer>();
-
 	{
 		payoffs.put("0", 35);
 		payoffs.put("Single", 35);
@@ -52,12 +67,25 @@ public class Roulette extends SimultaneouslyExecutedCoordinator {
 		payoffs.put("Even", 1);
 	}
 
+	/**
+	 * Hash map used to store the bets the agents make in one turn. Cleaned at
+	 * the end of each turnafter the payouts are made
+	 */
 	private final Map<AgentId, Bet> bets = new HashMap<AgentId, Bet>();
+
+	/**
+	 * Hash map used to store the economic standings of each agent.
+	 */
 	private final Map<AgentId, Double> standings = new HashMap<AgentId, Double>();
 
 	private String winningColor;
 	private int winningNumber;
 
+	/**
+	 * the first part of the post evaluation for the Roulette is to send signal
+	 * to the master agents the master agents will spin the wheel and make the
+	 * payouts. After that the post evaluation is complete
+	 */
 	@Override
 	protected void doPostEvaluation() {
 		for (AgentId aid : masterAgents.getAgentIds()) {
@@ -65,10 +93,22 @@ public class Roulette extends SimultaneouslyExecutedCoordinator {
 		}
 	}
 
+	/**
+	 * function used to compute the sum of coins won by a bettor
+	 * 
+	 * @param betType
+	 *            the type of the bet
+	 * @param betSum
+	 *            the sum betted
+	 * @return
+	 */
 	private double payoff(String betType, double betSum) {
 		return betSum * payoffs.get(betType);
 	}
 
+	/**
+	 * initializes the standings for all the agents
+	 */
 	private void initStandings() {
 
 		Set<AgentId> ids = regularAgents.getAgentIds();
@@ -85,12 +125,20 @@ public class Roulette extends SimultaneouslyExecutedCoordinator {
 		initStandings();
 	}
 
-	private void updateStandings(AgentId player, double value) {
-		if (standings.containsKey(player)) {
-			double oldValue = standings.get(player);
-			standings.put(player, oldValue + value);
+	/**
+	 * updates the economic standing of an agent
+	 * 
+	 * @param aid
+	 *            the id of the agent
+	 * @param value
+	 *            the value to be added to the economic standing to update it
+	 */
+	private void updateStandings(AgentId aid, double value) {
+		if (standings.containsKey(aid)) {
+			double oldValue = standings.get(aid);
+			standings.put(aid, oldValue + value);
 		} else {
-			standings.put(player, value);
+			standings.put(aid, value);
 		}
 	}
 
@@ -103,6 +151,16 @@ public class Roulette extends SimultaneouslyExecutedCoordinator {
 		return validateBet(betName, null, sum);
 	}
 
+	/**
+	 * used by the agents to make bets
+	 * 
+	 * @param betName
+	 *            type of bet the agent makes
+	 * @param betValues
+	 *            specifies the type of bet
+	 * @param sum
+	 *            sum of coins the agent bets
+	 */
 	@GAME_OPERATION(validator = "validateBet")
 	void bet(String betName, Object betValues[], double sum) {
 		AgentId aid = getOpUserId();
@@ -115,6 +173,16 @@ public class Roulette extends SimultaneouslyExecutedCoordinator {
 
 	}
 
+	/**
+	 * validates the bets
+	 * 
+	 * @param betName
+	 *            the type of the bet
+	 * @param betValues
+	 *            the particular instance of the bet
+	 * @param sum
+	 *            the sum of coins an agent bets
+	 */
 	ValidationResult validateBet(String betName, Object betValues[], double sum) {
 
 		AgentId aid = getOpUserId();
@@ -184,6 +252,10 @@ public class Roulette extends SimultaneouslyExecutedCoordinator {
 		return false;
 	}
 
+	/**
+	 * operation invoked by the master to obtain the result from spinning the
+	 * wheel
+	 */
 	@MASTER_OPERATION(validator = "validateSpinWheel")
 	public void spinWheel() {
 		int value = (int) (Math.random() * 37);
@@ -204,6 +276,15 @@ public class Roulette extends SimultaneouslyExecutedCoordinator {
 
 	}
 
+	/**
+	 * checks if a bet is winning and if so returns the payout for the agent if
+	 * the bet is losing it returns the negative of the bet sum value
+	 * 
+	 * @param bet
+	 *            data structure created when the bet operation is invoked
+	 * @return minus the bet sum if the bet is lost or the payout if the bet is
+	 *         won
+	 */
 	double computePayoffForPlayer(Bet bet) {
 		String betType = bet.type;
 		double betSum = bet.sum;
@@ -321,6 +402,10 @@ public class Roulette extends SimultaneouslyExecutedCoordinator {
 			return -betSum;
 	}
 
+	/**
+	 * operation used by the master agent to make the payouts to the agents
+	 * after the spin wheel operation is executed
+	 */
 	@MASTER_OPERATION(validator = "validatePayout")
 	public void payout() {
 		for (Map.Entry<AgentId, Bet> entry : bets.entrySet()) {
@@ -343,6 +428,10 @@ public class Roulette extends SimultaneouslyExecutedCoordinator {
 
 	/**
 	 * Operation used by the agents to obtain their economic status.
+	 * 
+	 * @param result
+	 *            the feedback parameter is used to give the calling agent its
+	 *            economic standing
 	 */
 	@OPERATION
 	void getBalance(OpFeedbackParam<Double> result) {
