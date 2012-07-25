@@ -9,6 +9,7 @@ import org.aria.rlandri.generic.artifacts.annotation.GAME_OPERATION;
 import org.aria.rlandri.generic.artifacts.annotation.PRIME_AGENT_OPERATION;
 import org.aria.rlandri.generic.artifacts.opmethod.PATBGameArtifactOpMethod;
 import org.aria.rlandri.generic.artifacts.opmethod.PrimeAgentArtifactOpMethod;
+import org.aria.rlandri.generic.artifacts.tools.ValidationType;
 
 import cartago.AgentId;
 import cartago.CartagoException;
@@ -51,10 +52,8 @@ public abstract class PlayerAlternatedCoordinator extends Coordinator {
 
 	public void failIfNotCurrentTurn() {
 		AgentId userId = getOpUserId();
-		if (!userId.equals(currentAgent)) {
-			// TODO: Standard error messages
-			failed("not_your_turn");
-		}
+		if (!userId.equals(currentAgent))
+			failTurn("not_your_turn", ValidationType.ERROR);
 	}
 
 	@Override

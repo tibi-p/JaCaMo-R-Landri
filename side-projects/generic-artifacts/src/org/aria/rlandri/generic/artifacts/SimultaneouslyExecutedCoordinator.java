@@ -11,6 +11,7 @@ import org.aria.rlandri.generic.artifacts.annotation.GAME_OPERATION;
 import org.aria.rlandri.generic.artifacts.annotation.PRIME_AGENT_OPERATION;
 import org.aria.rlandri.generic.artifacts.opmethod.PrimeAgentArtifactOpMethod;
 import org.aria.rlandri.generic.artifacts.opmethod.SETBGameArtifactOpMethod;
+import org.aria.rlandri.generic.artifacts.tools.ValidationType;
 
 import cartago.AgentId;
 import cartago.CartagoException;
@@ -82,7 +83,7 @@ public abstract class SimultaneouslyExecutedCoordinator extends Coordinator {
 	 */
 	public void failIfHasMoved() {
 		if (hasMoved(getOpUserId()))
-			failed("The current agent has already submitted a move this turn");
+			failTurn("has_already_submitted_action", ValidationType.ERROR);
 	}
 
 	@Override

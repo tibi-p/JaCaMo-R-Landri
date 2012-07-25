@@ -32,6 +32,7 @@ import org.aria.rlandri.generic.artifacts.annotation.MASTER_OPERATION;
 import org.aria.rlandri.generic.artifacts.annotation.PRIME_AGENT_OPERATION;
 import org.aria.rlandri.generic.artifacts.opmethod.MasterArtifactOpMethod;
 import org.aria.rlandri.generic.artifacts.tools.ValidationResult;
+import org.aria.rlandri.generic.artifacts.tools.ValidationType;
 import org.aria.rlandri.generic.artifacts.util.ReflectionUtils;
 
 import cartago.AgentId;
@@ -119,14 +120,6 @@ public abstract class Coordinator extends Artifact {
 		}
 	}
 
-	/**
-	 * Fails and prints a formatted message.
-	 */
-	public void failWithMessage(String section, String message) {
-		String failMsg = String.format("%s: %s", section, message);
-		failed(failMsg);
-	}
-
 	public void failValidation() {
 		ValidationResult vres = failures.get(getOpUserName());
 		ListTerm validationErrorList = new ListTermImpl();
@@ -139,20 +132,29 @@ public abstract class Coordinator extends Artifact {
 				validationErrorList));
 	}
 
+	public void failTurn(String reason, ValidationType type) {
+		ListTerm validationErrorList = new ListTermImpl();
+		Structure term = new Structure(type.getName());
+		term.addTerm(new Atom(reason));
+		validationErrorList.add(term);
+		failed("validation", TURN_FUNCTOR, new JasonTermWrapper(
+				validationErrorList));
+	}
+
 	/**
 	 * Fails if the coordinator is not currently in the initiated state.
 	 */
 	public void failIfNotInitiated() {
 		if (state != EnvStatus.INITIATED)
-			failed("The coordinator is not in running mode");
+			failTurn("coordinator_is_not_initiated", ValidationType.ERROR);
 	}
 
 	/**
 	 * Fails if the coordinator is not currently in the running state.
 	 */
 	public void failIfNotRunning() {
-		if (isNotRunning())
-			failed("The coordinator is not in running mode");
+		if (state != EnvStatus.RUNNING)
+			failTurn("coordinator_is_not_running", ValidationType.ERROR);
 	}
 
 	/**
@@ -160,11 +162,7 @@ public abstract class Coordinator extends Artifact {
 	 */
 	public void failIfNotRegisteredParticipatingAgent() {
 		if (!isRegisteredParticipatingAgent())
-			failed("The current agent is not a registered participating agent");
-	}
-
-	public boolean isNotRunning() {
-		return state != EnvStatus.RUNNING;
+			failTurn("not_registered_participating_agent", ValidationType.ERROR);
 	}
 
 	/**
@@ -172,7 +170,7 @@ public abstract class Coordinator extends Artifact {
 	 */
 	public void failIfNotRegisteredMasterAgent() {
 		if (!isRegisteredMasterAgent())
-			failed("The current agent is not a registered master agent");
+			failTurn("not_registered_master_agent", ValidationType.ERROR);
 	}
 
 	/**
@@ -180,7 +178,7 @@ public abstract class Coordinator extends Artifact {
 	 */
 	public void failIfNotRegisteredPrimeAgent() {
 		if (!isRegisteredPrimeAgent())
-			failed("The current agent is not a registered prime agent");
+			failTurn("not_registered_prime_agent", ValidationType.ERROR);
 	}
 
 	/**
@@ -405,8 +403,8 @@ public abstract class Coordinator extends Artifact {
 		failIfNotInitiated();
 		AgentId agentId = getOpUserId();
 		if (!regularAgents.registerAgent(agentId)) {
-			String errFmt = "%s cannot register as a regular in this sub-environment";
-			failed(String.format(errFmt, agentId));
+			failTurn("cannot_register_as_participating_agent",
+					ValidationType.ERROR);
 		}
 	}
 
@@ -415,8 +413,7 @@ public abstract class Coordinator extends Artifact {
 		failIfNotInitiated();
 		AgentId agentId = getOpUserId();
 		if (!masterAgents.registerAgent(agentId)) {
-			String errFmt = "%s cannot register as a master in this sub-environment";
-			failed(String.format(errFmt, agentId));
+			failTurn("cannot_register_as_master_agent", ValidationType.ERROR);
 		}
 	}
 
@@ -425,8 +422,7 @@ public abstract class Coordinator extends Artifact {
 		failIfNotInitiated();
 		AgentId agentId = getOpUserId();
 		if (!primeAgents.registerAgent(agentId)) {
-			String errFmt = "%s cannot register as a prime in this sub-environment";
-			failed(String.format(errFmt, agentId));
+			failTurn("cannot_register_as_prime_agent", ValidationType.ERROR);
 		}
 	}
 
