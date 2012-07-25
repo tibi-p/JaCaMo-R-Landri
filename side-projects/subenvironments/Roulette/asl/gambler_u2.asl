@@ -7,31 +7,48 @@
 /* Initial beliefs and rules */
 
 betSum(2).
+diff(0).
 
 /* Initial goals */
 
 /* Plans */
 
 +!start : true
-	<-	true.
-
-+startTurn(N)
-	<-	.print("Turn ",N, " has started");
-		?betSum(Sum);
-		!betPlan(Sum).
-
-+!betPlan(Sum)
+	<-	getBalance(B);
+		+startSum(B);
+		.print("My initial balance is ",B).
+		
++startTurn(N) 
+	<-	.print("Turn ",N," has started");
+		!decideBet.
+		
++!decideBet : diff <= 0
 	<-	getBalance(Balance);
-		.print("My balance is: ", Balance);
-		bet("Street", [1,2,3], Sum).
+		startSum(Start);
+		Start-Balance < 30;
+		?betSum(Sum);
+		!safeBet(Sum).
+
++!decideBet : diff > 0
+	<-	
+		?betSum(Sum);
+		!riskyBet(Sum).
+
++!safeBet(Sum)
+	<-	
+		.print("Decided to make a safe bet");
+		bet("Column1", Sum).
+	
++!riskyBet(Sum)
+	<- 
+		.print("Decided to make a risky bet");
+		bet("Single",9).
+
++payoff(Turn,Number,Color,Payoff):
+	<-	.print("Payoff in turn ",Turn," is ",Payoff);
+		?diff(Diff);
+		-+diff(Diff+Payoff).
 
 -!betPlan(BetSum)[error_msg("validation"),op_error(ErrList)]
 	<-	.print(" Error: ",ErrList).
 
-+payoff(Turn,Number,Color,Payoff): Payoff > 0
-	<-	.print("Won ",Payoff);
-		-+betSum(2).
-
-+payoff(Turn,Number,Color,Payoff): Payoff < 0
-	<-	.print("Lost ",-Payoff);
-		-+betSum(2*(-Payoff)).

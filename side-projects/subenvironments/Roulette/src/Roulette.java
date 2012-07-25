@@ -154,34 +154,34 @@ public class Roulette extends SimultaneouslyExecutedCoordinator {
 				vr.addReason("invalid_street_bet(wrong_number_of_arguments)",
 						ValidationType.ERROR);
 			int val = ((Number) betValues[0]).intValue();
-			if(!contains(streetBets,val))
+			if (!contains(streetBets, val))
 				vr.addReason("invalid_street_bet", ValidationType.ERROR);
 		}
 
 		if (betName.equals("Corner")) {
 			if (betValues.length != 1)
-				vr.addReason("invalid_corner_bet(wrong_number_of_arguments)", ValidationType.ERROR);
+				vr.addReason("invalid_corner_bet(wrong_number_of_arguments)",
+						ValidationType.ERROR);
 			int val = ((Number) betValues[0]).intValue();
-			if(!contains(cornerBets,val))
+			if (!contains(cornerBets, val))
 				vr.addReason("invalid_corner_bet", ValidationType.ERROR);
 		}
 
 		if (betName.equals("Six")) {
 			if (betValues.length != 1)
-				vr.addReason("invalid_six_bet(wrong_number_of_arguments)", ValidationType.ERROR);
+				vr.addReason("invalid_six_bet(wrong_number_of_arguments)",
+						ValidationType.ERROR);
 			int val = ((Number) betValues[0]).intValue();
-			if(!contains(sixBets,val))
+			if (!contains(sixBets, val))
 				vr.addReason("invalid_six_bet", ValidationType.ERROR);
 		}
 
 		return vr;
 	}
-	
-	private boolean contains(int[] array,int value)
-	{
-		for(int i=0;i<array.length;i++)
-		{
-			if(array[i]==value)
+
+	private boolean contains(int[] array, int value) {
+		for (int i = 0; i < array.length; i++) {
+			if (array[i] == value)
 				return true;
 		}
 		return false;
@@ -224,55 +224,50 @@ public class Roulette extends SimultaneouslyExecutedCoordinator {
 			if (winningNumber == betValue)
 				won = true;
 		}
-		
-		if (betType.equals("Split"))
-		{
+
+		if (betType.equals("Split")) {
 			int value1 = ((Number) values[0]).intValue();
 			int value2 = ((Number) values[1]).intValue();
 			if (winningNumber == value1 || winningNumber == value2)
 				won = true;
 		}
 
-		if (betType.equals("Street"))
-		{
+		if (betType.equals("Street")) {
 			int value = ((Number) values[0]).intValue();
-			for(int i=value;i<value+3;i++)
-			{
+			for (int i = value; i < value + 3; i++) {
 				if (winningNumber == i) {
 					won = true;
 					break;
 				}
 			}
 		}
-		
-		if(betType.equals("Corner"))
-		{
+
+		if (betType.equals("Corner")) {
 			int value1 = ((Number) values[0]).intValue();
-			int value2 = value1+1;
-			int value3 = value1+3;
-			int value4 = value1+4;
-			if(winningNumber == value1 || winningNumber == value2 || winningNumber == value3 || winningNumber == value4)
-			{
+			int value2 = value1 + 1;
+			int value3 = value1 + 3;
+			int value4 = value1 + 4;
+			if (winningNumber == value1 || winningNumber == value2
+					|| winningNumber == value3 || winningNumber == value4) {
 				won = true;
 			}
 		}
-		
-		if(betType.equals("Six")) {
-			
+
+		if (betType.equals("Six")) {
+
 			int value = ((Number) values[0]).intValue();
-			for(int i=value;i<value+6;i++)
-			{
+			for (int i = value; i < value + 6; i++) {
 				if (winningNumber == i) {
 					won = true;
 					break;
 				}
 			}
-			
+
 		}
 
 		if (betType.equals("Column1")) {
 			for (int i = 1; i <= 36; i += 3) {
-				
+
 			}
 		}
 		if (betType.equals("Column2")) {
