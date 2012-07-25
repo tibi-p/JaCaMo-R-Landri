@@ -1,11 +1,16 @@
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import org.aria.rlandri.generic.artifacts.SimultaneouslyExecutedCoordinator;
 import org.aria.rlandri.generic.artifacts.annotation.GAME_OPERATION;
 import org.aria.rlandri.generic.artifacts.annotation.MASTER_OPERATION;
+import org.aria.rlandri.generic.artifacts.annotation.PRIME_AGENT_OPERATION;
+import org.aria.rlandri.generic.artifacts.tools.ValidationResult;
+import org.aria.rlandri.generic.artifacts.tools.ValidationType;
 
 import cartago.AgentId;
+import cartago.OPERATION;
 import cartago.OpFeedbackParam;
 
 /**
@@ -14,15 +19,22 @@ import cartago.OpFeedbackParam;
 public class RouletteFeedback extends SimultaneouslyExecutedCoordinator {
 
 	private static final int[] numbers = new int[] { 0, 32, 15, 19, 4, 21, 2,
-			25, 17, 34, 6, 27, 13, 36, 11, 30, 8, 23, 10, 5, 24, 16, 33, 1, 20,
-			14, 31, 9, 22, 18, 29, 7, 28, 12, 35, 3, 26 };
+		25, 17, 34, 6, 27, 13, 36, 11, 30, 8, 23, 10, 5, 24, 16, 33, 1, 20,
+		14, 31, 9, 22, 18, 29, 7, 28, 12, 35, 3, 26 };
 
+	private static final int[] streetBets = new int[] { 1, 4, 7, 10, 13, 16,
+			19, 22, 25, 28, 31, 34 };
+	
+	private static final int[] cornerBets = new int[] { 1, 2, 4, 5, 7, 8, 10,
+			11, 13, 14, 16, 17, 19, 20, 22, 23, 25, 26, 28, 29, 31, 32 };
+	
+	private static final int[] sixBets = new int[] { 1, 7, 13, 19, 25, 31 };
+	
 	private final HashMap<String, Integer> payoffs = new HashMap<String, Integer>();
-
+	
 	{
 		payoffs.put("0", 35);
 		payoffs.put("Single", 35);
-		payoffs.put("Split", 17);
 		payoffs.put("Street", 11);
 		payoffs.put("Corner", 8);
 		payoffs.put("Six", 5);
@@ -39,12 +51,19 @@ public class RouletteFeedback extends SimultaneouslyExecutedCoordinator {
 		payoffs.put("Odd", 1);
 		payoffs.put("Even", 1);
 	}
-
+	
+	private final Map<AgentId, Bet> bets = new HashMap<AgentId, Bet>();
 	private final Map<AgentId, Double> standings = new HashMap<AgentId, Double>();
-
+	
 	private String winningColor;
-	private int winningNumber;
+private int winningNumber;
 
+	@PRIME_AGENT_OPERATION
+	protected void startSubenv() {
+		super.startSubenv();
+		initStandings();
+	}
+	
 	@Override
 	protected void doPreEvaluation() {
 		for (AgentId aid : masterAgents.getAgentIds()) {
@@ -63,6 +82,16 @@ public class RouletteFeedback extends SimultaneouslyExecutedCoordinator {
 		} else {
 			standings.put(player, value);
 		}
+	}
+	
+	private void initStandings() {
+
+		Set<AgentId> ids = regularAgents.getAgentIds();
+		for (AgentId id : ids) {
+			double value = 30 + (int) (Math.random() * 20);
+			standings.put(id, value);
+		}
+		System.out.println("Initial standings: " + standings);
 	}
 
 	@GAME_OPERATION(validator = "validateBet")
@@ -95,8 +124,67 @@ public class RouletteFeedback extends SimultaneouslyExecutedCoordinator {
 		payoff.set(pay);
 	}
 
-	void validateBet(String betName, Object betValues[], double sum,
-			OpFeedbackParam<Integer> currentStep, OpFeedbackParam<Double> payoff) {
+	
+	ValidationResult validateBet(String betName, Object betValues[], double sum,
+					OpFeedbackParam<Integer> currentStep, OpFeedbackParam<Double> payoff) {
+
+		AgentId aid = getOpUserId();
+		System.out.println("VALIDATION " + aid);
+		ValidationResult vr = new ValidationResult(aid.getAgentName());
+		double money = standings.get(aid);
+		if (money < sum) {
+			vr.addReason("insufficient_funds", ValidationType.ERROR);
+		}
+
+		if (betName.equals("Single")) {
+			if (betValues.length != 1)
+				vr.addReason(
+						"invalid_single_number_bet(wrong_number_of_arguments)",
+						ValidationType.ERROR);
+			int value = ((Number) betValues[0]).intValue();
+			if (value < 0 || value > 36)
+				vr.addReason("invalid_single_number_bet", ValidationType.ERROR);
+		}
+
+		if (betName.equals("Split")) {
+			if (betValues.length != 2)
+				vr.addReason("invalid_split_bet(wrong_number_of_arguments)",
+						ValidationType.ERROR);
+			int val1 = ((Number) betValues[0]).intValue();
+			int val2 = ((Number) betValues[1]).intValue();
+			int abs = Math.abs(val1 - val2);
+			if (abs != 1 && abs != 3)
+				vr.addReason("invalid_split_bet", ValidationType.ERROR);
+		}
+
+		if (betName.equals("Street")) {
+			if (betValues.length != 1)
+				vr.addReason("invalid_street_bet(wrong_number_of_arguments)",
+						ValidationType.ERROR);
+			int val = ((Number) betValues[0]).intValue();
+			if (!contains(streetBets, val))
+				vr.addReason("invalid_street_bet", ValidationType.ERROR);
+		}
+
+		if (betName.equals("Corner")) {
+			if (betValues.length != 1)
+				vr.addReason("invalid_corner_bet(wrong_number_of_arguments)",
+						ValidationType.ERROR);
+			int val = ((Number) betValues[0]).intValue();
+			if (!contains(cornerBets, val))
+				vr.addReason("invalid_corner_bet", ValidationType.ERROR);
+		}
+
+		if (betName.equals("Six")) {
+			if (betValues.length != 1)
+				vr.addReason("invalid_six_bet(wrong_number_of_arguments)",
+						ValidationType.ERROR);
+			int val = ((Number) betValues[0]).intValue();
+			if (!contains(sixBets, val))
+				vr.addReason("invalid_six_bet", ValidationType.ERROR);
+		}
+
+		return vr;
 	}
 
 	@MASTER_OPERATION(validator = "validateSpinWheel")
@@ -137,69 +225,67 @@ public class RouletteFeedback extends SimultaneouslyExecutedCoordinator {
 				won = true;
 		}
 
-		if (betType.equals("Split") || betType.equals("Street")
-				|| betType.equals("Corner") || betType.equals("Six")) {
+		if (betType.equals("Split")) {
+			int value1 = ((Number) values[0]).intValue();
+			int value2 = ((Number) values[1]).intValue();
+			if (winningNumber == value1 || winningNumber == value2)
+				won = true;
+		}
 
-			for (int i = 0; i < values.length; i++) {
-				int value = ((Number) values[i]).intValue();
-				if (winningNumber == value) {
-					won = true;
-					break;
-				}
+		if (betType.equals("Street")) {
+			int value = ((Number) values[0]).intValue();
+			if (winningNumber >= value && winningNumber < value + 3)
+				won = true;
+		}
+
+		if (betType.equals("Corner")) {
+			int value1 = ((Number) values[0]).intValue();
+			int value2 = value1 + 1;
+			int value3 = value1 + 3;
+			int value4 = value1 + 4;
+			if (winningNumber == value1 || winningNumber == value2
+					|| winningNumber == value3 || winningNumber == value4) {
+				won = true;
 			}
+		}
+
+		if (betType.equals("Six")) {
+
+			int value = ((Number) values[0]).intValue();
+			if (winningNumber >= value && winningNumber < value + 6)
+				won = true;
 		}
 
 		if (betType.equals("Column1")) {
-			for (int i = 1; i <= 36; i += 3) {
-				if (winningNumber == i) {
-					won = true;
-					break;
-				}
-			}
+			if (winningNumber > 0 && winningNumber <= 36
+					&& winningNumber % 3 == 1)
+				won = true;
 		}
 		if (betType.equals("Column2")) {
-			for (int i = 2; i <= 36; i += 3) {
-				if (winningNumber == i) {
-					won = true;
-					break;
-				}
-			}
+			if (winningNumber > 0 && winningNumber <= 36
+					&& winningNumber % 3 == 2)
+				won = true;
 		}
 
 		if (betType.equals("Column3")) {
-			for (int i = 3; i <= 36; i += 3) {
-				if (winningNumber == i) {
-					won = true;
-					break;
-				}
-			}
+			if (winningNumber > 0 && winningNumber <= 36
+					&& winningNumber % 3 == 0)
+				won = true;
 		}
 
 		if (betType.equals("Dozen1")) {
-			for (int i = 1; i <= 12; i += 1) {
-				if (winningNumber == i) {
-					won = true;
-					break;
-				}
-			}
+			if (winningNumber > 0 && winningNumber <= 12)
+				won = true;
 		}
 
 		if (betType.equals("Dozen2")) {
-			for (int i = 13; i <= 24; i += 1) {
-				if (winningNumber == i) {
-					won = true;
-					break;
-				}
-			}
+			if (winningNumber > 12 && winningNumber <= 24)
+				won = true;
 		}
 
 		if (betType.equals("Dozen3")) {
-			for (int i = 25; i <= 36; i += 1) {
-				if (winningNumber == i) {
-					won = true;
-					break;
-				}
-			}
+			if (winningNumber > 24 && winningNumber <= 36)
+				won = true;
 		}
 
 		if (betType.equals("Manque")) {
@@ -237,7 +323,22 @@ public class RouletteFeedback extends SimultaneouslyExecutedCoordinator {
 		else
 			return -betSum;
 	}
-
+	
+	private boolean contains(int[] array, int value) {
+		for (int i = 0; i < array.length; i++) {
+			if (array[i] == value)
+				return true;
+		}
+		return false;
+	}
+	
+	@OPERATION
+	void getBalance(OpFeedbackParam<Double> result) {
+		AgentId aid = getOpUserId();
+		double res = standings.get(aid);
+		result.set(res);
+	}
+	
 	@Override
 	protected void updateRank() {
 

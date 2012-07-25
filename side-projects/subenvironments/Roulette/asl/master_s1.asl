@@ -14,7 +14,7 @@
 	<-	true.
 
 +stopTurn(CurrentStep)
-	<- .print(CurrentStep, " has ended.").
+	<- .print("Turn ",CurrentStep, " has ended.").
 
 +spinWheel(CurrentStep)
 	<-	spinWheel;
