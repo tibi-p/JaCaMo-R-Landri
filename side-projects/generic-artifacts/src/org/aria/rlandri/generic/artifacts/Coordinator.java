@@ -130,30 +130,11 @@ public abstract class Coordinator extends Artifact {
 	 */
 	protected void init() throws CartagoException {
 		try {
-			loadProperties();
-
-			File mas2jFile = new File(".").listFiles(new FileFilter() {
-				public boolean accept(File arg0) {
-					return arg0.getAbsolutePath().endsWith("mas2j");
-				}
-			})[0];
-
-			mas2j parser = new mas2j(new FileInputStream(mas2jFile));
-			MAS2JProject project = parser.mas();
-			for (AgentParameters ap : project.getAgents()) {
-				String agentName = ap.getAgName();
-				if (isPrimeAgent(agentName)) {
-					addAgentToRegistry(primeAgents, agentName, ap.qty);
-				} else if (isParticipatingAgent(agentName)) {
-					addAgentToRegistry(regularAgents, agentName, ap.qty);
-				} else {
-					addAgentToRegistry(masterAgents, agentName, ap.qty);
-				}
-			}
-			setState(EnvStatus.INITIATED);
-			registerOperations();
+			doBaseInit();
 		} catch (FileNotFoundException e) {
 			throw new CartagoException("Could not find mas2j file");
+		} catch (IOException e) {
+			throw new CartagoException(e.getMessage());
 		} catch (ParseException e) {
 			throw new CartagoException("Parse exception for mas2j file");
 		}
@@ -297,6 +278,11 @@ public abstract class Coordinator extends Artifact {
 		return primeAgents.isRegistered(agentId);
 	}
 
+	/**
+	 * Returns the current state of the coordinator.
+	 * 
+	 * @return the current state of the coordinator
+	 */
 	public EnvStatus getState() {
 		return state;
 	}
@@ -346,18 +332,6 @@ public abstract class Coordinator extends Artifact {
 		return false;
 	}
 
-	private void loadProperties() throws CartagoException {
-		try {
-			Properties prop = new Properties();
-			prop.load(new FileInputStream("config.properties"));
-			this.environmentType = prop.getProperty("environment_type");
-		} catch (FileNotFoundException e) {
-			throw new CartagoException(e.getMessage());
-		} catch (IOException e) {
-			throw new CartagoException(e.getMessage());
-		}
-	}
-
 	/**
 	 * Fills the list of operations with the desired custom annotations.
 	 * 
@@ -372,12 +346,38 @@ public abstract class Coordinator extends Artifact {
 
 	protected abstract void saveState();
 
+	private void doBaseInit() throws FileNotFoundException, IOException,
+			ParseException, CartagoException {
+		loadProperties();
+
+		File mas2jFile = new File(".").listFiles(new FileFilter() {
+			public boolean accept(File arg0) {
+				return arg0.getAbsolutePath().endsWith("mas2j");
+			}
+		})[0];
+
+		mas2j parser = new mas2j(new FileInputStream(mas2jFile));
+		MAS2JProject project = parser.mas();
+		for (AgentParameters ap : project.getAgents()) {
+			String agentName = ap.getAgName();
+			if (isPrimeAgent(agentName)) {
+				primeAgents.addAgentName(agentName, ap.qty);
+			} else if (isParticipatingAgent(agentName)) {
+				regularAgents.addAgentName(agentName, ap.qty);
+			} else {
+				masterAgents.addAgentName(agentName, ap.qty);
+			}
+		}
+		setState(EnvStatus.INITIATED);
+		registerOperations();
+	}
+
 	private void addCustomAnnotation(GuardedAnnotation guardedAnnotation,
 			Method method) throws CartagoException {
 		Annotation annotation = guardedAnnotation.getMethodAnnotation(method);
 		String guard = guardedAnnotation.invokeGuardMethod(annotation);
 		ArtifactGuardMethod guardBody = null;
-		if (!"".equals(guard)) {
+		if (guard != null && !"".equals(guard)) {
 			Method guardMethod = ReflectionUtils.getMethodInHierarchy(
 					getClass(), guard, method.getParameterTypes());
 			if (guardMethod == null) {
@@ -389,7 +389,7 @@ public abstract class Coordinator extends Artifact {
 
 		String validator = guardedAnnotation.invokeValidatorMethod(annotation);
 		Method validatorMethod = null;
-		if (!"".equals(validator)) {
+		if (validator != null && !"".equals(validator)) {
 			validatorMethod = ReflectionUtils.getMethodInHierarchy(getClass(),
 					validator, method.getParameterTypes());
 			if (validatorMethod == null) {
@@ -418,6 +418,12 @@ public abstract class Coordinator extends Artifact {
 		}
 	}
 
+	private void loadProperties() throws FileNotFoundException, IOException {
+		Properties prop = new Properties();
+		prop.load(new FileInputStream("config.properties"));
+		this.environmentType = prop.getProperty("environment_type");
+	}
+
 	private void registerOperations() throws CartagoException {
 		fillDefaultOperations();
 		fillOperations();
@@ -438,7 +444,7 @@ public abstract class Coordinator extends Artifact {
 	}
 
 	@OPERATION
-	void registerAgent(OpFeedbackParam<String> wsp) {
+	protected void registerAgent(OpFeedbackParam<String> wsp) {
 		failIfNotInitiated();
 		AgentId agentId = getOpUserId();
 		if (!regularAgents.registerAgent(agentId)) {
@@ -448,7 +454,7 @@ public abstract class Coordinator extends Artifact {
 	}
 
 	@OPERATION
-	void registerMasterAgent(OpFeedbackParam<String> wsp) {
+	protected void registerMasterAgent(OpFeedbackParam<String> wsp) {
 		failIfNotInitiated();
 		AgentId agentId = getOpUserId();
 		if (!masterAgents.registerAgent(agentId)) {
@@ -457,7 +463,7 @@ public abstract class Coordinator extends Artifact {
 	}
 
 	@OPERATION
-	void registerPrimeAgent() {
+	protected void registerPrimeAgent() {
 		failIfNotInitiated();
 		AgentId agentId = getOpUserId();
 		if (!primeAgents.registerAgent(agentId)) {
@@ -466,7 +472,7 @@ public abstract class Coordinator extends Artifact {
 	}
 
 	@OPERATION
-	void finishSubenv() {
+	protected void finishSubenv() {
 		updateRank();
 		updateCurrency();
 		saveState();
@@ -474,16 +480,6 @@ public abstract class Coordinator extends Artifact {
 
 	public void addValidationResult(ValidationResult vres) {
 		failures.put(vres.getAgent(), vres);
-	}
-
-	private static final void addAgentToRegistry(AgentRegistry registry,
-			String agentName, int qty) {
-		if (qty > 1) {
-			for (int i = 1; i <= qty; i++)
-				registry.addAgentName(agentName + i);
-		} else {
-			registry.addAgentName(agentName);
-		}
 	}
 
 }

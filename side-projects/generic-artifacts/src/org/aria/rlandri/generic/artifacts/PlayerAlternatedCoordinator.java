@@ -66,7 +66,7 @@ public abstract class PlayerAlternatedCoordinator extends Coordinator {
 
 	// TODO use status here
 	@OPERATION
-	void registerAgent(OpFeedbackParam<String> wsp) {
+	protected void registerAgent(OpFeedbackParam<String> wsp) {
 		super.registerAgent(wsp);
 		order.add(getOpUserId());
 		wsp.set("NA");

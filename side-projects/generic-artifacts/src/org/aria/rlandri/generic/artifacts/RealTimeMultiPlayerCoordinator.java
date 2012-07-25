@@ -11,9 +11,8 @@ import cartago.OpFeedbackParam;
 
 abstract public class RealTimeMultiPlayerCoordinator extends Coordinator {
 
-	@Override
 	@OPERATION
-	void registerAgent(OpFeedbackParam<String> wsp) {
+	protected void registerAgent(OpFeedbackParam<String> wsp) {
 		super.registerAgent(wsp);
 		wsp.set("NA");
 	}

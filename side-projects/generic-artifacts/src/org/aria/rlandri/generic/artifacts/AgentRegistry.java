@@ -30,6 +30,15 @@ public class AgentRegistry {
 		agentNames.add(agentName);
 	}
 
+	public void addAgentName(String agentName, int qty) {
+		if (qty > 1) {
+			for (int i = 1; i <= qty; i++)
+				addAgentName(agentName + i);
+		} else {
+			addAgentName(agentName);
+		}
+	}
+
 	public boolean registerAgent(AgentId agentId) {
 		String agentName = agentId.getAgentName();
 		if (containsAgentName(agentName)) {

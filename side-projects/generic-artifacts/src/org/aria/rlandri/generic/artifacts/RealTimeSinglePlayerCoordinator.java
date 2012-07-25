@@ -32,7 +32,7 @@ public abstract class RealTimeSinglePlayerCoordinator extends Coordinator {
 	}
 
 	@OPERATION
-	void registerAgent(OpFeedbackParam<String> privateSubenv) {
+	protected void registerAgent(OpFeedbackParam<String> privateSubenv) {
 		super.registerAgent(privateSubenv);
 		String agentName = getOpUserName();
 		agentName = agentName.substring(0, agentName.lastIndexOf('_'));

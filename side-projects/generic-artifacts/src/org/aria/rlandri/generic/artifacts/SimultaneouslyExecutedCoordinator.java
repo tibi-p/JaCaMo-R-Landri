@@ -184,7 +184,7 @@ public abstract class SimultaneouslyExecutedCoordinator extends Coordinator {
 	}
 
 	@OPERATION
-	void registerAgent(OpFeedbackParam<String> wsp) {
+	protected void registerAgent(OpFeedbackParam<String> wsp) {
 		super.registerAgent(wsp);
 		wsp.set("NA");
 	}
