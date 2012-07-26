@@ -395,6 +395,17 @@ public abstract class Coordinator extends Artifact {
 		registerOperations();
 	}
 
+	/**
+	 * Adds a Cartago operation backed by a <tt>Method</tt> that is associated
+	 * with a <tt>GuardedAnnotation</tt>.
+	 * 
+	 * @param guardedAnnotation
+	 *            the method's guarded annotation
+	 * @param method
+	 *            the method underlying to the Cartago operation
+	 * @throws CartagoException
+	 *             if the Cartago operation could not be constructed
+	 */
 	private void addCustomAnnotation(GuardedAnnotation guardedAnnotation,
 			Method method) throws CartagoException {
 		Annotation annotation = guardedAnnotation.getMethodAnnotation(method);
@@ -441,12 +452,26 @@ public abstract class Coordinator extends Artifact {
 		}
 	}
 
+	/**
+	 * Loads the configuration properties.
+	 * 
+	 * @throws FileNotFoundException
+	 *             if the configuration properties file could not be found
+	 * @throws IOException
+	 *             if an I/O error occurs
+	 */
 	private void loadProperties() throws FileNotFoundException, IOException {
 		Properties prop = new Properties();
 		prop.load(new FileInputStream("config.properties"));
 		this.environmentType = prop.getProperty("environment_type");
 	}
 
+	/**
+	 * Populate the list of operations with custom annotations and process them.
+	 * 
+	 * @throws CartagoException
+	 *             if the custom annotations fail to be valid
+	 */
 	private void registerOperations() throws CartagoException {
 		fillDefaultOperations();
 		fillOperations();
@@ -456,6 +481,12 @@ public abstract class Coordinator extends Artifact {
 		processor.processAnnotations(annotations);
 	}
 
+	/**
+	 * Fills the list of operations with the default custom annotations.
+	 * 
+	 * @throws CartagoException
+	 *             if the custom annotations fail to be valid
+	 */
 	private void fillDefaultOperations() throws CartagoException {
 		addOperation(new CoordinatorAnnotation(MASTER_OPERATION.class,
 				MasterArtifactOpMethod.class, true));
