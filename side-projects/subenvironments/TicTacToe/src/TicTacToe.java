@@ -11,14 +11,29 @@ import cartago.OpFeedbackParam;
  */
 public class TicTacToe extends PlayerAlternatedCoordinator {
 
-	// maximum number of games
-	// the duration of all the games should be less than the permitted execution
-	// time for the subenv
+	/**
+	 * maximum number of games the duration of all the games should be less than
+	 * the permitted execution time for the subenv
+	 */
 	int maxGames;
 
+	/**
+	 * the state of the game represented by a 3 by 3 matrix
+	 */
 	private int[][] gameState = new int[3][3];
+
+	/**
+	 * retains the number of times each of the two players won
+	 */
 	private int[] score = new int[2];
 
+	/**
+	 * function that checks if the game has ended( if the state the game has
+	 * reached is final)
+	 * 
+	 * @return 0 if the game has not ended; -1 if the game ended and the first
+	 *         player won; 1 if the game ended and the second player won
+	 */
 	private int ended() {
 		for (int i = 0; i < 3; i++) {
 			if (gameState[i][0] == gameState[i][1]
@@ -53,6 +68,15 @@ public class TicTacToe extends PlayerAlternatedCoordinator {
 		return 0;
 	}
 
+	/**
+	 * game operation that permits an agent to mark a cell and thus modify the
+	 * state of the game
+	 * 
+	 * @param x
+	 *            the line on which the agent will mark
+	 * @param y
+	 *            the column on which the agent will mark
+	 */
 	@GAME_OPERATION(validator = "validateMark")
 	void mark(int x, int y) {
 		if (currentIndex == 0) {
@@ -82,7 +106,12 @@ public class TicTacToe extends PlayerAlternatedCoordinator {
 		}
 	}
 
-	//
+	/**
+	 * operation that gives agents a linear representation of the state of the
+	 * game
+	 * 
+	 * @param result
+	 */
 	@OPERATION
 	void getGameState(OpFeedbackParam<Integer[]> result) {
 		Integer[] res = new Integer[9];
@@ -93,6 +122,13 @@ public class TicTacToe extends PlayerAlternatedCoordinator {
 		result.set(res);
 	}
 
+	/**
+	 * validation for the mark operation
+	 * 
+	 * @param x
+	 * @param y
+	 * @return
+	 */
 	protected ValidationResult validateMark(int x, int y) {
 		ValidationResult vres = new ValidationResult(getOpUserName());
 

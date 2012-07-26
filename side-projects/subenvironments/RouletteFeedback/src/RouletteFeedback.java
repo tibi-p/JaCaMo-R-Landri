@@ -18,6 +18,8 @@ import cartago.OpFeedbackParam;
  */
 public class RouletteFeedback extends SimultaneouslyExecutedCoordinator {
 
+	private static final int maxBet = 50;
+	
 	private static final int[] numbers = new int[] { 0, 32, 15, 19, 4, 21, 2,
 		25, 17, 34, 6, 27, 13, 36, 11, 30, 8, 23, 10, 5, 24, 16, 33, 1, 20,
 		14, 31, 9, 22, 18, 29, 7, 28, 12, 35, 3, 26 };
@@ -56,7 +58,7 @@ public class RouletteFeedback extends SimultaneouslyExecutedCoordinator {
 	private final Map<AgentId, Double> standings = new HashMap<AgentId, Double>();
 	
 	private String winningColor;
-private int winningNumber;
+	private int winningNumber;
 
 	@PRIME_AGENT_OPERATION
 	protected void startSubenv() {
@@ -134,6 +136,14 @@ private int winningNumber;
 		double money = standings.get(aid);
 		if (money < sum) {
 			vr.addReason("insufficient_funds", ValidationType.ERROR);
+		}
+		
+		if (sum <=0){
+			vr.addReason("nonpositive_betting_sum",ValidationType.ERROR);
+		}
+		
+		if( sum >= maxBet){
+			vr.addReason("bet_sum_exceeds_max_allowed",ValidationType.ERROR);
 		}
 
 		if (betName.equals("Single")) {

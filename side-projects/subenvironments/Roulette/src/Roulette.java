@@ -19,6 +19,11 @@ import cartago.OpFeedbackParam;
 public class Roulette extends SimultaneouslyExecutedCoordinator {
 
 	/**
+	 * Maximum bet an agent can make
+	 */
+	private static final int maxBet = 50;
+	
+	/**
 	 * Roulette numbers in the order found on the wheel
 	 */
 	private static final int[] numbers = new int[] { 0, 32, 15, 19, 4, 21, 2,
@@ -191,6 +196,14 @@ public class Roulette extends SimultaneouslyExecutedCoordinator {
 		double money = standings.get(aid);
 		if (money < sum) {
 			vr.addReason("insufficient_funds", ValidationType.ERROR);
+		}
+		
+		if (sum <=0){
+			vr.addReason("nonpositive_betting_sum",ValidationType.ERROR);
+		}
+		
+		if( sum >= maxBet){
+			vr.addReason("bet_sum_exceeds_max_allowed",ValidationType.ERROR);
 		}
 
 		if (betName.equals("Single")) {
