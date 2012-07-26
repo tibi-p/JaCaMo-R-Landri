@@ -52,6 +52,10 @@ public class Auction extends RealTimeMultiPlayerCoordinator {
 		timeUp = true;
 		System.out.println(lastBidder + " is winrar");
 		signal(lastBidder, "you_are_a_winrar");
+		
+		for (AgentId agentId : primeAgents.getAgentIds())
+			signal(agentId, "stopGame");
+
 	}
 
 	@GAME_OPERATION(validator = "priceValid")
