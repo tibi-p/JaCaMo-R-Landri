@@ -191,7 +191,6 @@ public class Roulette extends SimultaneouslyExecutedCoordinator {
 	ValidationResult validateBet(String betName, Object betValues[], double sum) {
 
 		AgentId aid = getOpUserId();
-		System.out.println("VALIDATION " + aid);
 		ValidationResult vr = new ValidationResult(aid.getAgentName());
 		double money = standings.get(aid);
 		if (money < sum) {

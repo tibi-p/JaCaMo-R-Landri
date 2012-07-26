@@ -1,6 +1,8 @@
 import org.aria.rlandri.generic.artifacts.RealTimeSinglePlayerCoordinator;
 import org.aria.rlandri.generic.artifacts.annotation.GAME_OPERATION;
 
+import cartago.AgentId;
+
 public class Factorial extends RealTimeSinglePlayerCoordinator {
 
 	private boolean started = false;
