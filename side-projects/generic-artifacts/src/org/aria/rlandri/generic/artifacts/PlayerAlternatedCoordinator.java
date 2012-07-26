@@ -29,7 +29,7 @@ public abstract class PlayerAlternatedCoordinator extends Coordinator {
 	protected AgentId currentAgent = null;
 	protected int currentIndex = 0;
 
-	private final List<AgentId> order = new ArrayList<AgentId>();
+	protected final List<AgentId> order = new ArrayList<AgentId>();
 	private final Timer timer = new Timer();
 	private TimerTask task = null;
 	private int currentStep = 0;

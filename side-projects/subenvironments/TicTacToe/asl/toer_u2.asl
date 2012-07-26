@@ -34,7 +34,7 @@ getFirst([H | T],X,I) :-
 +!toePlan(CurrentTurn)
 	<-	getGameState(List);
 		?getFirst(List, X, 0);
-		.print("List: ", List, " - Free: ", X);
+		.print("I want to mark position ",X div 3," ",X mod 3);
 		mark(X div 3, X mod 3).
 		
 // this plan is for when the mark action doesn't validate

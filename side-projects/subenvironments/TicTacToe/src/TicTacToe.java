@@ -3,6 +3,8 @@ import org.aria.rlandri.generic.artifacts.annotation.GAME_OPERATION;
 import org.aria.rlandri.generic.artifacts.tools.ValidationResult;
 import org.aria.rlandri.generic.artifacts.tools.ValidationType;
 
+import com.sun.jmx.remote.util.OrderClassLoaders;
+
 import cartago.OPERATION;
 import cartago.OpFeedbackParam;
 import cartago.AgentId;
@@ -84,6 +86,24 @@ public class TicTacToe extends PlayerAlternatedCoordinator {
 		} else {
 			gameState[x][y] = -1;
 		}
+		
+		System.out.println("--------Game state--------");
+		for(int i=0;i<3;i++)
+		{
+			for(int j=0;j<3;j++)
+			{
+				System.out.print(gameState[i][j]+"  ");
+			}
+			System.out.println();
+		}
+		System.out.println("-----------------------");
+		try{
+			Thread.sleep(10);
+		}
+		catch(InterruptedException e)
+		{
+			
+		}
 
 		int end = ended();
 		if (end != 0) {
@@ -92,20 +112,24 @@ public class TicTacToe extends PlayerAlternatedCoordinator {
 					gameState[i][j] = 0;
 				}
 			
-			for (AgentId agentId : primeAgents.getAgentIds())
-				signal(agentId, "stopGame");
-
+			System.out.println("Game ended");
 			if (end < 0) {
 				score[0]++;
-				if (score[0] >= maxGames) {
-					// GAME ENDS. PLAYER 0 WINS
-				}
+				System.out.println("Agent "+ order.get(0) + " won ");	
+				//if (score[0] >= maxGames) {
+					
+				//}
 			} else {
 				score[1]++;
-				if (score[1] >= maxGames) {
-					// GAME ENDS. PLAYER 1 WINS
-				}
+				System.out.println("Agent "+ order.get(1) + " won ");	
+				//if (score[1] >= maxGames) {
+				//	// GAME ENDS. PLAYER 1 WINS
+				//}
 			}
+			
+			for (AgentId agentId : primeAgents.getAgentIds())
+				signal(agentId, "stopGame");
+			
 		}
 	}
 
