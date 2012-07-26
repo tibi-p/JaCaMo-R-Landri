@@ -19,37 +19,37 @@ import cartago.OpFeedbackParam;
 public class Roulette extends SimultaneouslyExecutedCoordinator {
 
 	/**
-	 * Maximum bet an agent can make
+	 * Maximum bet an agent can make.
 	 */
 	private static final int maxBet = 50;
-	
+
 	/**
-	 * Roulette numbers in the order found on the wheel
+	 * Roulette numbers in the order found on the wheel.
 	 */
 	private static final int[] numbers = new int[] { 0, 32, 15, 19, 4, 21, 2,
 			25, 17, 34, 6, 27, 13, 36, 11, 30, 8, 23, 10, 5, 24, 16, 33, 1, 20,
 			14, 31, 9, 22, 18, 29, 7, 28, 12, 35, 3, 26 };
 
 	/**
-	 * Street bets. Each bet is defined by the smallest number
+	 * Street bets. Each bet is defined by the smallest number.
 	 */
 	private static final int[] streetBets = new int[] { 1, 4, 7, 10, 13, 16,
 			19, 22, 25, 28, 31, 34 };
 
 	/**
-	 * Corner bets. Each bet is defined by the smallest number
+	 * Corner bets. Each bet is defined by the smallest number.
 	 */
 	private static final int[] cornerBets = new int[] { 1, 2, 4, 5, 7, 8, 10,
 			11, 13, 14, 16, 17, 19, 20, 22, 23, 25, 26, 28, 29, 31, 32 };
 
 	/**
-	 * Six bets. Each bet is defined by the smallest number
+	 * Six bets. Each bet is defined by the smallest number.
 	 */
 	private static final int[] sixBets = new int[] { 1, 7, 13, 19, 25, 31 };
 
 	/**
 	 * Payoffs hashmap. Each entry represents the payout for the corresponding
-	 * bet
+	 * bet.
 	 */
 	private final HashMap<String, Integer> payoffs = new HashMap<String, Integer>();
 	{
@@ -74,7 +74,7 @@ public class Roulette extends SimultaneouslyExecutedCoordinator {
 
 	/**
 	 * Hash map used to store the bets the agents make in one turn. Cleaned at
-	 * the end of each turnafter the payouts are made
+	 * the end of each turnafter the payouts are made.
 	 */
 	private final Map<AgentId, Bet> bets = new HashMap<AgentId, Bet>();
 
@@ -87,9 +87,9 @@ public class Roulette extends SimultaneouslyExecutedCoordinator {
 	private int winningNumber;
 
 	/**
-	 * the first part of the post evaluation for the Roulette is to send signal
+	 * The first part of the post evaluation for the Roulette is to send signal
 	 * to the master agents the master agents will spin the wheel and make the
-	 * payouts. After that the post evaluation is complete
+	 * payouts. After that the post evaluation is complete.
 	 */
 	@Override
 	protected void doPostEvaluation() {
@@ -99,7 +99,7 @@ public class Roulette extends SimultaneouslyExecutedCoordinator {
 	}
 
 	/**
-	 * function used to compute the sum of coins won by a bettor
+	 * Function used to compute the sum of coins won by a bettor.
 	 * 
 	 * @param betType
 	 *            the type of the bet
@@ -112,7 +112,7 @@ public class Roulette extends SimultaneouslyExecutedCoordinator {
 	}
 
 	/**
-	 * initializes the standings for all the agents
+	 * Initializes the standings for all the agents.
 	 */
 	private void initStandings() {
 
@@ -131,7 +131,7 @@ public class Roulette extends SimultaneouslyExecutedCoordinator {
 	}
 
 	/**
-	 * updates the economic standing of an agent
+	 * Updates the economic standing of an agent.
 	 * 
 	 * @param aid
 	 *            the id of the agent
@@ -157,7 +157,7 @@ public class Roulette extends SimultaneouslyExecutedCoordinator {
 	}
 
 	/**
-	 * used by the agents to make bets
+	 * Used by the agents to make bets.
 	 * 
 	 * @param betName
 	 *            type of bet the agent makes
@@ -179,7 +179,7 @@ public class Roulette extends SimultaneouslyExecutedCoordinator {
 	}
 
 	/**
-	 * validates the bets
+	 * Validates the bets.
 	 * 
 	 * @param betName
 	 *            the type of the bet
@@ -197,13 +197,13 @@ public class Roulette extends SimultaneouslyExecutedCoordinator {
 		if (money < sum) {
 			vr.addReason("insufficient_funds", ValidationType.ERROR);
 		}
-		
-		if (sum <=0){
-			vr.addReason("nonpositive_betting_sum",ValidationType.ERROR);
+
+		if (sum <= 0) {
+			vr.addReason("nonpositive_betting_sum", ValidationType.ERROR);
 		}
-		
-		if( sum >= maxBet){
-			vr.addReason("bet_sum_exceeds_max_allowed",ValidationType.ERROR);
+
+		if (sum >= maxBet) {
+			vr.addReason("bet_sum_exceeds_max_allowed", ValidationType.ERROR);
 		}
 
 		if (betName.equals("Single")) {
@@ -266,8 +266,8 @@ public class Roulette extends SimultaneouslyExecutedCoordinator {
 	}
 
 	/**
-	 * operation invoked by the master to obtain the result from spinning the
-	 * wheel
+	 * Operation invoked by the master to obtain the result from spinning the
+	 * wheel.
 	 */
 	@MASTER_OPERATION(validator = "validateSpinWheel")
 	public void spinWheel() {
@@ -416,8 +416,8 @@ public class Roulette extends SimultaneouslyExecutedCoordinator {
 	}
 
 	/**
-	 * operation used by the master agent to make the payouts to the agents
-	 * after the spin wheel operation is executed
+	 * Operation used by the master agent to make the payouts to the agents
+	 * after the spin wheel operation is executed.
 	 */
 	@MASTER_OPERATION(validator = "validatePayout")
 	public void payout() {
@@ -443,8 +443,8 @@ public class Roulette extends SimultaneouslyExecutedCoordinator {
 	 * Operation used by the agents to obtain their economic status.
 	 * 
 	 * @param result
-	 *            the feedback parameter is used to give the calling agent its
-	 *            economic standing
+	 *            The feedback parameter is used to give the calling agent its
+	 *            economic standing.
 	 */
 	@OPERATION
 	void getBalance(OpFeedbackParam<Double> result) {
