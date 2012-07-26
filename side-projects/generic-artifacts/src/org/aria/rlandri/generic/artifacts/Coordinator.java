@@ -140,6 +140,9 @@ public abstract class Coordinator extends Artifact {
 		}
 	}
 
+	/**
+	 * Fails as a result of a validation error.
+	 */
 	public void failValidation() {
 		ValidationResult vres = failures.get(getOpUserName());
 		ListTerm validationErrorList = new ListTermImpl();
@@ -152,6 +155,14 @@ public abstract class Coordinator extends Artifact {
 				validationErrorList));
 	}
 
+	/**
+	 * Fails as a result of a turn error.
+	 * 
+	 * @param reason
+	 *            the reason for the error
+	 * @param type
+	 *            the type of the error
+	 */
 	public void failTurn(String reason, ValidationType type) {
 		ListTerm validationErrorList = new ListTermImpl();
 		Structure term = new Structure(type.getName());
@@ -346,6 +357,18 @@ public abstract class Coordinator extends Artifact {
 
 	protected abstract void saveState();
 
+	/**
+	 * The basic initialisation of the coordinator with no exceptions wrapped.
+	 * 
+	 * @throws FileNotFoundException
+	 *             if the configuration properties file could not be found
+	 * @throws IOException
+	 *             if an I/O error occurs
+	 * @throws ParseException
+	 *             if the mas2j file could not be parsed
+	 * @throws CartagoException
+	 *             if the custom operations fail to register
+	 */
 	private void doBaseInit() throws FileNotFoundException, IOException,
 			ParseException, CartagoException {
 		loadProperties();
