@@ -132,10 +132,3 @@ diff(0).
 	<-	.print(" --------- Payoff in turn ",Turn," is ",Payoff, " --------- ");
 		?diff(Diff);
 		-+diff(Diff+Payoff).
-		
-/*	TODOs
-
-- comentarii cod ruleta
-- pretty printing
-
-*/
