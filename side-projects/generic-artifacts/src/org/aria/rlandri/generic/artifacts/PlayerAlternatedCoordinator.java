@@ -36,9 +36,16 @@ public abstract class PlayerAlternatedCoordinator extends Coordinator {
 	private boolean stepFinished = true;
 
 	// constants for testing purposes
-	public static final int STEPS = 5;
-	public static final int TURN_LENGTH = 1000;
+	protected int steps;
+	protected static final int TURN_LENGTH = 1000;
 
+	@Override
+	protected void init() throws CartagoException
+	{
+		super.init();
+		this.steps = Integer.parseInt(prop.getProperty("num_steps"));
+	}
+	
 	public void prepareEvaluation() {
 		boolean cancelled = task.cancel();
 		System.err.println(String.format("Cancellation has%s succeeded",
@@ -80,7 +87,7 @@ public abstract class PlayerAlternatedCoordinator extends Coordinator {
 
 	@INTERNAL_OPERATION
 	void runSubEnv() {
-		for (currentStep = 1; currentStep <= STEPS; currentStep++) {
+		for (currentStep = 1; currentStep <= steps; currentStep++) {
 			executeStep();
 		}
 	}

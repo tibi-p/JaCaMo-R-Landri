@@ -56,6 +56,8 @@ public abstract class Coordinator extends Artifact {
 	public static final String VALIDATION_FUNCTOR = "op_error";
 	public static final String TURN_FUNCTOR = "turn_error";
 	public static final String GAME_FUNCTOR = "game_error";
+	
+	protected Properties prop;
 
 	/**
 	 * The registry of regular agents.
@@ -442,7 +444,7 @@ public abstract class Coordinator extends Artifact {
 	}
 
 	private void loadProperties() throws FileNotFoundException, IOException {
-		Properties prop = new Properties();
+		prop = new Properties();
 		prop.load(new FileInputStream("config.properties"));
 		this.environmentType = prop.getProperty("environment_type");
 	}
