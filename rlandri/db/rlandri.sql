@@ -450,7 +450,7 @@ INSERT INTO `solution_solution` (`id`, `name`, `envUser_id`, `subEnvironment_id`
 (2, 'Auction solution', 4, 3, 'DA-MI HOTELU', 1, 'users/4/solutions/3/auction_solution_agents.zip', '', '', '2012-07-13 10:38:01'),
 (4, 'Factorial', 4, 2, 'Trivial computation!', 1, 'users/4/solutions/2/factorial_solution_agents.zip', '', '', '2012-07-13 10:56:26'),
 (5, 'sail', 2, 4, 'description', 1, 'users/2/solutions/4/roulette_feedback_solution_agents.zip', '', '', '2012-07-19 10:55:12'),
-(6, 'Toer', 2, 5, 'Really dumb agent for TicTacToe!', 1, 'users/2/solutions/5/toer_agent.zip', '', '', '2012-07-19 11:42:36');
+(6, 'Toer', 2, 5, 'Really dumb agent for TicTacToe!', 1, 'users/2/solutions/5/tictactoe_solution_agents.zip', '', '', '2012-07-19 11:42:36');
 
 -- --------------------------------------------------------
 
@@ -499,7 +499,7 @@ INSERT INTO `subenvironment_artifact` (`id`, `name`, `subenvironment_id`, `file`
 (2, 'Factorial', 2, 'subenvironments/2/artifacts/factorial_artifacts.zip'),
 (3, 'Auction', 3, 'subenvironments/3/artifacts/auction_artifacts.zip'),
 (6, 'Feedback Artifacts', 4, 'subenvironments/4/artifacts/roulette_feedback_artifacts.zip'),
-(7, 'TicTac Artifacts', 5, 'subenvironments/5/artifacts/tictac_artifacts.zip');
+(7, 'TicTac Artifacts', 5, 'subenvironments/5/artifacts/tictactoe_artifacts.zip');
 
 -- --------------------------------------------------------
 
