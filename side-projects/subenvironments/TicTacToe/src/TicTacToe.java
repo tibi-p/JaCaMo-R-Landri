@@ -5,7 +5,7 @@ import org.aria.rlandri.generic.artifacts.tools.ValidationType;
 
 import cartago.OPERATION;
 import cartago.OpFeedbackParam;
-
+import cartago.AgentId;
 /**
  *  
  */
@@ -91,6 +91,9 @@ public class TicTacToe extends PlayerAlternatedCoordinator {
 				for (int j = 0; j < 3; j++) {
 					gameState[i][j] = 0;
 				}
+			
+			for (AgentId agentId : primeAgents.getAgentIds())
+				signal(agentId, "stopGame");
 
 			if (end < 0) {
 				score[0]++;
