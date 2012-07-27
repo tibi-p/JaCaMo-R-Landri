@@ -14,26 +14,26 @@ import cartago.OPERATION;
 import cartago.OpFeedbackParam;
 
 /**
- * Artifact that implements the auction.
+ * Roulette artifact with instant feedback for the bet game operation
  */
 public class RouletteFeedback extends SimultaneouslyExecutedCoordinator {
 
 	private static final int maxBet = 50;
-	
+
 	private static final int[] numbers = new int[] { 0, 32, 15, 19, 4, 21, 2,
-		25, 17, 34, 6, 27, 13, 36, 11, 30, 8, 23, 10, 5, 24, 16, 33, 1, 20,
-		14, 31, 9, 22, 18, 29, 7, 28, 12, 35, 3, 26 };
+			25, 17, 34, 6, 27, 13, 36, 11, 30, 8, 23, 10, 5, 24, 16, 33, 1, 20,
+			14, 31, 9, 22, 18, 29, 7, 28, 12, 35, 3, 26 };
 
 	private static final int[] streetBets = new int[] { 1, 4, 7, 10, 13, 16,
 			19, 22, 25, 28, 31, 34 };
-	
+
 	private static final int[] cornerBets = new int[] { 1, 2, 4, 5, 7, 8, 10,
 			11, 13, 14, 16, 17, 19, 20, 22, 23, 25, 26, 28, 29, 31, 32 };
-	
+
 	private static final int[] sixBets = new int[] { 1, 7, 13, 19, 25, 31 };
-	
+
 	private final HashMap<String, Integer> payoffs = new HashMap<String, Integer>();
-	
+
 	{
 		payoffs.put("0", 35);
 		payoffs.put("Single", 35);
@@ -53,10 +53,10 @@ public class RouletteFeedback extends SimultaneouslyExecutedCoordinator {
 		payoffs.put("Odd", 1);
 		payoffs.put("Even", 1);
 	}
-	
+
 	private final Map<AgentId, Bet> bets = new HashMap<AgentId, Bet>();
 	private final Map<AgentId, Double> standings = new HashMap<AgentId, Double>();
-	
+
 	private String winningColor;
 	private int winningNumber;
 
@@ -65,7 +65,7 @@ public class RouletteFeedback extends SimultaneouslyExecutedCoordinator {
 		super.startSubenv();
 		initStandings();
 	}
-	
+
 	@Override
 	protected void doPreEvaluation() {
 		for (AgentId aid : masterAgents.getAgentIds()) {
@@ -85,7 +85,7 @@ public class RouletteFeedback extends SimultaneouslyExecutedCoordinator {
 			standings.put(player, value);
 		}
 	}
-	
+
 	private void initStandings() {
 
 		Set<AgentId> ids = regularAgents.getAgentIds();
@@ -126,9 +126,9 @@ public class RouletteFeedback extends SimultaneouslyExecutedCoordinator {
 		payoff.set(pay);
 	}
 
-	
-	ValidationResult validateBet(String betName, Object betValues[], double sum,
-					OpFeedbackParam<Integer> currentStep, OpFeedbackParam<Double> payoff) {
+	ValidationResult validateBet(String betName, Object betValues[],
+			double sum, OpFeedbackParam<Integer> currentStep,
+			OpFeedbackParam<Double> payoff) {
 
 		AgentId aid = getOpUserId();
 		System.out.println("VALIDATION " + aid);
@@ -137,13 +137,13 @@ public class RouletteFeedback extends SimultaneouslyExecutedCoordinator {
 		if (money < sum) {
 			vr.addReason("insufficient_funds", ValidationType.ERROR);
 		}
-		
-		if (sum <=0){
-			vr.addReason("nonpositive_betting_sum",ValidationType.ERROR);
+
+		if (sum <= 0) {
+			vr.addReason("nonpositive_betting_sum", ValidationType.ERROR);
 		}
-		
-		if( sum >= maxBet){
-			vr.addReason("bet_sum_exceeds_max_allowed",ValidationType.ERROR);
+
+		if (sum >= maxBet) {
+			vr.addReason("bet_sum_exceeds_max_allowed", ValidationType.ERROR);
 		}
 
 		if (betName.equals("Single")) {
@@ -333,7 +333,7 @@ public class RouletteFeedback extends SimultaneouslyExecutedCoordinator {
 		else
 			return -betSum;
 	}
-	
+
 	private boolean contains(int[] array, int value) {
 		for (int i = 0; i < array.length; i++) {
 			if (array[i] == value)
@@ -341,14 +341,14 @@ public class RouletteFeedback extends SimultaneouslyExecutedCoordinator {
 		}
 		return false;
 	}
-	
+
 	@OPERATION
 	void getBalance(OpFeedbackParam<Double> result) {
 		AgentId aid = getOpUserId();
 		double res = standings.get(aid);
 		result.set(res);
 	}
-	
+
 	@Override
 	protected void updateRank() {
 
