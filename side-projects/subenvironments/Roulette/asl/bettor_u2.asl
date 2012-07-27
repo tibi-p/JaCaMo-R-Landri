@@ -29,9 +29,9 @@ betSum(2).
 	<-	.print(" Error: ",ErrList).
 
 +payoff(Turn,Number,Color,Payoff): Payoff > 0
-	<-	.print("Won ",Payoff);
+	<-	.print(" --------- Payoff in turn ",Turn," is ",Payoff, " --------- ");
 		-+betSum(2).
 
 +payoff(Turn,Number,Color,Payoff): Payoff < 0
-	<-	.print("Lost ",-Payoff);
+	<-	.print(" --------- Payoff in turn ",Turn," is ",Payoff, " --------- ");
 		-+betSum(2*(-Payoff)).

@@ -1,11 +1,11 @@
 -- phpMyAdmin SQL Dump
--- version 3.5.1
+-- version 3.4.5deb1
 -- http://www.phpmyadmin.net
 --
--- Host: 127.0.0.1
--- Generation Time: Jul 24, 2012 at 11:46 AM
--- Server version: 5.5.25a-log
--- PHP Version: 5.4.4
+-- Host: localhost
+-- Generation Time: Jul 27, 2012 at 11:49 AM
+-- Server version: 5.1.63
+-- PHP Version: 5.3.6-13ubuntu3.8
 
 SET SQL_MODE="NO_AUTO_VALUE_ON_ZERO";
 SET time_zone = "+00:00";
@@ -159,7 +159,7 @@ CREATE TABLE IF NOT EXISTS `auth_user` (
 
 INSERT INTO `auth_user` (`id`, `username`, `first_name`, `last_name`, `email`, `password`, `is_staff`, `is_active`, `is_superuser`, `last_login`, `date_joined`) VALUES
 (1, 'admin', '', '', 'popa.tiberiu@gmail.com', 'pbkdf2_sha256$10000$Pel4TDYzKAof$zawDS1r9uzj0ZkO/N17caDtFPsDFwcLo9unbfJVXTlU=', 1, 1, 1, '2012-07-19 11:38:57', '2012-07-12 11:13:16'),
-(2, 'tibi', '', '', '', 'pbkdf2_sha256$10000$j4VqrRFjDGoy$mMDRAp9YUBpIDZXDoQDBJLe4ZhNQilyHnU7f4LUqIt4=', 0, 1, 0, '2012-07-19 16:59:55', '2012-07-12 11:14:25'),
+(2, 'tibi', '', '', '', 'pbkdf2_sha256$10000$j4VqrRFjDGoy$mMDRAp9YUBpIDZXDoQDBJLe4ZhNQilyHnU7f4LUqIt4=', 0, 1, 0, '2012-07-27 08:41:37', '2012-07-12 11:14:25'),
 (3, 'andrei', '', '', '', 'pbkdf2_sha256$10000$WDjG5qD6agbH$GtnTKn45ca2zlUa1uSEgtGolmWIzJ/9+iqhTaUZ86z8=', 0, 1, 0, '2012-07-19 10:52:46', '2012-07-12 11:14:40'),
 (4, 'mihai', '', '', '', 'pbkdf2_sha256$10000$Ac6AXMUmTKvR$EyJJuVXpvAAq/6hPqgufSiTLweRfKQPSvoJHuvVDVbA=', 0, 1, 0, '2012-07-19 15:42:44', '2012-07-12 11:14:46');
 
@@ -314,6 +314,13 @@ CREATE TABLE IF NOT EXISTS `django_session` (
   KEY `django_session_3da3d3d8` (`expire_date`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
+--
+-- Dumping data for table `django_session`
+--
+
+INSERT INTO `django_session` (`session_key`, `session_data`, `expire_date`) VALUES
+('d27b4929eb9b063693a3029c2412e6f0', 'NmJmZWUyZWExMGEyNzU1NGUwZjg2MzhiNzA4ZjA3MDI5YTg0MzNiYjqAAn1xAShVEl9hdXRoX3Vz\nZXJfYmFja2VuZHECVSlkamFuZ28uY29udHJpYi5hdXRoLmJhY2tlbmRzLk1vZGVsQmFja2VuZHED\nVQ1fYXV0aF91c2VyX2lkcQSKAQJ1Lg==\n', '2012-08-10 08:41:38');
+
 -- --------------------------------------------------------
 
 --
@@ -417,7 +424,14 @@ CREATE TABLE IF NOT EXISTS `simulator_abstractprocess` (
   `created` datetime NOT NULL,
   PRIMARY KEY (`id`),
   KEY `simulator_abstractprocess_6c4d8baf` (`solution_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=2 ;
+
+--
+-- Dumping data for table `simulator_abstractprocess`
+--
+
+INSERT INTO `simulator_abstractprocess` (`id`, `solution_id`, `created`) VALUES
+(1, 1, '2012-07-27 08:43:23');
 
 -- --------------------------------------------------------
 
