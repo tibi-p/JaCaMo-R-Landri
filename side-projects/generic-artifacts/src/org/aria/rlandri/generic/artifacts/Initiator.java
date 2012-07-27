@@ -1,10 +1,5 @@
 package org.aria.rlandri.generic.artifacts;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.util.Properties;
-
 import cartago.Artifact;
 import cartago.ArtifactId;
 import cartago.CartagoException;
@@ -18,16 +13,9 @@ public class Initiator extends Artifact {
 	private String coordinatorClass;
 
 	protected void init() throws CartagoException {
-		try {
-			Properties prop = new Properties();
-			prop.load(new FileInputStream("config.properties"));
-			this.environmentType = prop.getProperty("environment_type");
-			this.coordinatorClass = prop.getProperty("coordinator_class");
-		} catch (FileNotFoundException e) {
-			throw new CartagoException(e.getMessage());
-		} catch (IOException e) {
-			throw new CartagoException(e.getMessage());
-		}
+		Configuration configuration = Configuration.getInstance();
+		this.environmentType = configuration.getProperty("environment_type");
+		this.coordinatorClass = configuration.getProperty("coordinator_class");
 	}
 
 	@OPERATION

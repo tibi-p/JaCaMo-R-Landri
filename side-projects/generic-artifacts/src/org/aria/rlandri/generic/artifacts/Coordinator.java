@@ -22,7 +22,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 
 import ora4mas.nopl.JasonTermWrapper;
 
@@ -56,8 +55,8 @@ public abstract class Coordinator extends Artifact {
 	public static final String VALIDATION_FUNCTOR = "op_error";
 	public static final String TURN_FUNCTOR = "turn_error";
 	public static final String GAME_FUNCTOR = "game_error";
-	
-	protected Properties prop;
+
+	protected final Configuration configuration = Configuration.getInstance();
 
 	/**
 	 * The registry of regular agents.
@@ -323,6 +322,19 @@ public abstract class Coordinator extends Artifact {
 	}
 
 	/**
+	 * Sends a signal to all prime agents.
+	 * 
+	 * @param type
+	 *            the type of the signal
+	 * @param objs
+	 *            the signal's arguments
+	 */
+	protected void signalPrimeAgents(String type, Object... objs) {
+		for (AgentId agentId : primeAgents.getAgentIds())
+			signal(agentId, type, objs);
+	}
+
+	/**
 	 * Returns <tt>true</tt> if <tt>agentName</tt> is a participating agent.
 	 * 
 	 * @return <tt>true</tt> if <tt>agentName</tt> is a participating agent
@@ -463,9 +475,7 @@ public abstract class Coordinator extends Artifact {
 	 *             if an I/O error occurs
 	 */
 	private void loadProperties() throws FileNotFoundException, IOException {
-		prop = new Properties();
-		prop.load(new FileInputStream("config.properties"));
-		this.environmentType = prop.getProperty("environment_type");
+		this.environmentType = configuration.getProperty("environment_type");
 	}
 
 	/**

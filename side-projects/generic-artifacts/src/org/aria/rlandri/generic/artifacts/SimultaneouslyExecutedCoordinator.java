@@ -45,12 +45,11 @@ public abstract class SimultaneouslyExecutedCoordinator extends Coordinator {
 	private boolean postEvaluationDone = false;
 
 	@Override
-	protected void init() throws CartagoException
-	{
+	protected void init() throws CartagoException {
 		super.init();
-		this.steps = Integer.parseInt(prop.getProperty("num_steps"));
+		this.steps = Integer.parseInt(configuration.getProperty("num_steps"));
 	}
-	
+
 	public boolean waitForEndTurn() {
 		System.err.println(String.format("%s: waiting for the end of turn %s",
 				getOpUserId(), currentStep));
@@ -217,10 +216,9 @@ public abstract class SimultaneouslyExecutedCoordinator extends Coordinator {
 
 	@INTERNAL_OPERATION
 	void runSubEnv() {
-		for (currentStep = 1; currentStep <= steps ; currentStep++)
+		for (currentStep = 1; currentStep <= steps; currentStep++)
 			executeStep();
-		for (AgentId agentId : primeAgents.getAgentIds())
-			signal(agentId, "stopGame");
+		signalPrimeAgents("stopGame");
 	}
 
 	@GUARD

@@ -43,7 +43,7 @@ public abstract class PlayerAlternatedCoordinator extends Coordinator {
 	@Override
 	protected void init() throws CartagoException {
 		super.init();
-		this.steps = Integer.parseInt(prop.getProperty("num_steps"));
+		this.steps = Integer.parseInt(configuration.getProperty("num_steps"));
 	}
 
 	public void prepareEvaluation() {
@@ -93,10 +93,7 @@ public abstract class PlayerAlternatedCoordinator extends Coordinator {
 				break;
 		}
 		setState(EnvStatus.FINISHED);
-		for(AgentId aid : primeAgents.getAgentIds())
-		{
-			signal(aid,"stopGame");
-		}
+		signalPrimeAgents("stopGame");
 	}
 
 	@INTERNAL_OPERATION

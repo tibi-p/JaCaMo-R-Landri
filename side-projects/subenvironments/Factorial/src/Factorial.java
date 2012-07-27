@@ -1,12 +1,10 @@
 import org.aria.rlandri.generic.artifacts.RealTimeSinglePlayerCoordinator;
 import org.aria.rlandri.generic.artifacts.annotation.GAME_OPERATION;
 
-import cartago.AgentId;
-
 public class Factorial extends RealTimeSinglePlayerCoordinator {
 
 	private boolean started = false;
-	
+
 	@Override
 	protected void updateCurrency() {
 		// TODO Auto-generated method stub
@@ -36,10 +34,9 @@ public class Factorial extends RealTimeSinglePlayerCoordinator {
 
 	@GAME_OPERATION(validator = "catzelush")
 	protected void derp(int result) {
-		System.out.println("good job, brah: " + result);
-		
-		for (AgentId agentId : primeAgents.getAgentIds())
-			signal(agentId, "stopGame");
+		String msgFmt = "good job, brother %s: %s";
+		System.out.println(String.format(msgFmt, getOpUserId(), result));
+		signalPrimeAgents("stopGame");
 	}
 
 	protected void catzelush(int result) {

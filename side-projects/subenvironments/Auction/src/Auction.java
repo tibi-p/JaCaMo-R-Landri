@@ -6,15 +6,14 @@ import org.aria.rlandri.generic.artifacts.tools.ValidationResult;
 import org.aria.rlandri.generic.artifacts.tools.ValidationType;
 
 import cartago.AgentId;
-import cartago.CartagoException;
 import cartago.OpFeedbackParam;
 
 public class Auction extends RealTimeMultiPlayerCoordinator {
 
 	private final Random random = new Random();
 	private AgentId lastBidder;
-	private int currentBid;
-	private boolean timeUp, started;
+	private int currentBid = 1;
+	private boolean timeUp = false, started = false;
 
 	@Override
 	protected void updateRank() {
@@ -34,13 +33,6 @@ public class Auction extends RealTimeMultiPlayerCoordinator {
 
 	}
 
-	@Override
-	protected void init() throws CartagoException {
-		super.init();
-		currentBid = 1;
-		timeUp = false;
-	}
-
 	@GAME_OPERATION(validator = "derp")
 	protected void startAuction() throws InterruptedException {
 		started = true;
@@ -52,10 +44,7 @@ public class Auction extends RealTimeMultiPlayerCoordinator {
 		timeUp = true;
 		System.out.println(lastBidder + " is winrar");
 		signal(lastBidder, "you_are_a_winrar");
-		
-		for (AgentId agentId : primeAgents.getAgentIds())
-			signal(agentId, "stopGame");
-
+		signalPrimeAgents("stopGame");
 	}
 
 	@GAME_OPERATION(validator = "priceValid")
@@ -67,7 +56,7 @@ public class Auction extends RealTimeMultiPlayerCoordinator {
 		System.out.println(lastBidder + " bidded " + price);
 	}
 
-	ValidationResult priceValid(int price) {
+	protected ValidationResult priceValid(int price) {
 		ValidationResult vr = new ValidationResult(getOpUserName());
 		vr.setDefaultType(ValidationType.ERROR);
 		if (!started) {

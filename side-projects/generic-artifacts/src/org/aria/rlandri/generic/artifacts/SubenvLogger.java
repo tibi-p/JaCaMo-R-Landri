@@ -7,13 +7,11 @@ import jason.mas2j.parser.mas2j;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.Properties;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.EnhancedPatternLayout;
@@ -44,16 +42,9 @@ public class SubenvLogger extends Artifact {
 	private File logDirectory = new File(".");
 
 	public void init() throws CartagoException {
-		try {
-			Properties prop = new Properties();
-			prop.load(new FileInputStream("config.properties"));
-			String djangoDirectory = prop.getProperty("django_directory");
-			logDirectory = new File(djangoDirectory, LOG_REL_PATH);
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		Configuration configuration = Configuration.getInstance();
+		String djangoDirectory = configuration.getProperty("django_directory");
+		logDirectory = new File(djangoDirectory, LOG_REL_PATH);
 
 		// find the mas2jFile to extract the subenvironment name
 		String mas2jFile = new File(".").list(new FilenameFilter() {
