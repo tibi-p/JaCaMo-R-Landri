@@ -3,11 +3,8 @@ import org.aria.rlandri.generic.artifacts.annotation.GAME_OPERATION;
 import org.aria.rlandri.generic.artifacts.tools.ValidationResult;
 import org.aria.rlandri.generic.artifacts.tools.ValidationType;
 
-import com.sun.jmx.remote.util.OrderClassLoaders;
-
 import cartago.OPERATION;
 import cartago.OpFeedbackParam;
-import cartago.AgentId;
 /**
  *  
  */
@@ -127,9 +124,7 @@ public class TicTacToe extends PlayerAlternatedCoordinator {
 				//}
 			}
 			
-			for (AgentId agentId : primeAgents.getAgentIds())
-				signal(agentId, "stopGame");
-			
+			stop = true;
 		}
 	}
 
