@@ -1,6 +1,6 @@
 import org.aria.rlandri.generic.artifacts.SimultaneouslyExecutedCoordinator;
 
-public class IterativePrisonerDilemma extends SimultaneouslyExecutedCoordinator {
+public class IteratedPrisonerDilemma extends SimultaneouslyExecutedCoordinator {
 
 	@Override
 	protected void saveState() {

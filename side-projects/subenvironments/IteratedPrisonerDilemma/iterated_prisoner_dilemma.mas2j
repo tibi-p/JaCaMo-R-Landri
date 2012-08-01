@@ -1,6 +1,6 @@
 /* Jason Project */
 
-MAS iterative_prisoner's_dilemma {
+MAS iterated_prisoner_dilemma {
 
 	infrastructure: Centralised
 
