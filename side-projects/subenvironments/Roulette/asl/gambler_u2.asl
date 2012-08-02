@@ -111,17 +111,17 @@ diff(0).
 	<- .print("Decided to make a risky bet");
 		bet("Single",[9],Sum).
 
-/*
-	risky bet failure plan for validation errors
-*/
--!riskyBet(Sum)[error_msg("validation"),op_error(ErrList)]
-	<-	.print(" Error: ",ErrList).
+/**
+ * Risky bet failure plan for validation errors.
+ */
+-!riskyBet(Sum)[error_msg("validation"), op_error(ErrList)]
+	<-	.print("Specific Error: ", ErrList).
 
-/*
-	generic risky bet failure plan
-*/
+/**
+ * Generic risky bet failure plan.
+ */
 -!riskyBet(Sum)[error_msg(Msg)]
-	<-	.print(" Error: ",Msg).
+	<-	.print("Generic Error: ", Msg).
 
 /*
 	payoff plan

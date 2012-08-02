@@ -143,14 +143,12 @@ public abstract class SimultaneouslyExecutedCoordinator extends Coordinator {
 	}
 
 	private boolean prepareEvaluation() {
-		boolean cancelled = task.cancel();
-		System.err.println(String.format("Cancellation has%s succeeded",
-				cancelled ? "" : " not"));
+		resetTask();
+		setState(EnvStatus.EVALUATING);
 
 		doPreEvaluation();
 		await("isPreEvaluationDone");
 
-		setState(EnvStatus.EVALUATING);
 		executingAgentIterator = readyAgents.iterator();
 		if (executingAgentIterator.hasNext()) {
 			executingAgent = executingAgentIterator.next();
@@ -160,6 +158,13 @@ public abstract class SimultaneouslyExecutedCoordinator extends Coordinator {
 			resetTurnInfo();
 			return false;
 		}
+	}
+
+	private void resetTask() {
+		boolean cancelled = task.cancel();
+		System.err.println(String.format("Cancellation has%s succeeded",
+				cancelled ? "" : " not"));
+		task = null;
 	}
 
 	@PRIME_AGENT_OPERATION
@@ -179,14 +184,13 @@ public abstract class SimultaneouslyExecutedCoordinator extends Coordinator {
 				long runTime = new Date().getTime();
 				System.err.println(String.format(errFmt, startTime, runTime,
 						runTime - startTime));
-				execInternalOp("finishTimer");
+				execInternalOp("finishTimer", this);
 			}
 		};
 		signal("startTurn", currentStep);
 		timer.schedule(task, STEP_LENGTH);
 		await("isStepFinished");
-		// TODO send only to master
-		signal("stopTurn", currentStep);
+		signalMasterAgents("stopTurn", currentStep);
 	}
 
 	@OPERATION
@@ -196,16 +200,18 @@ public abstract class SimultaneouslyExecutedCoordinator extends Coordinator {
 	}
 
 	@INTERNAL_OPERATION
-	private void finishTimer() {
-		EnvStatus state = getState();
-		if (state == EnvStatus.RUNNING) {
-			String errFmt = "As the timer expired - %s from %s";
-			System.err.println(String.format(errFmt, readyAgents.size(),
-					regularAgents.getNumRegistered()));
-			timerExpired = true;
-			prepareEvaluation();
-		} else {
-			// TODO handle me
+	private void finishTimer(TimerTask callerTask) {
+		if (callerTask != null && callerTask.equals(task)) {
+			EnvStatus state = getState();
+			if (EnvStatus.RUNNING.equals(state)) {
+				String errFmt = "As the timer expired - %s from %s";
+				System.err.println(String.format(errFmt, readyAgents.size(),
+						regularAgents.getNumRegistered()));
+				timerExpired = true;
+				prepareEvaluation();
+			} else {
+				// TODO handle me
+			}
 		}
 	}
 

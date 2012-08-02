@@ -322,6 +322,19 @@ public abstract class Coordinator extends Artifact {
 	}
 
 	/**
+	 * Sends a signal to all master agents.
+	 * 
+	 * @param type
+	 *            the type of the signal
+	 * @param objs
+	 *            the signal's arguments
+	 */
+	protected void signalMasterAgents(String type, Object... objs) {
+		for (AgentId agentId : masterAgents.getAgentIds())
+			signal(agentId, type, objs);
+	}
+
+	/**
 	 * Sends a signal to all prime agents.
 	 * 
 	 * @param type
