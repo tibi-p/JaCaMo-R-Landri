@@ -1,3 +1,4 @@
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -21,31 +22,31 @@ public class Roulette extends SimultaneouslyExecutedCoordinator {
 	/**
 	 * Maximum bet an agent can make.
 	 */
-	private static final int maxBet = 50;
+	private static final int MAX_BET = 50;
 
 	/**
 	 * Roulette numbers in the order found on the wheel.
 	 */
-	private static final int[] numbers = new int[] { 0, 32, 15, 19, 4, 21, 2,
+	private static final int[] NUMBERS = new int[] { 0, 32, 15, 19, 4, 21, 2,
 			25, 17, 34, 6, 27, 13, 36, 11, 30, 8, 23, 10, 5, 24, 16, 33, 1, 20,
 			14, 31, 9, 22, 18, 29, 7, 28, 12, 35, 3, 26 };
 
 	/**
 	 * Street bets. Each bet is defined by the smallest number.
 	 */
-	private static final int[] streetBets = new int[] { 1, 4, 7, 10, 13, 16,
+	private static final int[] STREET_BETS = new int[] { 1, 4, 7, 10, 13, 16,
 			19, 22, 25, 28, 31, 34 };
 
 	/**
 	 * Corner bets. Each bet is defined by the smallest number.
 	 */
-	private static final int[] cornerBets = new int[] { 1, 2, 4, 5, 7, 8, 10,
+	private static final int[] CORNER_BETS = new int[] { 1, 2, 4, 5, 7, 8, 10,
 			11, 13, 14, 16, 17, 19, 20, 22, 23, 25, 26, 28, 29, 31, 32 };
 
 	/**
 	 * Six bets. Each bet is defined by the smallest number.
 	 */
-	private static final int[] sixBets = new int[] { 1, 7, 13, 19, 25, 31 };
+	private static final int[] SIX_BETS = new int[] { 1, 7, 13, 19, 25, 31 };
 
 	/**
 	 * Payoffs hashmap. Each entry represents the payout for the corresponding
@@ -83,7 +84,14 @@ public class Roulette extends SimultaneouslyExecutedCoordinator {
 	 */
 	private final Map<AgentId, Double> standings = new HashMap<AgentId, Double>();
 
+	/**
+	 * The winning color after the wheel was spun
+	 */
 	private String winningColor;
+
+	/**
+	 * The winning number after the wheel was spun
+	 */
 	private int winningNumber;
 
 	/**
@@ -92,7 +100,7 @@ public class Roulette extends SimultaneouslyExecutedCoordinator {
 	 * payouts. After that the post evaluation is complete.
 	 */
 	@Override
-	protected void doPostEvaluation() {
+	protected final void doPostEvaluation() {
 		for (AgentId aid : masterAgents.getAgentIds()) {
 			signal(aid, "spinWheel", currentStep);
 		}
@@ -105,9 +113,9 @@ public class Roulette extends SimultaneouslyExecutedCoordinator {
 	 *            the type of the bet
 	 * @param betSum
 	 *            the sum betted
-	 * @return
+	 * @return The sum of coins won by a bettor.
 	 */
-	private double payoff(String betType, double betSum) {
+	private double payoff(final String betType, final double betSum) {
 		return betSum * payoffs.get(betType);
 	}
 
@@ -125,7 +133,7 @@ public class Roulette extends SimultaneouslyExecutedCoordinator {
 	}
 
 	@PRIME_AGENT_OPERATION
-	protected void startSubenv() {
+	protected final void startSubenv() {
 		super.startSubenv();
 		initStandings();
 	}
@@ -134,11 +142,11 @@ public class Roulette extends SimultaneouslyExecutedCoordinator {
 	 * Updates the economic standing of an agent.
 	 * 
 	 * @param aid
-	 *            the id of the agent
+	 *            The id of the agent.
 	 * @param value
-	 *            the value to be added to the economic standing to update it
+	 *            The value to be added to the economic standing to update it.
 	 */
-	private void updateStandings(AgentId aid, double value) {
+	private void updateStandings(final AgentId aid, final double value) {
 		if (standings.containsKey(aid)) {
 			double oldValue = standings.get(aid);
 			standings.put(aid, oldValue + value);
@@ -148,11 +156,11 @@ public class Roulette extends SimultaneouslyExecutedCoordinator {
 	}
 
 	@GAME_OPERATION(validator = "validateBet")
-	void bet(String betName, double sum) {
+	final void bet(final String betName, final double sum) {
 		this.bet(betName, null, sum);
 	}
 
-	ValidationResult validateBet(String betName, double sum) {
+	ValidationResult validateBet(final String betName, final double sum) {
 		return validateBet(betName, null, sum);
 	}
 
@@ -160,20 +168,17 @@ public class Roulette extends SimultaneouslyExecutedCoordinator {
 	 * Used by the agents to make bets.
 	 * 
 	 * @param betName
-	 *            type of bet the agent makes
+	 *            Type of bet the agent makes.
 	 * @param betValues
-	 *            specifies the type of bet
+	 *            Specifies the type of bet.
 	 * @param sum
-	 *            sum of coins the agent bets
+	 *            Sum of coins the agent bets.
 	 */
 	@GAME_OPERATION(validator = "validateBet")
-	void bet(String betName, Object betValues[], double sum) {
+	void bet(final String betName, final Object[] betValues, final double sum) {
 		AgentId aid = getOpUserId();
 		System.out.println(aid + " bets " + sum + " gold coins on " + betName);
-		Bet bet = new Bet();
-		bet.sum = sum;
-		bet.type = betName;
-		bet.betValues = betValues;
+		Bet bet = new Bet(sum, betName, betValues);
 		bets.put(aid, bet);
 
 	}
@@ -182,13 +187,14 @@ public class Roulette extends SimultaneouslyExecutedCoordinator {
 	 * Validates the bets.
 	 * 
 	 * @param betName
-	 *            the type of the bet
+	 *            The type of the bet.
 	 * @param betValues
-	 *            the particular instance of the bet
+	 *            The particular instance of the bet.
 	 * @param sum
-	 *            the sum of coins an agent bets
+	 *            The sum of coins an agent bets.
 	 */
-	ValidationResult validateBet(String betName, Object betValues[], double sum) {
+	ValidationResult validateBet(final String betName,
+			final Object betValues[], final double sum) {
 
 		AgentId aid = getOpUserId();
 		ValidationResult vr = new ValidationResult(aid.getAgentName());
@@ -201,7 +207,7 @@ public class Roulette extends SimultaneouslyExecutedCoordinator {
 			vr.addReason("nonpositive_betting_sum", ValidationType.ERROR);
 		}
 
-		if (sum >= maxBet) {
+		if (sum >= MAX_BET) {
 			vr.addReason("bet_sum_exceeds_max_allowed", ValidationType.ERROR);
 		}
 
@@ -231,7 +237,7 @@ public class Roulette extends SimultaneouslyExecutedCoordinator {
 				vr.addReason("invalid_street_bet(wrong_number_of_arguments)",
 						ValidationType.ERROR);
 			int val = ((Number) betValues[0]).intValue();
-			if (!contains(streetBets, val))
+			if (Arrays.asList(STREET_BETS).contains(val))
 				vr.addReason("invalid_street_bet", ValidationType.ERROR);
 		}
 
@@ -240,7 +246,7 @@ public class Roulette extends SimultaneouslyExecutedCoordinator {
 				vr.addReason("invalid_corner_bet(wrong_number_of_arguments)",
 						ValidationType.ERROR);
 			int val = ((Number) betValues[0]).intValue();
-			if (!contains(cornerBets, val))
+			if (Arrays.asList(CORNER_BETS).contains(val))
 				vr.addReason("invalid_corner_bet", ValidationType.ERROR);
 		}
 
@@ -249,19 +255,11 @@ public class Roulette extends SimultaneouslyExecutedCoordinator {
 				vr.addReason("invalid_six_bet(wrong_number_of_arguments)",
 						ValidationType.ERROR);
 			int val = ((Number) betValues[0]).intValue();
-			if (!contains(sixBets, val))
+			if (Arrays.asList(SIX_BETS).contains(val))
 				vr.addReason("invalid_six_bet", ValidationType.ERROR);
 		}
 
 		return vr;
-	}
-
-	private boolean contains(int[] array, int value) {
-		for (int i = 0; i < array.length; i++) {
-			if (array[i] == value)
-				return true;
-		}
-		return false;
 	}
 
 	/**
@@ -272,7 +270,7 @@ public class Roulette extends SimultaneouslyExecutedCoordinator {
 	public void spinWheel() {
 		int value = (int) (Math.random() * 37);
 
-		winningNumber = numbers[value];
+		winningNumber = NUMBERS[value];
 		winningColor = "red";
 		if (value % 2 == 0) {
 			winningColor = "black";
@@ -297,35 +295,39 @@ public class Roulette extends SimultaneouslyExecutedCoordinator {
 	 * @return minus the bet sum if the bet is lost or the payout if the bet is
 	 *         won
 	 */
-	double computePayoffForPlayer(Bet bet) {
-		String betType = bet.type;
-		double betSum = bet.sum;
-		Object[] values = bet.betValues;
+	final double computePayoffForPlayer(final Bet bet) {
+		String betType = bet.getType();
+		double betSum = bet.getSum();
+		Object[] values = bet.getBetValues();
 
 		boolean won = false;
 
 		if (betType.equals("0")) {
-			if (winningNumber == 0)
+			if (winningNumber == 0) {
 				won = true;
+			}
 		}
 
 		if (betType.equals("Single")) {
 			int betValue = ((Number) values[0]).intValue();
-			if (winningNumber == betValue)
+			if (winningNumber == betValue) {
 				won = true;
+			}
 		}
 
 		if (betType.equals("Split")) {
 			int value1 = ((Number) values[0]).intValue();
 			int value2 = ((Number) values[1]).intValue();
-			if (winningNumber == value1 || winningNumber == value2)
+			if (winningNumber == value1 || winningNumber == value2) {
 				won = true;
+			}
 		}
 
 		if (betType.equals("Street")) {
 			int value = ((Number) values[0]).intValue();
-			if (winningNumber >= value && winningNumber < value + 3)
+			if (winningNumber >= value && winningNumber < value + 3) {
 				won = true;
+			}
 		}
 
 		if (betType.equals("Corner")) {
@@ -342,76 +344,90 @@ public class Roulette extends SimultaneouslyExecutedCoordinator {
 		if (betType.equals("Six")) {
 
 			int value = ((Number) values[0]).intValue();
-			if (winningNumber >= value && winningNumber < value + 6)
+			if (winningNumber >= value && winningNumber < value + 6) {
 				won = true;
+			}
 		}
 
 		if (betType.equals("Column1")) {
 			if (winningNumber > 0 && winningNumber <= 36
-					&& winningNumber % 3 == 1)
+					&& winningNumber % 3 == 1) {
 				won = true;
+			}
 		}
 		if (betType.equals("Column2")) {
 			if (winningNumber > 0 && winningNumber <= 36
-					&& winningNumber % 3 == 2)
+					&& winningNumber % 3 == 2) {
 				won = true;
+			}
 		}
 
 		if (betType.equals("Column3")) {
 			if (winningNumber > 0 && winningNumber <= 36
-					&& winningNumber % 3 == 0)
+					&& winningNumber % 3 == 0) {
 				won = true;
+			}
 		}
 
 		if (betType.equals("Dozen1")) {
-			if (winningNumber > 0 && winningNumber <= 12)
+			if (winningNumber > 0 && winningNumber <= 12) {
 				won = true;
+			}
 		}
 
 		if (betType.equals("Dozen2")) {
-			if (winningNumber > 12 && winningNumber <= 24)
+			if (winningNumber > 12 && winningNumber <= 24) {
 				won = true;
+			}
 		}
 
 		if (betType.equals("Dozen3")) {
-			if (winningNumber > 24 && winningNumber <= 36)
+			if (winningNumber > 24 && winningNumber <= 36) {
 				won = true;
+			}
 		}
 
 		if (betType.equals("Manque")) {
-			if (winningNumber >= 1 && winningNumber <= 18)
+			if (winningNumber >= 1 && winningNumber <= 18) {
 				won = true;
+			}
 		}
 
 		if (betType.equals("Passe")) {
-			if (winningNumber >= 19 && winningNumber <= 36)
+			if (winningNumber >= 19 && winningNumber <= 36) {
 				won = true;
+			}
 		}
 
 		if (betType.equals("Red")) {
-			if (winningColor.equals("red"))
+			if (winningColor.equals("red")) {
 				won = true;
+			}
 		}
 
 		if (betType.equals("Black")) {
-			if (winningColor.equals("black"))
+			if (winningColor.equals("black")) {
 				won = true;
+			}
 		}
 
 		if (betType.equals("Odd")) {
-			if (winningNumber % 2 == 1)
+			if (winningNumber % 2 == 1) {
 				won = true;
+			}
 		}
 
 		if (betType.equals("Even")) {
-			if (winningNumber % 2 == 0 && winningNumber > 0)
+			if (winningNumber % 2 == 0 && winningNumber > 0) {
 				won = true;
+			}
 		}
 
-		if (won)
+		if (won) {
 			return payoff(betType, betSum);
-		else
+		} else {
 			return -betSum;
+		}
 	}
 
 	/**
