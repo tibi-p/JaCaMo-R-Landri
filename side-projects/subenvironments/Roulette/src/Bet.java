@@ -9,15 +9,15 @@ public class Bet {
 		this.betValues = betValues;
 	}
 
-	public final double getSum() {
+	public double getSum() {
 		return sum;
 	}
 
-	public final String getType() {
+	public String getType() {
 		return type;
 	}
 
-	public final Object[] getBetValues() {
+	public Object[] getBetValues() {
 		return betValues;
 	}
 }

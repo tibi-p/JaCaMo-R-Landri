@@ -100,7 +100,7 @@ public class Roulette extends SimultaneouslyExecutedCoordinator {
 	 * payouts. After that the post evaluation is complete.
 	 */
 	@Override
-	protected final void doPostEvaluation() {
+	protected void doPostEvaluation() {
 		for (AgentId aid : masterAgents.getAgentIds()) {
 			signal(aid, "spinWheel", currentStep);
 		}
@@ -133,7 +133,7 @@ public class Roulette extends SimultaneouslyExecutedCoordinator {
 	}
 
 	@PRIME_AGENT_OPERATION
-	protected final void startSubenv() {
+	protected void startSubenv() {
 		super.startSubenv();
 		initStandings();
 	}
@@ -156,7 +156,7 @@ public class Roulette extends SimultaneouslyExecutedCoordinator {
 	}
 
 	@GAME_OPERATION(validator = "validateBet")
-	final void bet(final String betName, final double sum) {
+	void bet(final String betName, final double sum) {
 		this.bet(betName, null, sum);
 	}
 
@@ -295,7 +295,7 @@ public class Roulette extends SimultaneouslyExecutedCoordinator {
 	 * @return minus the bet sum if the bet is lost or the payout if the bet is
 	 *         won
 	 */
-	final double computePayoffForPlayer(final Bet bet) {
+	double computePayoffForPlayer(final Bet bet) {
 		String betType = bet.getType();
 		double betSum = bet.getSum();
 		Object[] values = bet.getBetValues();
