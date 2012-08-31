@@ -1,26 +1,26 @@
 package org.aria.rlandri.generic.artifacts;
 
+import jason.mas2j.AgentParameters;
+import jason.mas2j.MAS2JProject;
+import jason.mas2j.parser.ParseException;
+import jason.mas2j.parser.mas2j;
+
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Properties;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.EnhancedPatternLayout;
 import org.apache.log4j.FileAppender;
 import org.apache.log4j.Layout;
 import org.apache.log4j.Logger;
 
 import cartago.Artifact;
+import cartago.CartagoException;
 import cartago.OPERATION;
 
 /**
@@ -30,14 +30,8 @@ import cartago.OPERATION;
 public class SubenvLogger extends Artifact {
 
 	public static final String LOG_REL_PATH = "media/agents";
+	private static final DateFormat day = new SimpleDateFormat("dd-MM-yy");
 
-	/**
-	 * Keep a mapping between agents and output streams towards a file so we
-	 * don't reopen files every time we want to write the logs.
-	 */
-	private Map<String, Logger> loggers;
-	// TODO remove this
-	private ArrayList<String> override;
 	/**
 	 * The name of the subenvironment that will be logged.
 	 */
@@ -47,20 +41,11 @@ public class SubenvLogger extends Artifact {
 	 */
 	private File logDirectory = new File(".");
 
-	public void init() {
-		try {
-			Properties prop = new Properties();
-			prop.load(new FileInputStream("config.properties"));
-			String djangoDirectory = prop.getProperty("django_directory");
-			logDirectory = new File(djangoDirectory, LOG_REL_PATH);
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+	public void init() throws CartagoException {
+		Configuration configuration = Configuration.getInstance();
+		String djangoDirectory = configuration.getProperty("django_directory");
+		logDirectory = new File(djangoDirectory, LOG_REL_PATH);
 
-		loggers = new HashMap<String, Logger>();
-		override = new ArrayList<String>();
 		// find the mas2jFile to extract the subenvironment name
 		String mas2jFile = new File(".").list(new FilenameFilter() {
 			public boolean accept(File dir, String name) {
@@ -69,117 +54,75 @@ public class SubenvLogger extends Artifact {
 		})[0];
 		subEnvName = mas2jFile.substring(mas2jFile.lastIndexOf('_') + 1,
 				mas2jFile.length() - 6);
+
+		try {
+			initLoggers(mas2jFile);
+		} catch (ParseException e) {
+			throw new CartagoException(e.getMessage());
+		} catch (IOException e) {
+			throw new CartagoException(e.getMessage());
+		}
 	}
 
 	@OPERATION
 	public void logInfo(Object... strings) {
-		Logger l = fetchLogger(getOpUserName());
-		String line = "";
-		for(Object o : strings){
-			line += o.toString();
-		}
-		l.info(line);
+		Logger l = Logger.getLogger(getOpUserName());
+		l.info(StringUtils.join(strings));
 	}
 
 	@OPERATION
 	public void logWarning(Object... strings) {
-		Logger l = fetchLogger(getOpUserName());
-		String line = "";
-		for(Object o : strings){
-			line += o.toString();
-		}
-		l.warn(line);
+		Logger l = Logger.getLogger(getOpUserName());
+		l.warn(StringUtils.join(strings));
 	}
 
 	@OPERATION
 	public void logError(Object... strings) {
-		Logger l = fetchLogger(getOpUserName());
-		String line = "";
-		for(Object o : strings){
-			line += o.toString();
-		}
-		l.error(line);
+		Logger l = Logger.getLogger(getOpUserName());
+		l.error(StringUtils.join(strings));
 	}
 
 	@OPERATION
 	public void logFatal(Object... strings) {
-		Logger l = fetchLogger(getOpUserName());
-		String line = "";
-		for(Object o : strings){
-			line += o.toString();
-		}
-		l.fatal(line);
+		Logger l = Logger.getLogger(getOpUserName());
+		l.fatal(StringUtils.join(strings));
 	}
 
-	private Logger fetchLogger(String agent) {
-		/*
-		 * @agent: the jason name of the agent
-		 * 
-		 * @agentBaseName: the 'root' name of the agent e.g.: "Rambo4 -> 'Rambo'
-		 * Used to identify clones
-		 */
-		int pos = agent.lastIndexOf('_');
-		if (pos < 1) {
-			String msg = "The agent name does not respect the required format";
-			throw new IllegalArgumentException(msg);
+	private void initLoggers(String filename) throws ParseException,
+			IOException {
+		mas2j parser = new mas2j(new FileInputStream(filename));
+		MAS2JProject project = parser.mas();
+		for (AgentParameters ap : project.getAgents()) {
+			String agentName = ap.getAgName();
+			createLogger(agentName, ap.qty);
 		}
+	}
 
-		String agentBaseName = agent.substring(0, pos);
-		// Remove final underscore if cardinality is 1
-		if (pos == agent.length() - 1)
-			agent = agentBaseName;
+	private void createLogger(String baseName, int qty) throws IOException {
+		String date = day.format(Calendar.getInstance().getTime());
 
-		if (loggers.containsKey(agent)) {
-			return loggers.get(agent);
+		// the log for the current day
+		String filename = String.format("%s_%s.log", subEnvName, date);
+		File agDir = new File(logDirectory, baseName);
+		File agLog = new File(agDir, filename);
+		agLog.delete();
+
+		String logPath = agLog.getAbsolutePath();
+		if (qty > 1) {
+			for (int i = 1; i <= qty; i++)
+				addLoger(baseName + i, logPath);
 		} else {
-			File agDir = new File(logDirectory, agentBaseName);
-			if (!agDir.exists())
-				agDir.mkdir(); // make the agent's home directory if it doesn't
-								// exist
-
-			Date date = Calendar.getInstance().getTime();
-			DateFormat day = new SimpleDateFormat("dd-MM-yy");
-
-			// the log for that day
-			File agLog = new File(agDir, subEnvName + "_" + day.format(date)
-					+ ".log");
-			if (!agLog.exists()) { // make sure file exists
-				try {
-					agLog.createNewFile();
-				} catch (IOException e) {
-					e.printStackTrace();
-					return null;
-				}
-			} else if (!override.contains(agentBaseName)) {// truncate if
-															// necessary
-				try {
-					FileOutputStream eraser = new FileOutputStream(agLog);
-					eraser.close();
-					override.add(agentBaseName);
-				} catch (FileNotFoundException e) {
-					// impossible for file to not exist
-					e.printStackTrace();
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			}
-
-			Logger logger = Logger.getLogger(agent);
-			loggers.put(agent, logger);
-			Layout layout = new EnhancedPatternLayout("[%d{HH:mm:ss}][" + agent
-					+ "][%p]: %m%n");
-			FileAppender appender;
-			try {
-				appender = new FileAppender(layout, agLog.getAbsolutePath(),
-						true);
-			} catch (IOException e) {
-				e.printStackTrace();
-				return null;
-			}
-			logger.removeAllAppenders();
-			logger.addAppender(appender);
-			return logger;
+			addLoger(baseName, logPath);
 		}
 	}
+
+	private void addLoger(String agentName, String logPath) throws IOException {
+		Logger logger = Logger.getLogger(agentName);
+		Layout layout = new EnhancedPatternLayout("[%d{HH:mm:ss}][" + agentName
+				+ "][%p]: %m%n");
+		FileAppender appender = new FileAppender(layout, logPath, true);
+		logger.removeAllAppenders();
+		logger.addAppender(appender);
+	}
+
 }

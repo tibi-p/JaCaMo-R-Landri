@@ -1,82 +1,95 @@
 package org.aria.rlandri.generic.artifacts;
 
-import java.util.Collection;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.Set;
+import java.util.Timer;
+import java.util.TimerTask;
 
-import org.apache.commons.collections.map.MultiValueMap;
 import org.aria.rlandri.generic.artifacts.annotation.GAME_OPERATION;
 import org.aria.rlandri.generic.artifacts.annotation.PRIME_AGENT_OPERATION;
+import org.aria.rlandri.generic.artifacts.opmethod.PrimeAgentArtifactOpMethod;
 import org.aria.rlandri.generic.artifacts.opmethod.SETBGameArtifactOpMethod;
+import org.aria.rlandri.generic.artifacts.tools.ValidationType;
 
 import cartago.AgentId;
 import cartago.CartagoException;
-import cartago.IArtifactOp;
+import cartago.GUARD;
 import cartago.INTERNAL_OPERATION;
 import cartago.OPERATION;
 import cartago.OpFeedbackParam;
 
-public class SimultaneouslyExecutedCoordinator extends Coordinator {
+/**
+ * The abstract coordinator class for simultaneously-executed turn-based
+ * sub-environments.
+ * 
+ * @author Tiberiu Popa
+ */
+public abstract class SimultaneouslyExecutedCoordinator extends Coordinator {
 
-	private int currentStep = 0;
-
-	public static final int STEPS = 10;
+	protected int steps;
 	public static final int STEP_LENGTH = 1000;
 
-	private MultiValueMap operationQueue = new MultiValueMap();
+	protected int currentStep = 0;
 
-	public void addOpMethod(IArtifactOp op, Object[] params) {
-		AgentId agentId = getOpUserId();
-		operationQueue.put(agentId, new ParameterizedOperation(op, params));
+	private final Timer timer = new Timer();
+	private TimerTask task = null;
+
+	private final Set<AgentId> readyAgents = new LinkedHashSet<AgentId>();
+	private Iterator<AgentId> executingAgentIterator = null;
+	private AgentId executingAgent = null;
+	private boolean stepFinished = true;
+	private boolean timerExpired = false;
+	private boolean preEvaluationDone = false;
+	private boolean postEvaluationDone = false;
+
+	@Override
+	protected void init() throws CartagoException {
+		super.init();
+		this.steps = Integer.parseInt(configuration.getProperty("num_steps"));
 	}
 
-	@OPERATION
-	void registerAgent() {
-
-	}
-
-	@OPERATION
-	void runQueuedOperations() {
-		System.out.println("SPARTAAAAAA!");
-		for (Object key : operationQueue.keySet()) {
-			Collection<?> coll = operationQueue.getCollection(key);
-			for (Object value : coll) {
-				if (value instanceof ParameterizedOperation) {
-					ParameterizedOperation entry = (ParameterizedOperation) value;
-					try {
-						SETBGameArtifactOpMethod op = (SETBGameArtifactOpMethod) entry
-								.getOp();
-						op.execSavedParameters(entry.getParams());
-					} catch (Exception e) {
-						// TODO log it or something
-						e.printStackTrace();
-					}
-				}
-			}
+	public boolean waitForEndTurn() {
+		System.err.println(String.format("%s: waiting for the end of turn %s",
+				getOpUserId(), currentStep));
+		leaveNoAgentBehind();
+		System.err.println(String.format(
+				"%s: every agent has submitted its action", getOpUserId()));
+		await("checkTurn", getOpUserId());
+		System.err.println(String.format("%s: kill the bugs", getOpUserId()));
+		if (executingAgentIterator.hasNext()) {
+			executingAgent = executingAgentIterator.next();
+			return false;
+		} else {
+			return true;
 		}
 	}
 
-	// TODO remove me
-	@GAME_OPERATION(validator = "catzelushCuParuCretz")
-	void hotelCismigiu() {
-		System.out.println("SA MA MUT IN HOTEL CISMIGIU");
-	}
-
-	// TODO remove me
-	void catzelushCuParuCretz() {
-		System.out.println("Toni da cu Grebla");
-	}
-
-	@PRIME_AGENT_OPERATION
-	void startSubenv() {
-		super.startSubenv();
-		execInternalOp("runSubEnv");
+	public void resetTurnInfo() {
+		execInternalOp("internalResetTurnInfo");
 	}
 
 	@INTERNAL_OPERATION
-	void runSubEnv() {
-		for (currentStep = 1; currentStep <= STEPS; currentStep++) {
-			// TODO: implement step execution
-			// executeStep();
-		}
+	public void internalResetTurnInfo() {
+		doPostEvaluation();
+		await("isPostEvaluationDone");
+
+		readyAgents.clear();
+		executingAgentIterator = null;
+		executingAgent = null;
+		stepFinished = true;
+		timerExpired = false;
+		preEvaluationDone = false;
+		postEvaluationDone = false;
+	}
+
+	/**
+	 * Fails if the current agent has already submitted a move this turn.
+	 */
+	public void failIfHasMoved() {
+		if (hasMoved(getOpUserId()))
+			failTurn("has_already_submitted_action", ValidationType.ERROR);
 	}
 
 	@Override
@@ -87,25 +100,159 @@ public class SimultaneouslyExecutedCoordinator extends Coordinator {
 				PrimeAgentArtifactOpMethod.class, false));
 	}
 
+	protected void doPreEvaluation() {
+		setPreEvaluationDone(true);
+	}
+
+	protected void doPostEvaluation() {
+		setPostEvaluationDone(true);
+	}
+
+	protected void setPreEvaluationDone(boolean preEvaluationDone) {
+		this.preEvaluationDone = preEvaluationDone;
+	}
+
+	protected void setPostEvaluationDone(boolean postEvaluationDone) {
+		this.postEvaluationDone = postEvaluationDone;
+	}
+
+	private boolean hasMoved(AgentId agentId) {
+		return readyAgents.contains(agentId);
+	}
+
+	private boolean isEverybodyReady() {
+		return readyAgents.size() == regularAgents.getNumRegistered();
+	}
+
+	private void leaveNoAgentBehind() {
+		readyAgents.add(getOpUserId());
+		if (isEverybodyReady()) {
+			System.err.println(String.format(
+					"Submitting is over!!! remaining(%s)",
+					task.scheduledExecutionTime() - new Date().getTime()));
+			if (prepareEvaluation()) {
+				// TODO this can be skipped if it's this agent's turn!
+				execInternalOp("wakerOfAgents");
+			} else {
+				// TODO document/log this impossible situation
+				System.exit(1);
+			}
+		} else {
+			await("isSubmittingOver");
+		}
+	}
+
+	private boolean prepareEvaluation() {
+		resetTask();
+		setState(EnvStatus.EVALUATING);
+
+		doPreEvaluation();
+		await("isPreEvaluationDone");
+
+		executingAgentIterator = readyAgents.iterator();
+		if (executingAgentIterator.hasNext()) {
+			executingAgent = executingAgentIterator.next();
+			return true;
+		} else {
+			System.err.println("WOP WOP WOP WOP");
+			resetTurnInfo();
+			return false;
+		}
+	}
+
+	private void resetTask() {
+		boolean cancelled = task.cancel();
+		System.err.println(String.format("Cancellation has%s succeeded",
+				cancelled ? "" : " not"));
+		task = null;
+	}
+
+	@PRIME_AGENT_OPERATION
+	protected void startSubenv() {
+		super.startSubenv();
+		execInternalOp("runSubEnv");
+	}
+
+	private void executeStep() {
+		setState(EnvStatus.RUNNING);
+		stepFinished = false;
+		final long startTime = new Date().getTime();
+		System.err.println("PRIME: The task was scheduled at " + startTime);
+		task = new TimerTask() {
+			public void run() {
+				String errFmt = "The task scheduled at %s was run at %s (diff=%s)";
+				long runTime = new Date().getTime();
+				System.err.println(String.format(errFmt, startTime, runTime,
+						runTime - startTime));
+				execInternalOp("finishTimer", this);
+			}
+		};
+		signal("startTurn", currentStep);
+		timer.schedule(task, STEP_LENGTH);
+		await("isStepFinished");
+		signalMasterAgents("stopTurn", currentStep);
+	}
+
 	@OPERATION
-	void registerAgent(OpFeedbackParam<String> wsp) throws Exception {
+	protected void registerAgent(OpFeedbackParam<String> wsp) {
 		super.registerAgent(wsp);
 		wsp.set("NA");
 	}
 
-	@Override
-	protected void updateRank() {
-		// TODO Auto-generated method stub
+	@INTERNAL_OPERATION
+	private void finishTimer(TimerTask callerTask) {
+		if (callerTask != null && callerTask.equals(task)) {
+			EnvStatus state = getState();
+			if (EnvStatus.RUNNING.equals(state)) {
+				String errFmt = "As the timer expired - %s from %s";
+				System.err.println(String.format(errFmt, readyAgents.size(),
+						regularAgents.getNumRegistered()));
+				timerExpired = true;
+				prepareEvaluation();
+			} else {
+				// TODO handle me
+			}
+		}
 	}
 
-	@Override
-	protected void updateCurrency() {
-		// TODO Auto-generated method stub
+	@INTERNAL_OPERATION
+	private void wakerOfAgents() {
+		System.err.println("DID YOU PAY THE IRON PRICE FOR IT OR THE GOLD?");
 	}
 
-	@Override
-	protected void saveState() {
-		// TODO Auto-generated method stub
+	@INTERNAL_OPERATION
+	void runSubEnv() {
+		for (currentStep = 1; currentStep <= steps; currentStep++)
+			executeStep();
+		signalPrimeAgents("stopGame");
+	}
+
+	@GUARD
+	private boolean checkTurn(AgentId agentId) {
+		if (agentId != null)
+			return agentId.equals(executingAgent);
+		else
+			return false;
+	}
+
+	@GUARD
+	protected boolean isPreEvaluationDone() {
+		return preEvaluationDone;
+	}
+
+	@GUARD
+	protected boolean isPostEvaluationDone() {
+		return postEvaluationDone;
+	}
+
+	@GUARD
+	private boolean isStepFinished() {
+		return stepFinished;
+	}
+
+	@GUARD
+	private boolean isSubmittingOver() {
+		return timerExpired || isEverybodyReady();
 	}
 
 }

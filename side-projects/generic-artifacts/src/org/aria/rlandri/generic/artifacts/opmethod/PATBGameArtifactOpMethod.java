@@ -12,13 +12,26 @@ public class PATBGameArtifactOpMethod extends ValidatorArtifactOpMethod {
 	}
 
 	public void exec(Object[] actualParams) throws Exception {
+		invokeParameterless("preliminaryCheck");
+		if (coordinator instanceof PlayerAlternatedCoordinator) {
+			PlayerAlternatedCoordinator paCoordinator = (PlayerAlternatedCoordinator) coordinator;
+			paCoordinator.prepareEvaluation();
+			try {
+				validate(actualParams);
+				super.exec(actualParams);
+			} finally {
+				paCoordinator.resetTurnInfo();
+			}
+		}
+	}
+
+	protected void preliminaryCheck() {
 		coordinator.failIfNotRunning();
+		coordinator.failIfNotRegisteredParticipatingAgent();
 		if (coordinator instanceof PlayerAlternatedCoordinator) {
 			PlayerAlternatedCoordinator paCoordinator = (PlayerAlternatedCoordinator) coordinator;
 			paCoordinator.failIfNotCurrentTurn();
 		}
-		validate(coordinator, actualParams);
-		super.exec(actualParams);
 	}
 
 }

@@ -1,0 +1,8 @@
+<project name="roulette" basedir="." default="clean-build">
+
+	<property name="subenvid" value="1" />
+	<property name="userid" value="2" />
+
+	<import file="../s_generic.xml" />
+
+</project>

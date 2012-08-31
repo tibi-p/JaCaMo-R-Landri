@@ -1,0 +1,41 @@
+<project name="rlandri-subenvironments" basedir="." default="clean-build">
+
+	<target name="generic-target">
+		<ant dir="Factorial" inheritAll="false" target="${target-param}" />
+		<ant dir="Auction" inheritAll="false" target="${target-param}" />
+		<ant dir="Roulette" inheritAll="false" target="${target-param}" />
+		<ant dir="RouletteFeedback" inheritAll="false" target="${target-param}" />
+		<ant dir="TicTacToe" inheritAll="false" target="${target-param}" />
+	</target>
+
+	<target name="clean">
+		<antcall target="generic-target">
+			<param name="target-param" value="clean" />
+		</antcall>
+	</target>
+
+	<target name="compile">
+		<antcall target="generic-target">
+			<param name="target-param" value="compile" />
+		</antcall>
+	</target>
+
+	<target name="jar">
+		<antcall target="generic-target">
+			<param name="target-param" value="jar" />
+		</antcall>
+	</target>
+
+	<target name="run">
+		<antcall target="generic-target">
+			<param name="target-param" value="run" />
+		</antcall>
+	</target>
+
+	<target name="clean-build">
+		<antcall target="generic-target">
+			<param name="target-param" value="clean-build" />
+		</antcall>
+	</target>
+
+</project>

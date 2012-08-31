@@ -8,31 +8,18 @@
 
 /* Plans */
 
-+!prepare_environment : true 
-		<- 	!makeAndJoinDefaultWorkspace;
-			!makeStandardArtifacts;
-			!startSubenv
-		.
-			
-+!makeStandardArtifacts: true
-		<- 	!makeLogger;
-			!makeCoordinator.
-
 +!makeCoordinator: true
-		<- 	makeArtifact("coordinator",
-				"org.aria.rlandri.generic.artifacts.PlayerAlternatedCoordinator", [], _
-			).
+	<-	makeArtifact("initiator",
+			"org.aria.rlandri.generic.artifacts.Initiator", [], _
+		);
+		makeCoordinatorArtifact("coordinator", [], Coordinator);
+		focus(Coordinator);
+		registerPrimeAgent[artifact_id(Coordinator)].
 
 +!makeLogger: true
-		<- 	makeArtifact("logger",
-				"org.aria.rlandri.generic.artifacts.SubenvLogger", [], _
-			).
+	<-	makeArtifact("logger",
+			"org.aria.rlandri.generic.artifacts.SubenvLogger", [], _
+		).
 
-+!makeAndJoinDefaultWorkspace: true
-		<- 	createWorkspace("SubenvDefaultWorkspace");
-			joinWorkspace("SubenvDefaultWorkspace", Id);
-			cartago.set_current_wsp(Id).
-
-+!startSubenv: true
-		<- 	.wait(2000);
-			startSubenv.
++stopGame
+	<-	.stopMAS.
