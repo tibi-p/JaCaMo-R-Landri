@@ -154,15 +154,18 @@ def index_common(request, postSolution=None, postSubEnv=None, others=False):
         agentFilter['envUser__user'] = user
     agentQueryset = EnvAgent.objects.filter(**agentFilter)
 
+    active_subenv = None
+    active_solution = None
+
     allSolutions = [ ]
-    for subEnvironment in subEnvironments:
+    for subenv_index, subEnvironment in enumerate(subEnvironments):
         subenvs = SubEnvironment.objects.filter(pk=subEnvironment.pk)
         SolutionForm = make_special_solution_form(envUser, subenvs,
             singleSubEnv=True)
         solutions = userSolutions.filter(subEnvironment__in=subenvs)
 
         forms = [ ]
-        for solution in solutions:
+        for soln_index, solution in enumerate(solutions):
             SolutionFormSet = make_single_solution_formset(SolutionForm,
                 solution, extra=0)
             if is_post and solution == postSolution:
@@ -172,6 +175,12 @@ def index_common(request, postSolution=None, postSubEnv=None, others=False):
                         'envUser': envUser,
                         'subEnvironment': subEnvironment,
                     })
+                else:
+                    active_subenv = {
+                        'id': subEnvironment.id,
+                        'index': subenv_index,
+                    }
+                    active_solution = soln_index
             else:
                 formset = SolutionFormSet()
 
@@ -205,6 +214,12 @@ def index_common(request, postSolution=None, postSubEnv=None, others=False):
                     'envUser': envUser,
                     'subEnvironment': subEnvironment,
                 })
+            else:
+                active_subenv = {
+                    'id': subEnvironment.id,
+                    'index': subenv_index,
+                }
+                active_solution = len(solutions)
         else:
             form = SolutionForm()
         forms.append({
@@ -226,6 +241,10 @@ def index_common(request, postSolution=None, postSubEnv=None, others=False):
             return handle_solution_formset(othersFormset, {
                 'envUser': envUser,
             }, are_novel=True)
+        else:
+            active_subenv = {
+                'index': len(subEnvironments),
+            }
     else:
         othersFormset = SolutionFormSet()
 
@@ -240,6 +259,8 @@ def index_common(request, postSolution=None, postSubEnv=None, others=False):
             'allSolutions': allSolutions,
             'othersFormset': othersFormset,
             'agentForm': AgentForm(),
+            'active_subenv': active_subenv,
+            'active_solution': active_solution,
         },
         context_instance=RequestContext(request))
 

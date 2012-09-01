@@ -55,9 +55,12 @@ table.dataTable tr.even.row_selected td {
 
 <script type="text/javascript">
     $(function () {
+        var solnTagTpl = '#solution-accordion-{0}';
+        var solnTag = null;
     {% for subSolutions in allSolutions %}
     {% with subEnvironment=subSolutions.subEnvironment %}
-        $("#solution-accordion-{{ subEnvironment.id }}").accordion({
+        solnTag = $.validator.format(solnTagTpl, '{{ subEnvironment.id }}');
+        $(solnTag).accordion({
             animated: 'bounceslide',
             autoHeight: false,
             navigation: true,
@@ -66,17 +69,27 @@ table.dataTable tr.even.row_selected td {
     {% endwith %}
     {% endfor %}
 
-        $("#subenv-accordion").accordion({
+        var subEnvAccordion = $("#subenv-accordion");
+        subEnvAccordion.accordion({
             animated: 'bounceslide',
             autoHeight: false,
             navigation: true,
             collapsible: true,
         });
 
-       {% for subSolutions in allSolutions %}
-       {% with subEnvironment=subSolutions.subEnvironment %}
+        {% if active_subenv != None %}
+            subEnvAccordion.accordion("activate", {{ active_subenv.index }});
+            {% if active_solution != None %}
+            {% with subenv_id=active_subenv.id %}
+                solnTag = $.validator.format(solnTagTpl, '{{ subenv_id }}');
+                $(solnTag).accordion("activate", {{ active_solution }});
+            {% endwith %}
+            {% endif %}
+        {% endif %}
+
+    {% for subSolutions in allSolutions %}
        {% for entry in subSolutions.forms %}
-       {% with form=entry.form obj=entry.obj is_novel=entry.is_novel %}
+       {% with obj=entry.obj is_novel=entry.is_novel %}
        {% if not is_novel %}
        (function () {
          var $dialog = $('<div></div>')
@@ -99,19 +112,17 @@ table.dataTable tr.even.row_selected td {
 				}]
 			});
 
-		$('#delete-{{obj.id}}').click(function() {
-			$dialog.dialog('open');
-			// prevent the default action, e.g., following a link
-			return false;
-		});
+            $('#delete-{{ obj.id }}').click(function() {
+                $dialog.dialog('open');
+                // prevent the default action, e.g., following a link
+                return false;
+            });
 		})();
 
-		{% endif %}
-		{% endwith %}
-		{% endfor %}
-		{% endwith %}
+        {% endif %}
+        {% endwith %}
         {% endfor %}
-        
+    {% endfor %}
     });
 
     $(document).ready(function () {
