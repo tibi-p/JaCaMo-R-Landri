@@ -1,0 +1,1 @@
+<solution><asl-list><asl agentId="6" cardinality="1" file="auction_master_u4.asl" /><asl agentId="7" cardinality="4" file="bidder_u4.asl" /></asl-list></solution>

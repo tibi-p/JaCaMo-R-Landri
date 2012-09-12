@@ -1,6 +1,6 @@
 package org.aria.rlandri.generic.artifacts;
 
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -8,51 +8,59 @@ import java.util.TimerTask;
 import org.aria.rlandri.generic.artifacts.annotation.GAME_OPERATION;
 import org.aria.rlandri.generic.artifacts.annotation.PRIME_AGENT_OPERATION;
 import org.aria.rlandri.generic.artifacts.opmethod.PATBGameArtifactOpMethod;
+import org.aria.rlandri.generic.artifacts.opmethod.PrimeAgentArtifactOpMethod;
+import org.aria.rlandri.generic.artifacts.tools.ValidationType;
 
 import cartago.AgentId;
 import cartago.CartagoException;
+import cartago.GUARD;
 import cartago.INTERNAL_OPERATION;
 import cartago.OPERATION;
 import cartago.OpFeedbackParam;
 
 /**
- * @author Andrei Geacar
+ * The abstract coordinator class for player-alternated turn-based
+ * sub-environments.
  * 
+ * @author Andrei Geacar
  */
+public abstract class PlayerAlternatedCoordinator extends Coordinator {
 
-public class PlayerAlternatedCoordinator extends Coordinator {
+	protected AgentId currentAgent = null;
+	protected int currentIndex = 0;
 
+	protected final List<AgentId> order = new ArrayList<AgentId>();
+	private final Timer timer = new Timer();
+	private TimerTask task = null;
 	private int currentStep = 0;
-	private int currentAgent = 0;
-
-	List<String> order = new LinkedList<String>();
+	private boolean stepFinished = true;
+	protected boolean stop = false;
 
 	// constants for testing purposes
-	public static final int STEPS = 10;
-	public static final int TURN_LENGTH = 1000;
+	protected int steps;
+	protected static final int TURN_LENGTH = 1000;
 
-	// TODO use status here
-	@OPERATION
-	void registerAgent(OpFeedbackParam<String> wsp) throws Exception {
-		super.registerAgent(wsp);
-		String name = this.getOpUserName();
-		order.add(name);
-		wsp.set("NA");
+	@Override
+	protected void init() throws CartagoException {
+		super.init();
+		this.steps = Integer.parseInt(configuration.getProperty("num_steps"));
+	}
 
+	public void prepareEvaluation() {
+		boolean cancelled = task.cancel();
+		System.err.println(String.format("Cancellation has%s succeeded",
+				cancelled ? "" : " not"));
+		setState(EnvStatus.EVALUATING);
+	}
+
+	public void resetTurnInfo() {
+		stepFinished = true;
 	}
 
 	public void failIfNotCurrentTurn() {
-		String userName = getOpUserName();
-		if (userName != order.get(currentAgent)) {
-			// TODO: Standard error messages
-			failed("Error message");
-		}
-	}
-
-	@PRIME_AGENT_OPERATION
-	void startSubenv() {
-		super.startSubenv();
-		execInternalOp("runSubEnv");
+		AgentId userId = getOpUserId();
+		if (!userId.equals(currentAgent))
+			failTurn("not_your_turn", ValidationType.ERROR);
 	}
 
 	@Override
@@ -63,70 +71,72 @@ public class PlayerAlternatedCoordinator extends Coordinator {
 				PrimeAgentArtifactOpMethod.class, false));
 	}
 
-	@INTERNAL_OPERATION
-	void runSubEnv() {
-		for (currentStep = 1; currentStep <= STEPS; currentStep++) {
-			executeStep();
-		}
+	// TODO use status here
+	@OPERATION
+	protected void registerAgent(OpFeedbackParam<String> wsp) {
+		super.registerAgent(wsp);
+		order.add(getOpUserId());
+		wsp.set("NA");
+	}
+
+	@PRIME_AGENT_OPERATION
+	protected void startSubenv() {
+		super.startSubenv();
+		execInternalOp("runSubEnv");
 	}
 
 	@INTERNAL_OPERATION
-	void changeToEvaluating() {
+	void runSubEnv() {
+		for (currentStep = 1; currentStep <= steps; currentStep++) {
+			executeStep();
+			if (stop)
+				break;
+		}
+		setState(EnvStatus.FINISHED);
+		signalPrimeAgents("stopGame");
+	}
+
+	@INTERNAL_OPERATION
+	void finishTimer() {
 		EnvStatus state = getState();
 		if (state == EnvStatus.RUNNING) {
 			setState(EnvStatus.EVALUATING);
+			resetTurnInfo();
 		} else {
 			// TODO handle me
 		}
 	}
 
 	private void executeStep() {
-		for (currentAgent = 0; currentAgent < order.size(); currentAgent++) {
+		currentIndex = 0;
+		for (AgentId agentId : order) {
+			currentAgent = agentId;
 			startPlayerTurn();
 			executePlayerTurn();
+			currentIndex++;
+			if (stop)
+				break;
 		}
 	}
 
 	private void startPlayerTurn() {
-		String name = order.get(currentAgent);
-		AgentId aid = agents.get(name);
-		signal(aid, "startTurn", currentStep);
-		currentAgent += 1;
+		setState(EnvStatus.RUNNING);
+		stepFinished = false;
+		signal(currentAgent, "startTurn", currentStep);
 	}
 
 	private void executePlayerTurn() {
-		final Timer timer = new Timer();
-		timer.schedule(new TimerTask() {
+		task = new TimerTask() {
 			public void run() {
-				execInternalOp("changeToEvaluating");
+				execInternalOp("finishTimer");
 			}
-		}, TURN_LENGTH);
+		};
+		timer.schedule(task, TURN_LENGTH);
+		await("isStepFinished");
 	}
 
-	@Override
-	protected void updateRank() {
-		// TODO Auto-generated method stub
+	@GUARD
+	private boolean isStepFinished() {
+		return stepFinished;
 	}
-
-	@Override
-	protected void updateCurrency() {
-		// TODO Auto-generated method stub
-	}
-
-	@Override
-	protected void saveState() {
-		// TODO Auto-generated method stub
-	}
-
-	// TODO remove me
-	@GAME_OPERATION(validator = "catzelushCuParuCretz")
-	void hotelCismigiu() {
-		System.out.println("SA MA MUT IN HOTEL CISMIGIU");
-	}
-
-	// TODO remove me
-	void catzelushCuParuCretz() {
-		System.out.println("Toni da cu Grebla");
-	}
-
 }

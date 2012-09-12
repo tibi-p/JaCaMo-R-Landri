@@ -90,6 +90,16 @@ public abstract class GuardedAnnotation {
 			return null;
 	}
 
+	/**
+	 * Processes a method that has an annotation of the type
+	 * <tt>annotationClass</tt>.
+	 * 
+	 * @param method
+	 *            the method to be processed
+	 * @throws CartagoException
+	 *             any exception that occurs inside this method should be
+	 *             wrapped inside a <tt>CartagoException</tt>
+	 */
 	public abstract void processMethod(Method method) throws CartagoException;
 
 }

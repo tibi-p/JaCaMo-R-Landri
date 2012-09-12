@@ -1,2 +1,18 @@
 */*.pyc
+
+# Java #
+*.class
+
+# Package Files #
+*.jar
+*.war
+*.ear
+
+# Archive Files #
+*.zip
+
+# Build Directories #
+build/
+
 /run
+/run.bat

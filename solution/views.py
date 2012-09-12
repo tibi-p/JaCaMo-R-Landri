@@ -6,20 +6,13 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render_to_response
 from django.template import RequestContext
 from envuser.models import EnvAgent, EnvUser
-from home.base import fill_object, make_base_custom_formset
+from home.base import fill_object, get_agent_name_list, \
+    make_base_custom_formset
 from solution.models import Solution
 from subenvironment.models import SubEnvironment
 from specification import SolutionSpecification
 from validate import Validator
 import json
-from zipfile import BadZipfile, ZipFile
-
-def get_agent_code_from_zip(filename):
-    try:
-        with ZipFile(filename, 'r') as zipFile:
-            return zipFile.namelist()
-    except BadZipfile:
-        return [ ]
 
 def tweak_keywords(keywords, attr, defaults):
     queryset = keywords.get(attr, None)
@@ -41,6 +34,7 @@ def make_custom_agent_form(agent_kwargs={ }, asl_kwargs={ }):
     class AgentForm(forms.Form):
         agent_name = forms.models.ModelChoiceField(**agent_kwargs)
         asl = forms.ChoiceField(**asl_kwargs)
+        agent_class = forms.CharField(required=False)
         cardinality = forms.IntegerField(min_value=1)
 
     return AgentForm
@@ -52,7 +46,7 @@ def validate_artifacts(artifacts, userID):
             raise forms.ValidationError(error_msg)
     return artifacts
 
-def validate_agents(agents,userID):
+def validate_agents(agents, userID):
     if not Validator.validateAgentZip(agents, userID):
         error_msg = "Should upload a valid .zip with agents"
         raise forms.ValidationError(error_msg)
@@ -73,7 +67,7 @@ def make_solution_form(envUser, subEnvKwArgs={ }):
             
             def clean_agents(self):
                 agents = self.cleaned_data['agents']
-                return validate_agents(agents,envUser.id)
+                return validate_agents(agents, envUser.id)
 
             class Meta:
                 model = Solution
@@ -92,7 +86,7 @@ def make_solution_form(envUser, subEnvKwArgs={ }):
             
             def clean_agents(self):
                 agents = self.cleaned_data['agents']
-                return validate_agents(agents,envUser.id)
+                return validate_agents(agents, envUser.id)
 
             class Meta:
                 model = Solution
@@ -160,15 +154,18 @@ def index_common(request, postSolution=None, postSubEnv=None, others=False):
         agentFilter['envUser__user'] = user
     agentQueryset = EnvAgent.objects.filter(**agentFilter)
 
+    active_subenv = None
+    active_solution = None
+
     allSolutions = [ ]
-    for subEnvironment in subEnvironments:
+    for subenv_index, subEnvironment in enumerate(subEnvironments):
         subenvs = SubEnvironment.objects.filter(pk=subEnvironment.pk)
         SolutionForm = make_special_solution_form(envUser, subenvs,
             singleSubEnv=True)
         solutions = userSolutions.filter(subEnvironment__in=subenvs)
 
         forms = [ ]
-        for solution in solutions:
+        for soln_index, solution in enumerate(solutions):
             SolutionFormSet = make_single_solution_formset(SolutionForm,
                 solution, extra=0)
             if is_post and solution == postSolution:
@@ -178,15 +175,16 @@ def index_common(request, postSolution=None, postSubEnv=None, others=False):
                         'envUser': envUser,
                         'subEnvironment': subEnvironment,
                     })
+                else:
+                    active_subenv = {
+                        'id': subEnvironment.id,
+                        'index': subenv_index,
+                    }
+                    active_solution = soln_index
             else:
                 formset = SolutionFormSet()
-                
-            ##FIXME: Make sure this error is treated correctly
-            try:
-                agentFiles = get_agent_code_from_zip(solution.agents.path)
-            except IOError:
-                agentFiles = []
 
+            agentFiles = get_agent_name_list(solution.agents.path)
             choices = [ (filename, filename) for filename in agentFiles ]
             AgentForm = make_custom_agent_form({
                 'queryset': agentQueryset,
@@ -216,6 +214,12 @@ def index_common(request, postSolution=None, postSubEnv=None, others=False):
                     'envUser': envUser,
                     'subEnvironment': subEnvironment,
                 })
+            else:
+                active_subenv = {
+                    'id': subEnvironment.id,
+                    'index': subenv_index,
+                }
+                active_solution = len(solutions)
         else:
             form = SolutionForm()
         forms.append({
@@ -237,6 +241,10 @@ def index_common(request, postSolution=None, postSubEnv=None, others=False):
             return handle_solution_formset(othersFormset, {
                 'envUser': envUser,
             }, are_novel=True)
+        else:
+            active_subenv = {
+                'index': len(subEnvironments),
+            }
     else:
         othersFormset = SolutionFormSet()
 
@@ -251,6 +259,8 @@ def index_common(request, postSolution=None, postSubEnv=None, others=False):
             'allSolutions': allSolutions,
             'othersFormset': othersFormset,
             'agentForm': AgentForm(),
+            'active_subenv': active_subenv,
+            'active_solution': active_solution,
         },
         context_instance=RequestContext(request))
 
@@ -309,6 +319,7 @@ def change_agent_mapping(request, solutionId):
                 solution = get_solution_or_404(user, id=solutionId)
                 config = solution.get_config_filepath()
                 agents = json.loads(params[u'json'])
+                # TODO Y U forgot to handle this?
                 Validator.validateAgentMapping(agents)
                 # TODO server-side validation goes here
                 # also check IDs!!

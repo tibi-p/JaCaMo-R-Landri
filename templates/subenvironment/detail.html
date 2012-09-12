@@ -22,7 +22,7 @@
                     'data': 'Environment Agents',
                     'state': 'open',
                     'children': [
-                    {% for component in subEnvironment.envagent_set.all %}
+                    {% for component in subEnvironment.agent_set.all %}
                     {
                         'data': '{{ component.name }}',
                         'metadata': {

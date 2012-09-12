@@ -1,4 +1,5 @@
 from django import forms
+from zipfile import BadZipfile, ZipFile
 
 def make_base_custom_formset(queryset):
     class BaseCustomFormSet(forms.models.BaseModelFormSet):
@@ -39,3 +40,13 @@ def fill_object(row, attributes):
     for key, value in attributes.iteritems():
         setattr(row, key, value)
     row.save()
+
+def get_agent_name_list(filename):
+    try:
+        with ZipFile(filename, 'r') as zipFile:
+            return zipFile.namelist()
+    except BadZipfile:
+        return [ ]
+    # FIXME: Make sure this error is treated correctly
+    except IOError:
+        return [ ]

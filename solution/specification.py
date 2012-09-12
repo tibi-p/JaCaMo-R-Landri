@@ -44,31 +44,16 @@ class SolutionSpecification(object):
 
     @staticmethod
     def parseAgentMapping(xmlFile):
-        lst = []
-        dom = parse(xmlFile)
-        nodes = dom.getElementsByTagName('asl')
-        for node in nodes:
-            agentName = node.getAttribute('agentId')
-            file = node.getAttribute('file')
-            cardinality = node.getAttribute('cardinality')
-            lst.append([[agentName, ''], [file, ''], [cardinality, '']])
-        return lst
+        tree = ElementTree()
+        tree.parse(xmlFile)
+        nodes = tree.findall('asl-list/asl')
+        return [ node_to_datatables(node) for node in nodes ]
 
     @staticmethod
     def parse(xmlFile):
-        agents = []
         dom = parse(xmlFile)
         nodes = dom.getElementsByTagName('asl')
-        for node in nodes:
-            agentId = node.getAttribute('agentId')
-            filename = node.getAttribute('file')
-            cardinality = node.getAttribute('cardinality')
-            agents.append({
-                'arch': 'c4jason.CAgentArch',
-                'name': 'agent_%s_' % (agentId,),
-                'code': filename,
-                'no': cardinality,
-            })
+        agents = [ node_to_config(node) for node in nodes ]
 
         artifacts = None
         nodes = dom.getElementsByTagName('artifacts')
@@ -98,3 +83,25 @@ class SolutionSpecification(object):
 def node_attr_filepath(node, attr):
     filename = node.getAttribute(attr)
     return default_storage.path(filename)
+
+def node_to_datatables(node):
+    attrib = node.attrib
+    agent_name = attrib.get('agentId')
+    filename = attrib.get('file')
+    agent_class = attrib.get('agentClass', '')
+    cardinality = attrib.get('cardinality')
+    return [ [agent_name, ''], [filename, ''], [agent_class, ''],
+        [cardinality, ''] ]
+
+def node_to_config(node):
+    agent_id = node.getAttribute('agentId')
+    filename = node.getAttribute('file')
+    agent_class = node.getAttribute('agentClass')
+    cardinality = node.getAttribute('cardinality')
+    return {
+        'arch': 'c4jason.CAgentArch',
+        'name': 'agent_%s_' % (agent_id,),
+        'code': filename,
+        'class': agent_class,
+        'no': cardinality,
+    }

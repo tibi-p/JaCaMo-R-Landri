@@ -27,6 +27,14 @@ class SubEnvironment(models.Model):
     ring = models.ForeignKey(Ring)
     index = models.PositiveIntegerField()
     owners = models.ManyToManyField(EnvUser, through='OwnerRelationship')
+    envType = models.CharField(max_length=10, choices=[
+        ('rtsp', 'Real-time Single-player'),
+        ('rtmp', 'Real-time Multiplayer'),
+        ('patb', 'Player-alternated Turn-based'),
+        ('setb', 'Simultaneously-executed Turn-based'),
+    ])
+    coordinatorClass = models.CharField(max_length=200)
+    numSteps = models.IntegerField()
 
     objects = SubEnvironmentManager()
 

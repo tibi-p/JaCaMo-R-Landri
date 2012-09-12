@@ -1,0 +1,75 @@
+<project>
+
+	<property name="django.dir" value="../../.." />
+	<property name="src.dir" value="src" />
+	<property name="asl.dir" value="asl" />
+	<property name="build.dir" value="build" />
+	<property name="classes.dir" value="${build.dir}/classes" />
+	<property name="lib.dir" value="${django.dir}/lib/jacamo" />
+	<property name="dependencies.dir" value="${django.dir}/media/subenvironments/generic/extra" />
+
+	<property name="subenvironment.dir" value="${django.dir}/media/subenvironments/${subenvid}" />
+	<property name="mediauser.dir" value="${django.dir}/media/users/${userid}" />
+	<property name="jar.dir" value="${subenvironment.dir}/artifacts" />
+	<property name="zip.dir" value="${jar.dir}" />
+	<property name="master.agent.dir" value="${subenvironment.dir}/agents" />
+	<property name="solution.agent.dir" value="${mediauser.dir}/solutions/${subenvid}" />
+
+	<path id="classpath">
+		<fileset dir="${lib.dir}" includes="*.jar" />
+		<fileset dir="${dependencies.dir}" includes="*.jar" />
+	</path>
+
+	<target name="clean">
+		<delete dir="${build.dir}" />
+	</target>
+
+	<target name="master-agent-src">
+		<mkdir dir="${master.agent.dir}" />
+		<zip destfile="${master.agent.dir}/${ant.project.name}_master_agents.zip">
+			<fileset dir="${asl.dir}" includes="*.asl">
+				<filename regex=".*_s[0-9]+\.asl" />
+			</fileset>
+		</zip>
+	</target>
+
+	<target name="solution-agent-src">
+		<mkdir dir="${master.agent.dir}" />
+		<zip destfile="${solution.agent.dir}/${ant.project.name}_solution_agents.zip">
+			<fileset dir="${asl.dir}" includes="*.asl">
+				<filename regex=".*_u[0-9]+\.asl" />
+			</fileset>
+		</zip>
+	</target>
+
+	<target name="zip-src" depends="master-agent-src, solution-agent-src">
+		<mkdir dir="${zip.dir}" />
+		<zip destfile="${zip.dir}/${ant.project.name}_artifacts.zip" basedir="${src.dir}">
+		</zip>
+	</target>
+
+	<target name="compile">
+		<mkdir dir="${classes.dir}" />
+		<javac debug="true" srcdir="${src.dir}" destdir="${classes.dir}">
+			<classpath refid="classpath" />
+		</javac>
+	</target>
+
+	<target name="jar" depends="compile">
+		<mkdir dir="${jar.dir}" />
+		<jar destfile="${jar.dir}/${ant.project.name}.jar" basedir="${classes.dir}">
+			<manifest>
+				<attribute name="Class-Path" value="${lib.jar}" />
+			</manifest>
+		</jar>
+	</target>
+
+	<target name="run" depends="jar">
+		<java jar="${jar.dir}/${ant.project.name}.jar" fork="true" />
+	</target>
+
+	<target name="clean-build" depends="clean, zip-src" />
+
+	<target name="clean-build-jar" depends="clean, jar" />
+
+</project>

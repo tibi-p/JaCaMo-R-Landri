@@ -1,0 +1,8 @@
+<project name="iterated_prisoner_dilemma" basedir="." default="clean-build">
+
+	<property name="subenvid" value="6" />
+	<property name="userid" value="3" />
+
+	<import file="../s_generic.xml" />
+
+</project>
