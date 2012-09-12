@@ -1,0 +1,8 @@
+<project name="factorial" basedir="." default="clean-build">
+
+	<property name="subenvid" value="2" />
+	<property name="userid" value="4" />
+
+	<import file="../s_generic.xml" />
+
+</project>

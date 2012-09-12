@@ -1,0 +1,20 @@
+/* Jason Project */
+
+MAS tictactoe{
+
+   infrastructure: Centralised
+
+   environment: c4jason.CartagoEnvironment
+
+   agents:
+   
+   agent_1_ toer_u2 agentArchClass c4jason.CAgentArch #2;
+   prime_agent_s_patb agentArchClass c4jason.CAgentArch;
+
+   classpath: "lib/moise.jar";   // moise: where the artifacts are included
+              "lib/cartago.jar"; // cartago: platform for artifacts
+              "lib/c4jason.jar"; // jason-cartago integration
+			  "lib/commons-collections-3.2.1.jar";
+			  "lib/log4j-1.2.17.jar";
+
+	}

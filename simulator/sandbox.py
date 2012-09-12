@@ -1,10 +1,12 @@
+from django.conf import settings
+from string import Template
+from zipfile import ZipFile
 import errno
 import functools
 import os
 import shutil
 import subprocess
-from string import Template
-from zipfile import ZipFile
+from xml.etree.cElementTree import ElementTree, SubElement
 
 def silent_md(f, path):
     try:
@@ -57,8 +59,9 @@ def transferFiles(files, directory):
     return libraries
 
 class JaCaMoSandbox(object):
-    def __init__(self, root):
+    def __init__(self, root, subenvironment):
         self.root = root
+        self.subenvironment = subenvironment
         self.libs = filter_listdir(os.path.join('lib', 'jacamo'), 'jar')
 
     def handle_filelist(self, dirname, filelist):
@@ -69,13 +72,19 @@ class JaCaMoSandbox(object):
 
     def populate(self, solutionFiles, subenvFiles):
         libraries = filter_listdir(os.path.join('lib', 'rlandri'), 'jar')
-        subprocess.call([
+
+        args = [
             "java",
             "-classpath",
             os.pathsep.join(libraries),
             "org.aria.rlandri.tools.JaCaMoConfig",
             self.root,
-        ])
+            self.subenvironment.envType,
+            self.subenvironment.coordinatorClass,
+        ]
+        if self.subenvironment.numSteps:
+            args.append(str(self.subenvironment.numSteps))
+        subprocess.call(args)
 
         for dirname, filelist in solutionFiles.iteritems():
             self.handle_filelist(dirname, filelist)
@@ -85,12 +94,19 @@ class JaCaMoSandbox(object):
 
     def writeMAS(self, name, infra, env, agents):
         # create agents string
+        paramTemplates = {
+            'code': '%(code)s',
+            'arch': 'agentArchClass %(arch)s',
+            'class': 'agentClass %(class)s',
+            'no': '#%(no)s',
+        }
         ags = [ ]
         for agent in agents:
-            if 'arch' in agent:
-                agTpl = '\t\t%(name)s %(code)s agentArchClass %(arch)s #%(no)s;'
-            else:
-                agTpl = '\t\t%(name)s %(code)s #%(no)s;'
+            agTpl = [ '%(name)s' ]
+            for k, v in paramTemplates.iteritems():
+                if agent.get(k):
+                    agTpl.append(v)
+            agTpl = '\t\t%s;' % (' '.join(agTpl),)
             ags.append(agTpl % agent)
         ags = '\n'.join(ags)
 
@@ -109,37 +125,46 @@ class JaCaMoSandbox(object):
 
     def buildMAS(self, name):
         path = os.path.join(self.root, name)
-        subprocess.call([
+        mas2j_args = [
             "java",
             "-classpath",
             os.pathsep.join(self.libs),
             "jason.mas2j.parser.mas2j",
             path,
-        ])
+        ]
+        '''
+        TODO this could be activated under some flag
+        if settings.DEBUG:
+            mas2j_args.append("debug")
+        '''
+        subprocess.call(mas2j_args)
+
+        if settings.DEBUG:
+            self.tweak_build_xml()
 
     def ant(self, pipe):
         libraries = filter_listdir(os.path.join('lib', 'ant'), 'jar')
-        popenArgs = { }
+        popen_args = { }
         if pipe is not None:
-            popenArgs['stdout'] = subprocess.PIPE
-        masProcess = subprocess.Popen([
+            popen_args['stdout'] = subprocess.PIPE
+        mas_process = subprocess.Popen([
             "java",
             "-classpath",
             os.pathsep.join(libraries),
             "org.apache.tools.ant.launch.Launcher",
             "-f",
-            os.path.join(self.root, 'bin', 'build.xml'),
-        ], **popenArgs)
+            self.get_build_xml(),
+        ], **popen_args)
         if pipe is not None:
             while True:
-                line = masProcess.stdout.readline()
+                line = mas_process.stdout.readline()
                 if line:
                     line = line.rstrip()
                     pipe.send(line)
                 else:
                     break
             pipe.close()
-        return masProcess.wait()
+        return mas_process.wait()
 
     def clean(self):
         shutil.rmtree(os.path.join(self.root, 'src'), True)
@@ -148,3 +173,34 @@ class JaCaMoSandbox(object):
             relfile = os.path.join(self.root, filename)
             if has_extension(relfile, 'mas2j'):
                 os.remove(relfile)
+
+    def get_build_xml(self):
+        return os.path.join(self.root, 'bin', 'build.xml')
+
+    def tweak_build_xml(self):
+        runjdwp_args = [
+            'transport=dt_socket',
+            'server=y',
+            'address=8765',
+            'suspend=n',
+        ]
+        runjdwp_args = ','.join(runjdwp_args)
+        jvm_debug_args = [
+            '-Xdebug',
+            '-Xrunjdwp:%s' % (runjdwp_args,),
+        ]
+        jvm_debug_args = ' '.join(jvm_debug_args)
+
+        build_xml = self.get_build_xml()
+        tree = ElementTree()
+        tree.parse(build_xml)
+
+        root = tree.getroot()
+        targets = root.findall('target')
+        for node in targets:
+            if node.get('name') == 'run':
+                java_node = node.find('java')
+                SubElement(java_node, 'jvmarg', {
+                    'line': jvm_debug_args,
+                })
+        tree.write(build_xml)
